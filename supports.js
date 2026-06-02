@@ -1646,7 +1646,7 @@ function requirementDot(value) {
 
 function requirementLabel(value) {
     var level = Math.max(0, Math.min(4, Math.round(value || 0)));
-    return level >= 3 ? 'Prioritario' : level === 2 ? 'Recomendado' : level === 1 ? 'Observación' : 'Sin ajuste';
+    return level >= 3 ? 'Barrera significativa — intervenir' : level === 2 ? 'Barrera moderada — ajustar' : level === 1 ? 'Barrera leve — observar' : 'Sin barrera detectada';
 }
 
 function groupHasMatrixProfile(group) {
@@ -2692,10 +2692,10 @@ function collectSocialStudents() {
 }
 
 function getMatrixSeverity(score) {
-    if (score === 1) return { requirement: 3, label: 'Ajuste prioritario', className: 'severity-high' };
-    if (score === 2) return { requirement: 2, label: 'Ajuste recomendado', className: 'severity-medium' };
-    if (score === 3) return { requirement: 1, label: 'Observación situacional', className: 'severity-watch' };
-    return { requirement: 0, label: 'Sin ajuste', className: 'severity-none' };
+    if (score === 1) return { requirement: 3, label: 'Barrera significativa — intervenir', className: 'severity-high' };
+    if (score === 2) return { requirement: 2, label: 'Barrera moderada — ajustar', className: 'severity-medium' };
+    if (score === 3) return { requirement: 1, label: 'Barrera leve — observar', className: 'severity-watch' };
+    return { requirement: 0, label: 'Sin barrera detectada', className: 'severity-none' };
 }
 
 function getMatrixObservation(activityLabel) {
@@ -3016,7 +3016,7 @@ function renderPdfCIFChart(students) {
         { text: 'Niveles:', fontSize: 7, color: '#6b7280', margin: [0, 0, 0, 3] }
     ];
     [0, 1, 2, 3].forEach(function(lvl) {
-        var l = lvl === 0 ? 'Sin ajuste' : lvl === 1 ? 'Observaci\u00f3n' : lvl === 2 ? 'Recomendado' : 'Prioritario';
+        var l = lvl === 0 ? 'Sin barrera detectada' : lvl === 1 ? 'Barrera leve \u2014 observar' : lvl === 2 ? 'Barrera moderada \u2014 ajustar' : 'Barrera significativa \u2014 intervenir';
         var c = levelColors[lvl];
         legendStack.push({
             columns: [
@@ -3099,7 +3099,7 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
 
     if (!includeCharts) {
         var legColors = ['#ea4335', '#fbbc04', '#34a853', '#9aa0a6'];
-        var legLabels = ['Prioritario', 'Recomendado', 'Observar', 'Sin ajuste'];
+        var legLabels = ['Barrera significativa — intervenir', 'Barrera moderada — ajustar', 'Barrera leve — observar', 'Sin barrera detectada'];
         var legCols = [];
         for (var i = 0; i < 4; i++) {
             legCols.push({ width: 'auto', canvas: [{ type: 'rect', x: 0, y: 0, w: 8, h: 8, r: 2, color: legColors[i] }], margin: [0, 2, 3, 0] });
@@ -3171,7 +3171,7 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
                             var bucket = item.kind === 'manual' ? 'manual' : item.kind === 'clarification' ? 'clarification' : item.kind === 'observation' ? 'observation' : (item.priorityLevel >= 3 ? 3 : item.priorityLevel === 2 ? 2 : item.priorityLevel === 1 ? 1 : 0);
                             if (priorityBuckets[bucket] !== undefined) priorityBuckets[bucket].push(item);
                         });
-                        var priorityHeaders = { 3: 'Ajustes prioritarios', 2: 'Ajustes recomendados', 1: 'Observar', 0: 'Sin ajuste' };
+                        var priorityHeaders = { 3: 'Barrera significativa — intervenir', 2: 'Barrera moderada — ajustar', 1: 'Barrera leve — observar', 0: 'Sin barrera detectada' };
                         var priorityColors = { 3: '#ea4335', 2: '#fbbc04', 1: '#34a853', 0: '#9aa0a6' };
                         [3, 2, 1, 0].forEach(function(level) {
                             var bucket = priorityBuckets[level];
@@ -3464,7 +3464,7 @@ function generatePlanEmail() {
                 groupMatrixItemsByDimension(getVisibleMatrixItems(student)).forEach(function(group) {
                     body += '  ' + group.label + ':\n';
                     group.items.forEach(function(item) {
-                        var label = item.kind === 'clarification' ? 'Precisar barrera' : item.kind === 'observation' ? 'Observacion situacional' : (item.priorityLevel >= 3 ? 'Ajuste prioritario' : 'Ajuste recomendado');
+                        var label = item.kind === 'clarification' ? 'Precisar barrera' : item.kind === 'observation' ? 'Observacion situacional' : (item.priorityLevel >= 3 ? 'Barrera significativa — intervenir' : 'Barrera moderada — ajustar');
                         body += '    - [' + label + '] ' + item.text + '\n';
                         body += '      Actividad CIF: ' + item.activities.join(', ') + '\n';
                         var evidence = formatClarificationEvidence(student.cardIndex || student.index, item);

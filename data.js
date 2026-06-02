@@ -725,9 +725,9 @@ const shortActivityLabels = {
 };
 
 const prioridadLabels = {
-    1: { icon: '🔴', label: 'Prioridad alta' },
-    2: { icon: '🟡', label: 'Prioridad media' },
-    3: { icon: '🟢', label: 'Observar' }
+    1: { icon: '🟢', label: 'Barrera leve — observar' },
+    2: { icon: '🟡', label: 'Barrera moderada — ajustar' },
+    3: { icon: '🔴', label: 'Barrera significativa — intervenir' }
 };
 
 function buildRecommendationsData() {
