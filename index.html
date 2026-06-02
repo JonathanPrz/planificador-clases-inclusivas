@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260529-support-scale">
 </head>
 <body class="theme-light">
     <nav class="navbar" aria-label="Navegación principal">
@@ -225,27 +225,29 @@
 
             <div class="good-practices" id="good-practices"></div>
 
-            <div class="support-students-panel planning-panel" id="support-students-panel">
+            <!-- CONSULTOR POR CONDICIÓN -->
+            <div class="support-mode-panel" id="panel-medical">
                 <div class="resource-heading">
-                    <span class="source-pill">Plan de adecuaciones</span>
-                    <h3>Recomendaciones por condición</h3>
-                    <p class="support-guide-text">Selecciona una o más condiciones para ver recomendaciones de apoyo adaptadas. Si seleccionas dos o más, se fusionan automáticamente.</p>
+                    <span class="source-pill">Apoyos por condición</span>
+                    <p class="support-guide-text">Selecciona una condición para iniciar la conversación pedagógica. Si cuentas con ficha o información del aula, ajusta con matriz CIF para responder a barreras observadas.</p>
+                    <h3>Define apoyos desde la evidencia del caso</h3>
+                    <p>La condición orienta la pertinencia; la matriz ayuda a priorizar. Cada recomendación puede revisarse, ocultarse o complementarse antes de generar el plan.</p>
                 </div>
-                <div class="condition-pills-scroll">
-                    <div class="condition-pills" id="condition-pills"></div>
+                <div class="student-cards-section">
+                    <div id="support-students-medical" class="support-students"></div>
+                    <button class="btn btn-secondary" id="add-student-btn-medical" type="button">+ Agregar estudiante</button>
                 </div>
-                <div class="condition-detail" id="condition-detail"></div>
+            </div>
+            <div class="support-layout">
+                <div id="support-results" class="results-box hidden"></div>
+            </div>
+
+            <div class="plan-cta-panel" id="plan-cta-panel">
                 <div class="plan-cta-divider">
                     <span class="plan-cta-divider-text">¿Listo para generar?</span>
                 </div>
-                <button id="btn-generate-plan" class="btn btn-generate-plan btn-cta" type="button">
-                    <span class="btn-generate-plan-icon">📄</span>
-                    Generar plan de apoyo
-                </button>
-            </div>
-
-            <div class="support-layout" style="display:none">
-                <div id="support-results" class="results-box hidden"></div>
+                <button id="btn-toggle-editing-mode" class="btn btn-secondary btn-cta" type="button" aria-pressed="false">Editar recomendaciones</button>
+                <button id="btn-generate-plan-medical" class="btn btn-generate-plan btn-cta" type="button">📄 Generar plan de apoyo</button>
             </div>
 
             <div class="section-footer-action">
@@ -636,31 +638,45 @@
         </div>
     </footer>
 
+    <div class="clarification-modal-overlay" id="clarification-modal-overlay" style="display:none">
+        <div class="clarification-modal" role="dialog" aria-modal="true" aria-labelledby="clarification-modal-title">
+            <div class="plan-modal-header">
+                <div>
+                    <h2 id="clarification-modal-title">Precisar barrera</h2>
+                    <p id="clarification-activity-label" class="plan-modal-intro">Actividad CIF</p>
+                </div>
+                <button class="plan-modal-close" id="clarification-modal-close" type="button" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="clarification-modal-body">
+                <label for="clarification-where">¿Dónde aparece la barrera?</label>
+                <textarea id="clarification-where" class="text-control" rows="3" placeholder="Asignatura, evaluación, sala, taller, práctica u otro contexto."></textarea>
+
+                <label for="clarification-trigger">¿Qué la gatilla o dificulta?</label>
+                <textarea id="clarification-trigger" class="text-control" rows="3" placeholder="Describe la situación, demanda, formato, interacción o condición del entorno."></textarea>
+
+                <label for="clarification-support">¿Qué apoyo ya usa el estudiante?</label>
+                <textarea id="clarification-support" class="text-control" rows="3" placeholder="Tecnología, estrategia personal, mediación, apoyo docente u otra medida ya validada."></textarea>
+
+                <label for="clarification-source">¿Qué dijo el docente, estudiante o ficha?</label>
+                <textarea id="clarification-source" class="text-control" rows="3" placeholder="Registra la fuente de la información para documentar el ajuste."></textarea>
+            </div>
+            <div class="plan-modal-footer">
+                <div class="plan-modal-actions">
+                    <button class="btn btn-secondary" id="clarification-cancel" type="button">Cancelar</button>
+                    <button class="btn btn-primary" id="clarification-save" type="button">Guardar evidencia</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="plan-modal-overlay" id="plan-modal-overlay" style="display:none">
-        <div class="plan-modal" id="plan-modal" role="dialog" aria-modal="true" aria-label="Generar plan de apoyo">
+        <div class="plan-modal" id="plan-modal" role="dialog" aria-modal="true" aria-label="Configurar plan de apoyo">
             <div class="plan-modal-header">
                 <h2>Generar plan de apoyo</h2>
                 <button class="plan-modal-close" id="plan-modal-close" type="button" aria-label="Cerrar">&times;</button>
             </div>
-            <div class="plan-modal-tabs" role="tablist">
-                <button class="plan-modal-tab active" data-tab="basic" role="tab" aria-selected="true">Básico</button>
-                <button class="plan-modal-tab" data-tab="personalized" role="tab" aria-selected="false">Personalizado</button>
-            </div>
             <div class="plan-modal-body" id="plan-modal-body">
-                <div class="plan-form-row">
-                    <label for="plan-student-count">Cantidad de estudiantes</label>
-                    <select id="plan-student-count" class="text-control">
-                        <option value="1">1 estudiante</option>
-                        <option value="2">2 estudiantes</option>
-                        <option value="3">3 estudiantes</option>
-                        <option value="4">4 estudiantes</option>
-                        <option value="5">5 estudiantes</option>
-                        <option value="6">6 estudiantes</option>
-                        <option value="7">7 estudiantes</option>
-                        <option value="8">8 estudiantes</option>
-                    </select>
-                </div>
-                <div class="plan-students" id="plan-students"></div>
+                <p class="plan-modal-intro">El plan se generará con los estudiantes registrados en la sección de adecuaciones. Revisa que cada estudiante tenga sus condiciones seleccionadas o su matriz de acceso completada antes de continuar.</p>
             </div>
             <div class="plan-modal-footer">
                 <label class="plan-option">
@@ -668,7 +684,7 @@
                     <span>Incluir checklist DUA</span>
                 </label>
                 <label class="plan-option">
-                    <input type="checkbox" id="plan-include-charts" checked>
+                    <input type="checkbox" id="plan-include-charts">
                     <span>Incluir gráficos de barrera</span>
                 </label>
                 <div class="plan-modal-actions">
@@ -693,7 +709,7 @@
     <script src="theme.js"></script>
     <script src="content.js"></script>
     <script src="dua.js"></script>
-    <script src="supports.js"></script>
+    <script src="supports.js?v=20260529-support-scale"></script>
     <script src="report.js"></script>
     <script src="navigation.js"></script>
     <script src="app.js"></script>

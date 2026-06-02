@@ -1,5 +1,5 @@
 (function () {
-const { accommodationsData, autismMyths, goodPracticesData } = window.UiePlannerData;
+const { accommodationsData, autismMyths, goodPracticesData, matrixRecommendationRules, accommodationCifMap, shortActivityLabels, prioridadLabels, recommendationsData } = window.UiePlannerData;
 
 const barrierDimensions = [
     { key: 'context', label: 'Contexto' },
@@ -11,19 +11,17 @@ const barrierDimensions = [
 ];
 
 const barrierProfiles = {
-    fisica:       { context: 4, materials: 2, methods: 2, interaction: 2, evaluacion: 2, tech: 3 },
-    auditiva:     { context: 2, materials: 3, methods: 3, interaction: 3, evaluacion: 2, tech: 3 },
-    visual:       { context: 2, materials: 4, methods: 2, interaction: 2, evaluacion: 3, tech: 4 },
-    sordoceguera: { context: 3, materials: 4, methods: 3, interaction: 4, evaluacion: 3, tech: 4 },
-    tactil:       { context: 2, materials: 2, methods: 2, interaction: 1, evaluacion: 2, tech: 2 },
-    vestibular:   { context: 4, materials: 2, methods: 2, interaction: 2, evaluacion: 2, tech: 1 },
-    visceral:     { context: 3, materials: 2, methods: 2, interaction: 2, evaluacion: 3, tech: 2 },
-    intelectual:  { context: 1, materials: 3, methods: 4, interaction: 2, evaluacion: 4, tech: 2 },
-    psiquica:     { context: 1, materials: 2, methods: 2, interaction: 3, evaluacion: 3, tech: 2 },
-    autismo:      { context: 3, materials: 2, methods: 3, interaction: 4, evaluacion: 3, tech: 2 }
+    fisica:       { context: 3, materials: 1, methods: 1, interaction: 2, evaluacion: 2, tech: 2 },
+    auditiva:     { context: 1, materials: 2, methods: 2, interaction: 2, evaluacion: 1, tech: 2 },
+    visual:       { context: 1, materials: 3, methods: 2, interaction: 1, evaluacion: 2, tech: 3 },
+    sordoceguera: { context: 2, materials: 3, methods: 2, interaction: 2, evaluacion: 2, tech: 2 },
+    tactil:       { context: 1, materials: 1, methods: 1, interaction: 0, evaluacion: 2, tech: 1 },
+    vestibular:   { context: 3, materials: 1, methods: 1, interaction: 1, evaluacion: 1, tech: 0 },
+    visceral:     { context: 2, materials: 1, methods: 1, interaction: 1, evaluacion: 2, tech: 1 },
+    intelectual:  { context: 2, materials: 2, methods: 3, interaction: 3, evaluacion: 3, tech: 1 },
+    psiquica:     { context: 1, materials: 1, methods: 1, interaction: 2, evaluacion: 2, tech: 1 },
+    autismo:      { context: 2, materials: 1, methods: 2, interaction: 3, evaluacion: 2, tech: 1 }
 };
-
-const radarColors = ['#2563eb', '#dc2626', '#d97706', '#9333ea'];
 
 const shortConditionNames = {
     fisica: 'Física',
@@ -35,7 +33,8 @@ const shortConditionNames = {
     visceral: 'Visceral',
     intelectual: 'Intelectual',
     psiquica: 'Psíquica',
-    autismo: 'Neurodesarrollo'
+    autismo: 'Neurodesarrollo',
+    multiple: 'Múltiple'
 };
 
 const categoryLabels = {
@@ -46,6 +45,28 @@ const categoryLabels = {
     evaluacion: 'De las evaluaciones',
     tech: 'Tecnologías asistivas'
 };
+
+function getActivityTagString(activities) {
+    if (!activities || !activities.length) return '';
+    var labels = activities.map(function(a) { return shortActivityLabels[a] || a; });
+    return ' <span class="activity-tags">(' + labels.join(', ') + ')</span>';
+}
+
+function getSemaforo(activities, studentScores) {
+    if (!studentScores || !activities || !activities.length) return null;
+    var minScore = 4;
+    activities.forEach(function(actId) {
+        var score = Number(studentScores[actId] || 0);
+        if (score > 0 && score < 4 && score < minScore) minScore = score;
+    });
+    return minScore < 4 ? minScore : null;
+}
+
+function getSemaforoBadge(level, cat) {
+    if (!level || !prioridadLabels[level]) return '';
+    var p = prioridadLabels[level];
+    return ' <span class="semaforo-badge semaforo-' + level + '">' + p.icon + ' ' + p.label + '</span>';
+}
 
 // MERGE GUIDE: When adding new recommendations in data.js, check if they overlap
 // with existing merge groups below. If they do, add the text to the relevant group's
@@ -95,10 +116,127 @@ const mergeGroups = [
 ];
 
 const matrixData = {};
+const hiddenRecommendations = {};
+const advisorCommentsByStudent = {};
+const clarificationData = {};
+const manualRecommendationsByStudentCategory = {};
+
+const ruleDimensionWeights = {
+    fisica_escribir_teclado: { evaluacion: 1, tech: 0.7 },
+    fisica_escribir_tiempo: { evaluacion: 1 },
+    visual_leer_formato: { materials: 1, tech: 0.7 },
+    visual_leer_descripcion: { materials: 1, methods: 0.7 },
+    intelectual_leer_claridad: { materials: 1, methods: 0.7 },
+    auditiva_hablar_acceso_comunicacional: { interaction: 1, tech: 0.7 },
+    auditiva_hablar_turnos: { interaction: 1, context: 0.7 },
+    autismo_hablar_preparada: { interaction: 1, evaluacion: 0.7 },
+    autismo_recordar_estructura: { methods: 1, tech: 0.7 },
+    evaluacion_instrucciones_claras: { evaluacion: 1, materials: 0.7 },
+    evaluacion_tiempo_pausas: { evaluacion: 1, context: 0.5 },
+    evaluacion_auditiva_formato: { evaluacion: 1, tech: 0.7 },
+    evaluacion_visual_formato: { evaluacion: 1, tech: 0.7 },
+    practicos_fisica_alternativa: { methods: 1, context: 0.7 },
+    practicos_visual_descripcion: { methods: 1, interaction: 0.7 },
+    practicos_autismo_roles: { methods: 1, interaction: 0.7 },
+    sala_auditiva_visibilidad: { context: 1, interaction: 0.7 },
+    sala_autismo_previsibilidad: { context: 1, methods: 0.7 },
+    sala_psiquica_exposicion: { interaction: 1, context: 0.7 },
+    sociales_autismo_roles: { interaction: 1 },
+    sociales_auditiva_acceso: { interaction: 1 },
+    ayuda_canal_explicito: { interaction: 1 },
+    ayuda_checklist: { methods: 0.7, interaction: 1 },
+    acceder_fisica_ruta: { context: 1 },
+    acceder_visual_orientacion: { context: 1 }
+};
 
 const selectedConditionKeys = [];
 
-const conditionGridOrder = ['autismo', 'intelectual', 'sordoceguera', 'fisica', 'visual', 'auditiva', 'visceral', 'psiquica', 'vestibular', 'tactil'];
+var currentMode = 'medical';
+var editingMode = false;
+
+function setEditingMode(enabled) {
+    editingMode = Boolean(enabled);
+    var supportsSection = document.getElementById('apoyos');
+    var toggle = document.getElementById('btn-toggle-editing-mode');
+    if (supportsSection) supportsSection.classList.toggle('editing-mode', editingMode);
+    if (toggle) {
+        toggle.textContent = editingMode ? 'Terminar edición' : 'Editar recomendaciones';
+        toggle.setAttribute('aria-pressed', String(editingMode));
+    }
+    renderSelectedSupportRecommendations();
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    var selector = document.getElementById('mode-selector');
+    var panelMedical = document.getElementById('panel-medical');
+    var panelSocial = document.getElementById('panel-social');
+    var results = document.getElementById('support-results');
+    var resultsLayout = document.querySelector('.support-layout');
+    var ctaPanel = document.getElementById('plan-cta-panel');
+    var genMedical = document.getElementById('btn-generate-plan-medical');
+    var genSocial = document.getElementById('btn-generate-plan-social');
+    var editToggle = document.getElementById('btn-toggle-editing-mode');
+
+    if (selector) selector.classList.add('mode-selected');
+    if (panelMedical) panelMedical.style.display = (mode === 'medical') ? '' : 'none';
+    if (panelSocial) panelSocial.style.display = (mode === 'social') ? '' : 'none';
+    if (results) results.classList.add('hidden');
+    if (resultsLayout) resultsLayout.style.display = 'none';
+    if (ctaPanel) ctaPanel.style.display = mode ? '' : 'none';
+    if (genMedical) genMedical.style.display = (mode === 'medical') ? '' : 'none';
+    if (genSocial) genSocial.style.display = (mode === 'social') ? '' : 'none';
+
+    if (mode === 'medical') {
+        renderMedicalStudents(renderSelectedSupportRecommendations);
+        initConditionPillsMedical();
+    } else if (mode === 'social') {
+        renderSocialStudents(renderSelectedSupportRecommendations);
+    }
+}
+
+function initModeSelector() {
+    var btnMedical = document.getElementById('btn-mode-medical');
+    var btnSocial = document.getElementById('btn-mode-social');
+    var btnSwitchSocial = document.getElementById('btn-switch-social');
+    var btnSwitchMedical = document.getElementById('btn-switch-medical');
+    var genMedical = document.getElementById('btn-generate-plan-medical');
+    var genSocial = document.getElementById('btn-generate-plan-social');
+    var editToggle = document.getElementById('btn-toggle-editing-mode');
+
+    if (btnMedical && btnMedical.dataset.boundMode !== 'true') {
+        btnMedical.addEventListener('click', function() { switchMode('medical'); });
+        btnMedical.setAttribute('data-bound-mode', 'true');
+    }
+    if (btnSocial && btnSocial.dataset.boundMode !== 'true') {
+        btnSocial.addEventListener('click', function() { switchMode('social'); });
+        btnSocial.setAttribute('data-bound-mode', 'true');
+    }
+    if (btnSwitchSocial && btnSwitchSocial.dataset.boundMode !== 'true') {
+        btnSwitchSocial.addEventListener('click', function() { switchMode('social'); });
+        btnSwitchSocial.setAttribute('data-bound-mode', 'true');
+    }
+    if (btnSwitchMedical && btnSwitchMedical.dataset.boundMode !== 'true') {
+        btnSwitchMedical.addEventListener('click', function() { switchMode('medical'); });
+        btnSwitchMedical.setAttribute('data-bound-mode', 'true');
+    }
+    if (genMedical && genMedical.dataset.boundGen !== 'true') {
+        genMedical.addEventListener('click', function() { openPlanModal(); });
+        genMedical.setAttribute('data-bound-gen', 'true');
+        genMedical.style.display = '';
+    }
+    if (genSocial && genSocial.dataset.boundGen !== 'true') {
+        genSocial.addEventListener('click', function() { openPlanModal(); });
+        genSocial.setAttribute('data-bound-gen', 'true');
+    }
+    if (editToggle && editToggle.dataset.boundEdit !== 'true') {
+        editToggle.addEventListener('click', function() { setEditingMode(!editingMode); });
+        editToggle.setAttribute('data-bound-edit', 'true');
+        setEditingMode(editingMode);
+    }
+}
+
+const conditionGridOrder = ['autismo', 'intelectual', 'sordoceguera', 'fisica', 'visual', 'auditiva', 'visceral', 'psiquica', 'vestibular', 'tactil', 'multiple'];
 
 function getConditionImpact(key) {
     var profile = barrierProfiles[key];
@@ -118,44 +256,77 @@ function getSelectedConditionKeys() {
 }
 
 function toggleCondition(key) {
-    var idx = selectedConditionKeys.indexOf(key);
-    if (idx === -1) {
-        selectedConditionKeys.push(key);
+    if (key === 'multiple') {
+        var idx = selectedConditionKeys.indexOf('multiple');
+        if (idx === -1) {
+            selectedConditionKeys.push('multiple');
+        } else {
+            var components = selectedConditionKeys.filter(function(k) { return k !== 'multiple'; });
+            selectedConditionKeys.length = 0;
+            if (components.length) {
+                selectedConditionKeys.push(components[0]);
+            }
+        }
     } else {
-        selectedConditionKeys.splice(idx, 1);
+        var isMultipleMode = selectedConditionKeys.indexOf('multiple') !== -1;
+        var idx = selectedConditionKeys.indexOf(key);
+
+        if (isMultipleMode) {
+            if (idx === -1) {
+                selectedConditionKeys.push(key);
+            } else {
+                selectedConditionKeys.splice(idx, 1);
+            }
+        } else {
+            if (idx === -1) {
+                selectedConditionKeys.length = 0;
+                selectedConditionKeys.push(key);
+            } else {
+                selectedConditionKeys.splice(idx, 1);
+            }
+        }
     }
     renderConditionPills();
     renderConditionDetail();
     renderSelectedSupportRecommendations();
 }
 
-function initConditionPills(onStudentChange) {
+function initConditionPills() {
+    initModeSelector();
+    currentMode = 'medical';
+    renderMedicalStudents(renderSelectedSupportRecommendations);
+    renderSelectedSupportRecommendations();
+    setEditingMode(editingMode);
+}
+
+function initConditionPillsMedical() {
     if (!selectedConditionKeys.length) {
         selectedConditionKeys.push('autismo');
     }
 
     renderConditionPills();
     renderConditionDetail();
-
-    var genBtn = document.getElementById('btn-generate-plan');
-    if (genBtn && genBtn.dataset.bound !== 'true') {
-        genBtn.addEventListener('click', function() {
-            openPlanModal(onStudentChange);
-        });
-        genBtn.setAttribute('data-bound', 'true');
-    }
 }
 
 function renderConditionPills() {
-    var container = document.getElementById('condition-pills');
+    var container = document.getElementById('condition-pills-medical') || document.getElementById('condition-pills');
     if (!container) return;
 
+    var isMultipleMode = selectedConditionKeys.indexOf('multiple') !== -1;
+
     container.innerHTML = conditionGridOrder.map(function(key) {
+        var isMultiple = key === 'multiple';
         var data = accommodationsData[key];
-        if (!data) return '';
+        if (!data && !isMultiple) return '';
         var isSelected = selectedConditionKeys.indexOf(key) !== -1;
-        return '<button class="condition-pill' + (isSelected ? ' active' : '') + '" data-condition-key="' + key + '">' +
-            '<span class="condition-pill-name">' + shortConditionNames[key] + '</span>' +
+        var classes = 'condition-pill';
+        if (isSelected) classes += ' active';
+        if (isMultiple && isSelected) classes += ' multiple';
+        if (!isMultiple && isMultipleMode && isSelected) classes += ' component';
+
+        var label = isMultiple ? 'Múltiple' : shortConditionNames[key];
+        return '<button class="' + classes + '" data-condition-key="' + key + '">' +
+            '<span class="condition-pill-name">' + label + '</span>' +
             '</button>';
     }).join('');
 
@@ -167,7 +338,7 @@ function renderConditionPills() {
 }
 
 function renderConditionDetail() {
-    var detail = document.getElementById('condition-detail');
+    var detail = document.getElementById('condition-detail-medical') || document.getElementById('condition-detail');
     if (!detail) return;
 
     if (!selectedConditionKeys.length) {
@@ -175,26 +346,36 @@ function renderConditionDetail() {
         return;
     }
 
-    var students = getSelectedSupportStudentGroups();
-    var profiles = groupStudentsByProfile(students);
+    var isMultipleMode = selectedConditionKeys.indexOf('multiple') !== -1;
+    var componentKeys = selectedConditionKeys.filter(function(k) { return k !== 'multiple'; });
 
-    if (!profiles.length) {
+    if (isMultipleMode && !componentKeys.length) {
+        detail.innerHTML = '<p class="condition-detail-hint">Selecciona las condiciones que deseas combinar.</p>';
+        return;
+    }
+
+    var students = getSelectedSupportStudentGroups();
+
+    if (!students.length) {
         detail.innerHTML = '<p class="condition-detail-hint">No se encontraron recomendaciones para las condiciones seleccionadas.</p>';
         return;
     }
 
-    var radarHtml = '';
-    try {
-        radarHtml = renderBarrierMap(students);
-    } catch (e) {
-        console.error('radar falló:', e.message);
-    }
-
-    var profilesHtml = profiles.map(function(group) {
-        try { return renderProfileGroup(group); } catch (e) { return ''; }
+    var profilesHtml = students.map(function(student) {
+        var studentChartHtml = '';
+        try {
+            studentChartHtml = renderCIFBarChart([student]);
+        } catch (e) {
+            console.error('renderCIFBarChart falló:', e.message);
+        }
+        var group = {
+            conditions: student.conditions,
+            students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
+        };
+        try { return studentChartHtml + renderProfileGroup(group); } catch (e) { return ''; }
     }).join('');
 
-    var conditionNames = selectedConditionKeys.map(function(k) {
+    var conditionNames = componentKeys.map(function(k) {
         var d = accommodationsData[k];
         return d ? d.name : shortConditionNames[k] || k;
     }).join(' + ');
@@ -202,11 +383,10 @@ function renderConditionDetail() {
     detail.innerHTML =
         '<div class="results-title-header">' +
             '<div>' +
-                '<h3>' + (selectedConditionKeys.length > 1 ? 'Múltiple: ' + conditionNames : conditionNames) + '</h3>' +
+                '<h3>' + (componentKeys.length > 1 ? 'Múltiple: ' + conditionNames : conditionNames) + '</h3>' +
                 '<p>Las recomendaciones están agrupadas por categoría. Ajusta según observación directa y conversación con el estudiante.</p>' +
             '</div>' +
         '</div>' +
-        radarHtml +
         profilesHtml;
 }
 
@@ -215,9 +395,31 @@ function getStudentMatrixProfile(studentIndex) {
     return entry && entry.applied ? entry.profile : null;
 }
 
+function getStudentAssessmentSource(studentIndex) {
+    const entry = matrixData[studentIndex];
+    return entry && entry.applied ? (entry.source || 'matrix') : 'standard';
+}
+
 function getStudentMatrixScores(studentIndex) {
     const entry = matrixData[studentIndex];
     return entry ? entry.scores || {} : {};
+}
+
+function getEmptyMatrixMessage(scores) {
+    var values = Object.values(scores || {}).map(function(value) { return Number(value || 0); }).filter(function(value) { return value > 0; });
+    if (!values.length) {
+        return 'Aun no hay puntajes de matriz para generar apoyos automaticos.';
+    }
+    if (values.every(function(value) { return value === 4; })) {
+        return 'No hay apoyos automaticos para mostrar: todos los puntajes registrados son 4, por lo que no se detectan barreras en la matriz.';
+    }
+    return 'No hay apoyos automaticos para mostrar. Revisa que la condicion seleccionada sea pertinente o usa "Precisar barrera" cuando falte informacion del caso.';
+}
+
+function hasEnteredMatrixScores(studentIndex) {
+    return Object.values(readStudentMatrixScores(studentIndex)).some(function(value) {
+        return Number(value || 0) > 0;
+    });
 }
 
 function renderSupports() {
@@ -227,155 +429,329 @@ function renderSupports() {
 }
 
 function renderSelectedSupportRecommendations() {
-    const results = document.getElementById('support-results');
+    var results = document.getElementById('support-results');
     if (!results) return;
-    const students = getSelectedSupportStudentGroups();
-    const profiles = groupStudentsByProfile(students);
-    console.log('renderSelectedSupportRecs: students=' + students.length + ' profiles=' + profiles.length);
+    var layout = document.querySelector('.support-layout');
 
-    if (!profiles.length) {
-        results.classList.add('hidden');
-        results.innerHTML = '';
+    if (currentMode === 'social') {
+        renderSocialResults();
         return;
     }
 
-    results.classList.remove('hidden');
-    const hasMultiple = profiles.some(function(p) { return p.conditions.length > 1; });
-    const descriptionText = hasMultiple
-        ? 'Las recomendaciones se agrupan por perfil de estudiante. Las compartidas entre varias condiciones se fusionan automáticamente y las específicas se identifican con su condición.'
-        : 'Las recomendaciones se agrupan por condición para evitar repetir información cuando más de un estudiante requiere el mismo apoyo.';
+    var students = getSelectedSupportStudentGroups();
 
-    var radarHtml = '';
-    try {
-        var chartStudents = students.filter(function(s) {
-            var card = document.querySelector('.support-student-card[data-student-index="' + s.cardIndex + '"]');
-            if (!card) return true;
-            var cb = card.querySelector('.show-in-chart');
-            return cb ? cb.checked : true;
-        });
-        radarHtml = renderBarrierMap(chartStudents);
-    } catch (e) {
-        console.error('renderBarrierMap falló:', e.message, e.stack);
-        radarHtml = '<p style=\"color:red\">Error en radar: ' + e.message + '</p>';
+    if (!students.length) {
+        results.classList.add('hidden');
+        results.innerHTML = '';
+        if (layout) layout.style.display = 'none';
+        return;
     }
+
+    if (layout) layout.style.display = '';
+    results.classList.remove('hidden');
+    var hasMultiple = students.some(function(s) { return s.conditions && s.conditions.length > 1; });
+    var hasMatrixApplied = students.some(function(student) {
+        return !!getStudentMatrixProfile(student.cardIndex);
+    });
+    var descriptionText = hasMatrixApplied
+        ? 'Revisa los apoyos por dimension institucional. El semaforo indica prioridad por recomendacion y las consultas rapidas documentan informacion pendiente.'
+        : hasMultiple
+        ? 'Estas orientaciones combinan condiciones seleccionadas y evitan duplicar apoyos. Úsalas como referencia inicial mientras identificas barreras concretas.'
+        : 'Estas orientaciones sirven como referencia cuando no hay ficha disponible. La decisión final debe ajustarse a la barrera observada y al diálogo con el estudiante.';
 
     var profilesHtml = '';
     try {
-        profilesHtml = profiles.map(function(group) {
+        profilesHtml = students.map(function(student) {
+            var studentChartHtml = '';
             try {
-                return renderProfileGroup(group);
+                var card = document.querySelector('#support-students-medical .support-student-card[data-student-index="' + student.cardIndex + '"]');
+                var showChart = card ? (card.querySelector('.show-in-chart')?.checked ?? false) : true;
+                if (showChart) {
+                    studentChartHtml = renderCIFBarChart([student]);
+                }
             } catch (e) {
-                console.error('renderProfileGroup falló para grupo con condiciones:', group.conditions.map(function(c){return c.key;}).join(','), e.message);
-                return '<p style=\"color:red\">Error en perfil: ' + e.message + '</p>';
+                console.error('renderCIFBarChart falló:', e.message, e.stack);
+                studentChartHtml = '<p style=\"color:red\">Error en gráfico: ' + e.message + '</p>';
             }
+            var group = {
+                conditions: student.conditions,
+                students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
+            };
+            try { return studentChartHtml + renderProfileGroup(group); } catch (e) { return '<p style=\"color:red\">Error en recomendaciones: ' + e.message + '</p>'; }
         }).join('');
     } catch (e) {
         console.error('Error general en profiles:', e.message);
         profilesHtml = '<p style=\"color:red\">Error en recomendaciones: ' + e.message + '</p>';
     }
 
-    results.innerHTML = `
-        <div class="results-title-header">
-            <div>
-                <span class="source-pill">Adecuaciones de Acceso</span>
-                <h3>Recomendaciones para el plan</h3>
-                <p>${descriptionText}</p>
-            </div>
-        </div>
-        ${radarHtml}
-        ${profilesHtml}
-    `;
+    results.innerHTML =
+        '<div class="results-title-header">' +
+            '<div>' +
+                '<span class="source-pill">' + (hasMatrixApplied ? 'Matriz CIF aplicada' : 'Consultor por condición') + '</span>' +
+                '<h3>' + (hasMatrixApplied ? 'Apoyos sugeridos por dimension' : 'Orientaciones iniciales para observar barreras') + '</h3>' +
+                '<p>' + descriptionText + '</p>' +
+            '</div>' +
+        '</div>' +
+        profilesHtml;
+    bindCIFBarToggles();
+    bindRecommendationEditing();
+    bindManualRecommendationEditing();
+    bindAdvisorCommentFields();
+    bindClarificationModal();
+    bindClarificationButtons();
 }
 
-function renderBarrierMap(students) {
-    const center = 150;
-    const maxRadius = 100;
-    const matrixColor = '#7c3aed';
-    let hasAnyMatrix = false;
-    const profiles = students.slice(0, 4).map((student, index) => {
-        const studentIndex = student.cardIndex || (index + 1);
-        const matrixProfile = getStudentMatrixProfile(studentIndex);
-        if (matrixProfile) {
-            hasAnyMatrix = true;
-            return {
-                label: formatStudentLabel(student),
-                conditionLabel: 'Perfil desde matriz (CIF)',
-                color: matrixColor,
-                values: matrixProfile
-            };
-        }
+function renderSocialResults() {
+    var results = document.getElementById('support-results');
+    if (!results) return;
+
+    var layout = document.querySelector('.support-layout');
+    if (layout) layout.style.display = '';
+
+    var cards = document.querySelectorAll('#support-students-social .support-student-card');
+    var hasMatrixData = false;
+
+    var students = Array.from(cards).map(function(card) {
+        var idx = card.getAttribute('data-student-index');
+        var name = (card.querySelector('.student-name')?.value || '').trim();
+        var mData = matrixData[idx];
+        if (mData && mData.applied) hasMatrixData = true;
         return {
-            label: formatStudentLabel(student),
-            conditionLabel: formatStudentConditionLabel(student),
-            color: radarColors[index % radarColors.length],
-            values: mergeConditionProfiles(student.conditions.map(function(c) { return c.key; }))
+            label: name || ('Estudiante ' + idx),
+            cardIndex: Number(idx),
+            name: name,
+            conditionKeys: mData ? mData.conditionKeys || readSocialConditionKeys(idx) : readSocialConditionKeys(idx),
+            conditions: (mData ? mData.conditionKeys || readSocialConditionKeys(idx) : readSocialConditionKeys(idx)).map(function(key) {
+                var data = accommodationsData[key];
+                return data ? { key: key, name: data.name, source: data.source } : null;
+            }).filter(Boolean),
+            hasMatrix: !!(mData && mData.applied),
+            matrixScores: mData ? mData.scores || {} : {}
         };
     });
 
-    const extraCount = Math.max(0, students.length - 4);
-    const axisPoints = barrierDimensions.map((_, index) => radarPoint(center, maxRadius, index, barrierDimensions.length));
-    const rings = [1, 2, 3, 4].map(level => {
-        const points = barrierDimensions.map((_, index) => radarPoint(center, (maxRadius / 4) * level, index, barrierDimensions.length));
-        return `<polygon points="${points.map(point => `${point.x},${point.y}`).join(' ')}" class="radar-ring"></polygon>`;
-    }).join('');
-    const axes = axisPoints.map(point => `<line x1="${center}" y1="${center}" x2="${point.x}" y2="${point.y}" class="radar-axis"></line>`).join('');
-    const labels = axisPoints.map((point, index) => {
-        const labelPoint = radarPoint(center, maxRadius + 22, index, barrierDimensions.length);
-        return `<text x="${labelPoint.x}" y="${labelPoint.y}" class="radar-label">${barrierDimensions[index].label}</text>`;
-    }).join('');
-    const polygons = profiles.map(profile => {
-        const points = barrierDimensions.map((dimension, index) => {
-            const radius = (Math.max(0, Math.min(4, profile.values[dimension.key] || 0)) / 4) * maxRadius;
-            return radarPoint(center, radius, index, barrierDimensions.length);
-        });
-        return `
-            <polygon points="${points.map(point => `${point.x},${point.y}`).join(' ')}" class="radar-profile" style="--profile-color: ${profile.color};"></polygon>
-            ${points.map(point => `<circle cx="${point.x}" cy="${point.y}" r="3.5" class="radar-dot" style="--profile-color: ${profile.color};"></circle>`).join('')}
-        `;
+    results.classList.remove('hidden');
+
+    var recsHtml = students.map(function(student) {
+        var label = student.name || ('Estudiante ' + student.cardIndex);
+
+        if (student.hasMatrix) {
+            var studentChartHtml = '';
+            try {
+                studentChartHtml = renderCIFBarChart([student]);
+            } catch (e) {
+                console.error('renderCIFBarChart social falló:', e.message);
+            }
+            var barrierRecs = getBarrierBasedRecommendations(student.matrixScores, student.conditionKeys || []);
+
+            if (!barrierRecs.length) {
+                return '<article class="support-recommendation-group">' +
+                    '<div class="results-title-header"><div>' +
+                    '<h3>' + label + '</h3>' +
+                    '<p>No se identificaron barreras significativas o falta seleccionar la condici\u00f3n registrada en la ficha.</p>' +
+                    '</div></div></article>';
+            }
+
+            var itemsHtml = barrierRecs.map(function(group) {
+                var activityHtml = group.items.map(function(item) {
+                    var body = '';
+                    if (item.recommendations.length) {
+                        body += '<ul class="acc-list">' + item.recommendations.map(function(rec) { return '<li>' + rec + '</li>'; }).join('') + '</ul>';
+                    }
+                    if (item.observations.length) {
+                        body += '<ul class="acc-list matrix-observation-list">' + item.observations.map(function(obs) { return '<li>' + obs + '</li>'; }).join('') + '</ul>';
+                    }
+                    if (item.clarification) {
+                        body += '<p class="matrix-clarification">' + item.clarification + '</p>';
+                    }
+                    return '<div class="matrix-activity-result">' +
+                        '<h5>' + item.activity + ' <span class="matrix-severity ' + item.severityClass + '">' + item.score + ' \u00b7 ' + item.severity + '</span></h5>' +
+                        body +
+                        '</div>';
+                }).join('');
+                return '<article class="acc-card barrier-card">' +
+                    '<h4>' + group.label + '</h4>' +
+                    '<p class="barrier-activities">Barreras en: ' + group.activities.join(', ') + '</p>' +
+                    activityHtml +
+                    '</article>';
+            }).join('');
+
+            var conditionText = student.conditions.length
+                ? student.conditions.map(function(c) { return c.name; }).join(', ')
+                : 'Sin condici\u00f3n registrada';
+
+            return '<article class="support-recommendation-group">' +
+                '<div class="results-title-header"><div>' +
+                '<span class="source-pill">Matriz CIF/OMS</span>' +
+                '<h3>' + label + '</h3>' +
+                '<p><strong>Filtro de pertinencia:</strong> ' + conditionText + '. Las recomendaciones se agrupan en las mismas dimensiones del mapa de barreras.</p>' +
+                '</div></div>' +
+                studentChartHtml +
+                '<div class="support-grid">' + itemsHtml + '</div>' +
+                '</article>';
+        }
+
+        if (!student.conditions.length) {
+            return '<article class="support-recommendation-group">' +
+                '<div class="results-title-header"><div>' +
+                '<h3>' + label + '</h3>' +
+                '<p>Selecciona una condici\u00f3n registrada en la ficha para ver orientaciones de apoyo.</p>' +
+                '</div></div></article>';
+        }
+
+        var group = {
+            conditions: student.conditions,
+            students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
+        };
+        try {
+            return renderStandardRecommendationGroup(group, { hasMatrixProfile: false });
+        } catch (e) {
+            return '<article class="support-recommendation-group"><div class="results-title-header"><div><h3>' + label + '</h3><p>Error generando recomendaciones: ' + e.message + '</p></div></div></article>';
+        }
     }).join('');
 
-    return `
-        <div class="barrier-map-panel">
-            <div class="resource-heading">
-                <span class="source-pill">Mapa orientativo</span>
-                <h3>Mapa de barreras y apoyos del plan</h3>
-                <p>${hasAnyMatrix
-                    ? 'Los perfiles que provienen de la matriz de acceso (CIF/OMS) aparecen en púrpura. Los demás derivan de las condiciones seleccionadas. Ningún dato diagnostica: ajusta con observación.'
-                    : 'Este gráfico no diagnostica ni describe a la persona. Solo ayuda a visualizar dónde podrían requerirse apoyos según las condiciones seleccionadas y debe ajustarse con observación, conversación y evidencia.'}</p>
-            </div>
-            <div class="barrier-map-layout">
-                <div class="radar-wrap" aria-label="Gráfico radar de apoyos posibles">
-                    <svg viewBox="0 0 300 300" role="img" aria-labelledby="radar-title">
-                        <title id="radar-title">Mapa orientativo de barreras y apoyos</title>
-                        ${rings}
-                        ${axes}
-                        ${polygons}
-                        ${labels}
-                    </svg>
-                </div>
-                <div class="radar-side">
-                    <div class="radar-legend">
-                        ${profiles.map(profile => `
-                            <span><i style="--profile-color: ${profile.color};"></i>${profile.label}: ${profile.conditionLabel}</span>
-                        `).join('')}
-                        ${extraCount ? `<span class="small-note">+ ${extraCount} estudiante(s) no graficados para evitar saturación visual.</span>` : ''}
-                    </div>
-                    <div class="radar-scale">
-                        <span><strong>1</strong> Apoyo bajo</span>
-                        <span><strong>2</strong> Apoyo moderado</span>
-                        <span><strong>3</strong> Apoyo alto</span>
-                        <span><strong>4</strong> Requiere coordinación</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    var headerPill = hasMatrixData ? 'Resultados de la matriz' : 'Consultor por condici\u00f3n';
+    var headerTitle = hasMatrixData
+        ? 'Recomendaciones por actividad y dimensi\u00f3n'
+        : 'Orientaciones iniciales para observar barreras';
+    var headerDesc = hasMatrixData
+        ? 'La matriz define el requerimiento; la condici\u00f3n solo filtra pertinencia.'
+        : 'Revisa cada categor\u00eda como referencia inicial mientras identificas barreras concretas.';
+
+    results.innerHTML =
+        '<div class="results-title-header results-toolbar">' +
+            '<div>' +
+                '<span class="source-pill">' + headerPill + '</span>' +
+                '<h3>' + headerTitle + '</h3>' +
+                '<p>' + headerDesc + '</p>' +
+            '</div>' +
+        '</div>' +
+        recsHtml;
+    bindBarrierMapToggles();
+    bindRecommendationEditing();
+    bindManualRecommendationEditing();
+    bindAdvisorCommentFields();
+}
+
+function renderCIFBarChart(students, options) {
+    options = options || {};
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    var hasAnyMatrix = false;
+
+    var studentCols = [];
+    students.slice(0, 4).forEach(function(student, index) {
+        var studentIndex = student.cardIndex || (index + 1);
+        var matrixScores = getStudentMatrixScores(studentIndex);
+        var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
+
+        var rows;
+        var isReference;
+        if (hasMatrix) {
+            hasAnyMatrix = true;
+            isReference = false;
+            rows = activities.map(function(act) {
+                var score = Number(matrixScores[act.id] || 0);
+                var requirement = scoreToRequirement(score);
+                return { id: act.id, score: score, severity: requirement };
+            });
+        } else {
+            isReference = true;
+            var condKeys = student.conditions.map(function(c) { return c.key; });
+            rows = activities.map(function(act) {
+                var maxSev = 0;
+                condKeys.forEach(function(ck) {
+                    var profile = barrierProfiles[ck];
+                    if (!profile) return;
+                    act.dims.forEach(function(dim) {
+                        maxSev = Math.max(maxSev, profile[dim] || 0);
+                    });
+                });
+                return { id: act.id, score: 0, severity: maxSev };
+            });
+        }
+
+        studentCols.push({ label: formatStudentLabel(student), rows: rows, isReference: isReference });
+    });
+
+    var extraCount = Math.max(0, students.length - 4);
+
+    if (!hasAnyMatrix) return '';
+
+    var headerCells = studentCols.map(function(col) {
+        return '<div class="cif-student-header">' + col.label + '</div>';
+    }).join('');
+
+    var bodyRows = activities.map(function(act, ai) {
+        var label = shortActivityLabels[act.id] || act.label;
+        var cells = studentCols.map(function(col) {
+            var row = col.rows[ai];
+            var level = row.severity;
+            var widthPct = level > 0 ? (level / 3) * 100 : 0;
+            return '<div class="cif-cell">' +
+                '<div class="cif-minibar requirement-level-' + level + '" style="width:' + widthPct + '%"></div>' +
+                '</div>';
+        }).join('');
+        var labelCls = ai % 2 === 0 ? 'cif-label-even' : 'cif-label-odd';
+        return '<div class="cif-row">' +
+            '<div class="cif-label ' + labelCls + '">' + label + '</div>' +
+            cells +
+            '</div>';
+    }).join('');
+
+    var sourceLabel = hasAnyMatrix ? 'Matriz CIF aplicada' : 'Orientaci\u00f3n por condici\u00f3n';
+    var descText = hasAnyMatrix
+        ? 'Datos de la matriz CIF del estudiante. Cada barra muestra el nivel de apoyo sugerido seg\u00fan la compatibilidad registrada.'
+        : 'Valores de referencia basados en el perfil t\u00edpico de la condici\u00f3n. Aplica la matriz CIF para obtener datos reales del estudiante.';
+
+    var legendHtml = '<div class="cif-legend">' +
+        [0,1,2,3].map(function(lvl) {
+            return '<span class="cif-legend-item"><span class="cif-legend-swatch requirement-level-' + lvl + '"></span>' + requirementLabel(lvl) + '</span>';
+        }).join('') +
+        '</div>';
+
+    return '<div class="barrier-map-panel">' +
+        '<div class="resource-heading">' +
+            '<span class="source-pill">' + sourceLabel + '</span>' +
+            '<div class="barrier-map-heading">' +
+                '<div>' +
+                    '<h3>Apoyos sugeridos por actividad CIF</h3>' +
+                    '<p>' + descText + '</p>' +
+                '</div>' +
+                (options.hideToggle ? '' : '<button class="btn btn-secondary btn-sm cif-bar-toggle" type="button" aria-expanded="true">Ocultar gr\u00e1fico</button>') +
+            '</div>' +
+        '</div>' +
+        '<div class="cif-chart">' +
+            '<div class="cif-row">' +
+                '<div class="cif-label cif-header-label">Actividad CIF</div>' +
+                headerCells +
+            '</div>' +
+            bodyRows +
+            legendHtml +
+            (extraCount ? '<p class="small-note">+ ' + extraCount + ' estudiante(s) no graficados.</p>' : '') +
+        '</div>' +
+        '</div>';
+}
+
+function bindCIFBarToggles() {
+    document.querySelectorAll('.cif-bar-toggle:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var panel = btn.closest('.barrier-map-panel');
+            if (!panel) return;
+            var chart = panel.querySelector('.cif-chart');
+            if (!chart) return;
+            var isHidden = chart.style.display === 'none';
+            chart.style.display = isHidden ? '' : 'none';
+            btn.textContent = isHidden ? 'Ocultar gr\u00e1fico' : 'Ver gr\u00e1fico';
+            btn.setAttribute('aria-expanded', String(isHidden));
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
 }
 
 function mergeConditionProfiles(conditionKeys) {
-    return barrierDimensions.reduce((profile, dimension) => {
-        profile[dimension.key] = conditionKeys.reduce((max, key) => {
-            const value = barrierProfiles[key]?.[dimension.key] || 0;
+    return barrierDimensions.reduce(function(profile, dimension) {
+        profile[dimension.key] = conditionKeys.reduce(function(max, key) {
+            var value = barrierProfiles[key] ? (barrierProfiles[key][dimension.key] || 0) : 0;
             return Math.max(max, value);
         }, 0);
         return profile;
@@ -387,14 +763,6 @@ function formatStudentConditionLabel(student) {
     if (!names.length) return 'Sin condición seleccionada';
     if (names.length === 1) return names[0];
     return `Múltiples (${names.join(', ')})`;
-}
-
-function radarPoint(center, radius, index, total) {
-    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / total;
-    return {
-        x: Number((center + Math.cos(angle) * radius).toFixed(2)),
-        y: Number((center + Math.sin(angle) * radius).toFixed(2))
-    };
 }
 
 function supportRecommendationGroup(grouped) {
@@ -492,51 +860,163 @@ function supportCategory(title, items) {
     `;
 }
 
-function renderSupportStudents(onStudentChange = () => {}) {
-    const container = document.getElementById('support-students');
-    const addBtn = document.getElementById('add-student-btn');
+function renderMedicalStudents(onStudentChange) {
+    var container = document.getElementById('support-students-medical');
+    var addBtn = document.getElementById('add-student-btn-medical');
     if (!container) return;
 
     var count = Number(container.getAttribute('data-student-count')) || 1;
     count = Math.max(1, Math.min(8, count));
     container.setAttribute('data-student-count', String(count));
 
-    const existingCards = container.querySelectorAll('.support-student-card');
-    const existingCount = existingCards.length;
+    var existingCards = container.querySelectorAll('.support-student-card');
+    var existingCount = existingCards.length;
 
     if (count > existingCount) {
         for (var i = existingCount; i < count; i++) {
-            container.appendChild(createStudentCard(i + 1));
+            container.appendChild(createMedicalStudentCard(i + 1));
         }
     } else if (count < existingCount) {
-        for (var i = existingCount - 1; i >= count; i--) {
-            var removedIndex = existingCards[i].getAttribute('data-student-index');
-            delete matrixData[removedIndex];
-            existingCards[i].remove();
+        for (var j = existingCount - 1; j >= count; j--) {
+            existingCards[j].remove();
         }
     }
 
     container.querySelectorAll('.support-student-card:not([data-events-bound])').forEach(function(card) {
         var studentIndex = card.getAttribute('data-student-index');
 
-        card.querySelectorAll('.condition-check, .student-name').forEach(function(input) {
-            input.addEventListener('input', onStudentChange);
-            input.addEventListener('change', onStudentChange);
-            input.addEventListener('input', renderSelectedSupportRecommendations);
-            input.addEventListener('change', renderSelectedSupportRecommendations);
-            input.addEventListener('change', function() {
-                updateConditionSummaries(studentIndex);
-                updateAddButton();
-                updateRemoveButtons();
+        var nameInput = card.querySelector('.student-name');
+        if (nameInput) {
+            nameInput.addEventListener('change', function() {
+                renderSelectedSupportRecommendations();
+            });
+        }
+
+        card.querySelectorAll('.show-in-chart').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    var idx = card.getAttribute('data-student-index');
+                    var scores = getStudentMatrixScores(idx);
+                    var hasRealScores = Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
+                    if (!hasRealScores) {
+                        this.checked = false;
+                        showToast('Para ver el gráfico, completa la rúbrica CIF del estudiante.');
+                        return;
+                    }
+                }
+                renderSelectedSupportRecommendations();
             });
         });
 
-        card.querySelectorAll('.show-in-chart').forEach(function(cb) {
-            cb.addEventListener('change', renderSelectedSupportRecommendations);
+        card.querySelectorAll('input[type="radio"][name^="student-matrix"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                updateStudentMatrixBadge(studentIndex);
+                if (readMedicalConditionKeys(studentIndex).length) {
+                    applyStudentMatrix(studentIndex);
+                }
+            });
         });
 
-        card.querySelectorAll('input[type="radio"][name^="student-matrix"]').forEach(function(radio) {
-            radio.addEventListener('change', function() { updateStudentMatrixBadge(studentIndex); });
+        var applyMatrixBtn = card.querySelector('.apply-matrix');
+        var clearAssessmentBtn = card.querySelector('.clear-assessment');
+        if (applyMatrixBtn) applyMatrixBtn.addEventListener('click', function() { applyStudentMatrix(studentIndex); });
+        if (clearAssessmentBtn) clearAssessmentBtn.addEventListener('click', function() { clearStudentMatrix(studentIndex); });
+
+        var removeBtn = card.querySelector('.btn-remove-student');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() { removeLastMedicalStudent(onStudentChange); });
+        }
+
+        card.setAttribute('data-events-bound', '');
+    });
+
+    if (addBtn && addBtn.dataset.boundMedical !== 'true') {
+        addBtn.addEventListener('click', function() { addMedicalStudentCard(onStudentChange); });
+        addBtn.setAttribute('data-bound-medical', 'true');
+    }
+
+    updateMedicalRemoveButtons();
+    updateMedicalAddButton();
+    updateMedicalConditionSummaries();
+    container.querySelectorAll('.support-student-card').forEach(function(card) {
+        updateStudentMatrixBadge(card.getAttribute('data-student-index'));
+    });
+}
+
+function renderSocialStudents(onStudentChange) {
+    var container = document.getElementById('support-students-social');
+    var addBtn = document.getElementById('add-student-btn-social');
+    if (!container) return;
+
+    var count = Number(container.getAttribute('data-student-count')) || 1;
+    count = Math.max(1, Math.min(8, count));
+    container.setAttribute('data-student-count', String(count));
+
+    var existingCards = container.querySelectorAll('.support-student-card');
+    var existingCount = existingCards.length;
+
+    if (count > existingCount) {
+        for (var i = existingCount; i < count; i++) {
+            container.appendChild(createSocialStudentCard(i + 1));
+        }
+    } else if (count < existingCount) {
+        for (var j = existingCount - 1; j >= count; j--) {
+            var removedIndex = existingCards[j].getAttribute('data-student-index');
+            delete matrixData[removedIndex];
+            existingCards[j].remove();
+        }
+    }
+
+    container.querySelectorAll('.support-student-card:not([data-events-bound])').forEach(function(card) {
+        var studentIndex = card.getAttribute('data-student-index');
+
+        card.querySelectorAll('.student-name').forEach(function(input) {
+            input.addEventListener('input', onStudentChange);
+            input.addEventListener('change', onStudentChange);
+        });
+
+        card.querySelectorAll('.social-condition-pill').forEach(function(pill) {
+            pill.addEventListener('click', function() {
+                var key = pill.getAttribute('data-condition-key');
+                var isMultiplePill = key === 'multiple';
+                var isMultipleMode = card.getAttribute('data-multiple') === 'true';
+
+                if (isMultiplePill) {
+                    var newMode = !isMultipleMode;
+                    card.setAttribute('data-multiple', String(newMode));
+                    pill.classList.toggle('active', newMode);
+                    if (!newMode) {
+                        var activePills = card.querySelectorAll('.social-condition-pill.active:not(.multiple)');
+                        if (activePills.length > 1) {
+                            for (var i = 1; i < activePills.length; i++) {
+                                activePills[i].classList.remove('active');
+                            }
+                        }
+                    }
+                } else if (isMultipleMode) {
+                    pill.classList.toggle('active');
+                } else {
+                    var wasActive = pill.classList.contains('active');
+                    card.querySelectorAll('.social-condition-pill:not(.multiple)').forEach(function(p) {
+                        p.classList.remove('active');
+                    });
+                    if (!wasActive) pill.classList.add('active');
+                }
+
+                updateSocialConditionSummary(studentIndex);
+                if (matrixData[studentIndex] && matrixData[studentIndex].applied) {
+                    renderSelectedSupportRecommendations();
+                }
+            });
+        });
+
+        card.querySelectorAll('input[type="radio"][name^="social-matrix"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                updateStudentMatrixBadge(studentIndex);
+                if (readSocialConditionKeys(studentIndex).length) {
+                    applyStudentMatrix(studentIndex);
+                }
+            });
         });
 
         var applyBtn = card.querySelector('[id^="apply-matrix-"]');
@@ -546,35 +1026,190 @@ function renderSupportStudents(onStudentChange = () => {}) {
 
         var removeBtn = card.querySelector('.btn-remove-student');
         if (removeBtn) {
-            removeBtn.addEventListener('click', function() { removeLastStudent(onStudentChange); });
+            removeBtn.addEventListener('click', function() { removeLastSocialStudent(onStudentChange); });
         }
 
         card.setAttribute('data-events-bound', '');
     });
 
-    if (addBtn && addBtn.dataset.bound !== 'true') {
-        addBtn.addEventListener('click', function() { addStudentCard(onStudentChange); });
-        addBtn.setAttribute('data-bound', 'true');
+    if (addBtn && addBtn.dataset.boundSocial !== 'true') {
+        addBtn.addEventListener('click', function() { addSocialStudentCard(onStudentChange); });
+        addBtn.setAttribute('data-bound-social', 'true');
     }
 
-    updateRemoveButtons();
-    updateAddButton();
-    updateConditionSummaries();
-    renderSelectedSupportRecommendations();
-    onStudentChange();
+    updateSocialRemoveButtons();
+    updateSocialAddButton();
+    updateSocialMatrixSummaries();
+    container.querySelectorAll('.support-student-card').forEach(function(card) {
+        updateSocialConditionSummary(card.getAttribute('data-student-index'));
+    });
 }
 
-function createStudentCard(studentIndex) {
+function renderSupportStudents(onStudentChange) {
+    if (currentMode === 'medical') {
+        renderMedicalStudents(onStudentChange || renderSelectedSupportRecommendations);
+    } else if (currentMode === 'social') {
+        renderSocialStudents(onStudentChange || renderSelectedSupportRecommendations);
+    }
+}
+
+function getConditionFilterButtons(className) {
+    return conditionGridOrder.map(function(key) {
+        var isMultiple = key === 'multiple';
+        var data = accommodationsData[key];
+        if (!data && !isMultiple) return '';
+        var extraClass = isMultiple ? ' multiple' : '';
+        var label = isMultiple ? 'Múltiple' : (shortConditionNames[key] || key);
+        return '<button class="condition-pill ' + className + extraClass + '" data-condition-key="' + key + '" type="button">' +
+            '<span class="condition-pill-name">' + label + '</span>' +
+            '</button>';
+    }).join('');
+}
+
+function readSocialConditionKeys(studentIndex) {
+    var card = document.querySelector('#support-students-social .support-student-card[data-student-index="' + studentIndex + '"]');
+    if (!card) return [];
+    return Array.from(card.querySelectorAll('.social-condition-pill.active')).map(function(pill) {
+        return pill.getAttribute('data-condition-key');
+    }).filter(function(key) { return key && key !== 'multiple'; });
+}
+
+function updateSocialConditionSummary(studentIndex) {
+    var card = document.querySelector('#support-students-social .support-student-card[data-student-index="' + studentIndex + '"]');
+    if (!card) return;
+    var note = card.querySelector('.social-condition-summary');
+    var keys = readSocialConditionKeys(studentIndex);
+    if (note) {
+        note.textContent = keys.length
+            ? 'Filtro activo: ' + keys.map(function(key) { return shortConditionNames[key] || key; }).join(', ')
+            : 'Selecciona la condición registrada en la ficha para filtrar apoyos pertinentes.';
+    }
+    if (matrixData[studentIndex]) {
+        matrixData[studentIndex].conditionKeys = keys;
+    }
+}
+
+function createAssessmentRows(studentIndex, prefix) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    return activities.map(function(act) {
+        var cells = [4, 3, 2, 1].map(function(val) {
+            return '<td class="matrix-col-score">' +
+                '<label class="matrix-radio-group">' +
+                '<input type="radio" name="' + prefix + '-' + studentIndex + '-' + act.id + '" value="' + val + '">' +
+                '<span>' + val + '</span>' +
+                '</label></td>';
+        }).join('');
+        return '<tr><td class="matrix-activity-label">' + act.label + '</td>' + cells + '</tr>';
+    }).join('');
+}
+
+function createMedicalStudentCard(studentIndex) {
     var wrapper = document.createElement('article');
     wrapper.className = 'support-student-card';
     wrapper.setAttribute('data-student-index', String(studentIndex));
+    wrapper.setAttribute('data-multiple', 'false');
+
+    var pillsHtml = conditionGridOrder.map(function(key) {
+        var isMultiple = key === 'multiple';
+        var data = accommodationsData[key];
+        if (!data && !isMultiple) return '';
+        var label = isMultiple ? 'Múltiple' : (shortConditionNames[key] || key);
+        var extraClass = isMultiple ? ' multiple' : '';
+        return '<button class="condition-pill' + extraClass + '" data-condition-key="' + key + '">' +
+            '<span class="condition-pill-name">' + label + '</span>' +
+            '</button>';
+    }).join('');
+
+    var matrixRows = createAssessmentRows(studentIndex, 'student-matrix');
+
+    wrapper.innerHTML =
+        '<h4>Estudiante ' + studentIndex + '</h4>' +
+        '<label for="student-name-medical-' + studentIndex + '">Nombre del estudiante (opcional)</label>' +
+        '<input id="student-name-medical-' + studentIndex + '" class="text-control student-name" type="text" placeholder="Si queda vacío se usará Estudiante ' + studentIndex + '">' +
+        '<div class="student-card-status" id="student-status-medical-' + studentIndex + '">Sin condición de referencia seleccionada</div>' +
+        '<p class="condition-consultor-note">Selecciona una condición solo para orientar la observación. Luego formula el ajuste desde la barrera concreta, no desde la etiqueta.</p>' +
+        '<div class="condition-pills-inline" id="condition-pills-card-' + studentIndex + '">' +
+            pillsHtml +
+        '</div>' +
+        '<label class="radar-visibility-toggle">' +
+            '<input type="checkbox" class="show-in-chart">' +
+            '<span>Mostrar en gráfico</span>' +
+        '</label>' +
+        '<details class="student-matrix-toggle assessment-tools">' +
+            '<summary>Ajustar perfil con matriz CIF <span class="student-matrix-badge" id="student-matrix-badge-' + studentIndex + '"></span></summary>' +
+            '<div class="assessment-tool-grid">' +
+                '<section class="student-matrix-section">' +
+                    '<h5 class="matrix-heading">Matriz de acceso CIF/OMS</h5>' +
+                    '<p class="matrix-help">Puede llenarse desde la ficha del estudiante y ajustarse posteriormente con evidencia del aula.</p>' +
+                    '<div class="student-matrix-wrap"><table class="student-matrix-table">' +
+                        '<thead><tr><th>Actividad</th><th class="matrix-col-score">4</th><th class="matrix-col-score">3</th><th class="matrix-col-score">2</th><th class="matrix-col-score">1</th></tr></thead>' +
+                        '<tbody>' + matrixRows + '</tbody>' +
+                    '</table>' +
+                    '<div class="student-matrix-legend"><span><strong>4</strong> participa sin ajustes</span><span><strong>3</strong> observar</span><span><strong>2</strong> requiere apoyo</span><span><strong>1</strong> no participa sin apoyo</span></div><p class="matrix-help">La matriz mide compatibilidad: 4 es mayor compatibilidad y 1 es menor compatibilidad. El grafico invierte esa escala para mostrar necesidad de apoyo.</p></div>' +
+                    '<div class="student-matrix-actions"><button class="btn btn-primary btn-sm apply-matrix" type="button">Aplicar ajuste CIF</button><button class="btn btn-secondary btn-sm clear-assessment" type="button">Volver a perfil por condición</button></div>' +
+                '</section>' +
+            '</div>' +
+        '</details>' +
+        '<button class="btn-remove-student" type="button" title="Eliminar estudiante" style="display:none">&times;</button>';
+
+    wrapper.querySelectorAll('.condition-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            var key = pill.getAttribute('data-condition-key');
+            var isMultiplePill = key === 'multiple';
+            var isMultipleMode = wrapper.getAttribute('data-multiple') === 'true';
+
+            if (isMultiplePill) {
+                var newMode = !isMultipleMode;
+                wrapper.setAttribute('data-multiple', String(newMode));
+                if (newMode) {
+                    pill.classList.add('active');
+                } else {
+                    pill.classList.remove('active');
+                    var activePills = wrapper.querySelectorAll('.condition-pill.active:not(.multiple)');
+                    if (activePills.length > 1) {
+                        for (var i = 1; i < activePills.length; i++) {
+                            activePills[i].classList.remove('active');
+                        }
+                    }
+                }
+            } else {
+                if (isMultipleMode) {
+                    pill.classList.toggle('active');
+                } else {
+                    var wasActive = pill.classList.contains('active');
+                    wrapper.querySelectorAll('.condition-pill:not(.multiple)').forEach(function(p) {
+                        p.classList.remove('active');
+                    });
+                    if (!wasActive) pill.classList.add('active');
+                }
+            }
+
+            updateMedicalConditionSummaries(studentIndex);
+            if ((matrixData[studentIndex] && matrixData[studentIndex].applied) || hasEnteredMatrixScores(studentIndex)) {
+                applyStudentMatrix(studentIndex);
+                return;
+            }
+            updateMedicalAddButton();
+            updateMedicalRemoveButtons();
+            renderSelectedSupportRecommendations();
+        });
+    });
+
+    return wrapper;
+}
+
+function createSocialStudentCard(studentIndex) {
+    var wrapper = document.createElement('article');
+    wrapper.className = 'support-student-card';
+    wrapper.setAttribute('data-student-index', String(studentIndex));
+    wrapper.setAttribute('data-multiple', 'false');
 
     var activities = window.UiePlannerData.accessMatrixActivities;
     var matrixRows = activities.map(function(act) {
         var cells = [4, 3, 2, 1].map(function(val) {
             return '<td class="matrix-col-score">' +
                 '<label class="matrix-radio-group">' +
-                '<input type="radio" name="student-matrix-' + studentIndex + '-' + act.id + '" value="' + val + '">' +
+                '<input type="radio" name="social-matrix-' + studentIndex + '-' + act.id + '" value="' + val + '">' +
                 '<span>' + val + '</span>' +
                 '</label></td>';
         }).join('');
@@ -583,29 +1218,18 @@ function createStudentCard(studentIndex) {
 
     wrapper.innerHTML =
         '<h4>Estudiante ' + studentIndex + '</h4>' +
-        '<label for="student-name-' + studentIndex + '">Nombre del estudiante (opcional)</label>' +
-        '<input id="student-name-' + studentIndex + '" class="text-control student-name" type="text" placeholder="Si queda vacío se usará Estudiante ' + studentIndex + '">' +
-        '<div class="student-card-status" id="student-status-' + studentIndex + '">Sin apoyos definidos</div>' +
-        '<label class="radar-visibility-toggle">' +
-            '<input type="checkbox" class="show-in-chart" checked>' +
-            '<span>Mostrar en gráfico</span>' +
-        '</label>' +
-        '<details class="condition-dropdown">' +
-            '<summary>' +
-                '<span class="condition-summary-text">Seleccionar condiciones</span>' +
-                '<span class="condition-summary-count" id="condition-count-' + studentIndex + '">Sin selección</span>' +
-            '</summary>' +
-            '<div class="condition-checklist" aria-label="Condiciones del estudiante ' + studentIndex + '">' +
-                Object.keys(accommodationsData).map(function(key) {
-                    return '<label class="condition-option"><input type="checkbox" class="condition-check" value="' + key + '"><span>' + accommodationsData[key].name + '</span></label>';
-                }).join('') +
-            '</div>' +
-        '</details>' +
-        '<details class="student-matrix-toggle">' +
-            '<summary>' +
-                '<span>Matriz de acceso (CIF/OMS)</span>' +
-                '<span class="student-matrix-badge" id="student-matrix-badge-' + studentIndex + '"></span>' +
-            '</summary>' +
+        '<label for="student-name-social-' + studentIndex + '">Nombre del estudiante (opcional)</label>' +
+        '<input id="student-name-social-' + studentIndex + '" class="text-control student-name" type="text" placeholder="Si queda vacío se usará Estudiante ' + studentIndex + '">' +
+        '<div class="student-card-status" id="student-status-social-' + studentIndex + '">Sin apoyos definidos</div>' +
+        '<div class="social-condition-filter">' +
+            '<h5 class="matrix-heading">Condición registrada en ficha</h5>' +
+            '<p class="matrix-help">Filtra apoyos pertinentes. No cambia el gráfico.</p>' +
+            '<div class="condition-pills-inline">' + getConditionFilterButtons('social-condition-pill') + '</div>' +
+            '<p class="social-condition-summary">Selecciona la condición registrada en la ficha para filtrar apoyos pertinentes.</p>' +
+        '</div>' +
+        '<div class="student-matrix-section">' +
+            '<h5 class="matrix-heading">Matriz de acceso CIF/OMS</h5>' +
+            '<p class="matrix-help">Puntúa cada actividad según la ficha del estudiante.</p>' +
             '<div class="student-matrix-wrap">' +
                 '<table class="student-matrix-table">' +
                     '<thead><tr><th>Actividad</th><th class="matrix-col-score">4</th><th class="matrix-col-score">3</th><th class="matrix-col-score">2</th><th class="matrix-col-score">1</th></tr></thead>' +
@@ -619,78 +1243,167 @@ function createStudentCard(studentIndex) {
                 '</div>' +
             '</div>' +
             '<div class="student-matrix-actions">' +
-                '<button class="btn btn-primary btn-sm" id="apply-matrix-' + studentIndex + '" type="button">Aplicar puntajes</button>' +
+                '<button class="btn btn-primary btn-sm" id="apply-matrix-' + studentIndex + '" type="button">Identificar barreras</button>' +
                 '<button class="btn btn-secondary btn-sm" id="clear-matrix-' + studentIndex + '" type="button">Limpiar</button>' +
+                '<span class="student-matrix-badge" id="student-matrix-badge-' + studentIndex + '"></span>' +
             '</div>' +
-        '</details>' +
+        '</div>' +
         '<button class="btn-remove-student" type="button" title="Eliminar estudiante" style="display:none">&times;</button>';
-
-    wrapper.setAttribute('data-matrix-ready', '');
 
     return wrapper;
 }
 
-function addStudentCard(onStudentChange) {
-    var container = document.getElementById('support-students');
+function addMedicalStudentCard(onStudentChange) {
+    var container = document.getElementById('support-students-medical');
     if (!container) return;
     var count = Number(container.getAttribute('data-student-count')) || 1;
     if (count >= 8) return;
     container.setAttribute('data-student-count', String(count + 1));
-    renderSupportStudents(onStudentChange);
+    renderMedicalStudents(onStudentChange);
 }
 
-function removeLastStudent(onStudentChange) {
-    var container = document.getElementById('support-students');
+function addSocialStudentCard(onStudentChange) {
+    var container = document.getElementById('support-students-social');
+    if (!container) return;
+    var count = Number(container.getAttribute('data-student-count')) || 1;
+    if (count >= 8) return;
+    container.setAttribute('data-student-count', String(count + 1));
+    renderSocialStudents(onStudentChange);
+}
+
+function removeLastMedicalStudent(onStudentChange) {
+    var container = document.getElementById('support-students-medical');
+    if (!container) return;
+    var count = Number(container.getAttribute('data-student-count')) || 1;
+    if (count <= 1) return;
+    var cards = container.querySelectorAll('.support-student-card');
+    if (cards.length > 0) cards[cards.length - 1].remove();
+    container.setAttribute('data-student-count', String(count - 1));
+    updateMedicalRemoveButtons();
+    updateMedicalAddButton();
+    updateMedicalConditionSummaries();
+    if (typeof onStudentChange === 'function') onStudentChange();
+}
+
+function removeLastSocialStudent(onStudentChange) {
+    var container = document.getElementById('support-students-social');
     if (!container) return;
     var count = Number(container.getAttribute('data-student-count')) || 1;
     if (count <= 1) return;
     var cards = container.querySelectorAll('.support-student-card');
     if (cards.length > 0) {
-        cards[cards.length - 1].remove();
-        var matrixIdx = String(cards.length);
+        var matrixIdx = cards[cards.length - 1].getAttribute('data-student-index');
         delete matrixData[matrixIdx];
+        cards[cards.length - 1].remove();
     }
     container.setAttribute('data-student-count', String(count - 1));
-    updateRemoveButtons();
-    updateAddButton();
-    updateConditionSummaries();
-    renderSelectedSupportRecommendations();
+    updateSocialRemoveButtons();
+    updateSocialAddButton();
+    updateSocialMatrixSummaries();
     if (typeof onStudentChange === 'function') onStudentChange();
 }
 
-function updateAddButton() {
-    var addBtn = document.getElementById('add-student-btn');
-    var container = document.getElementById('support-students');
+function updateMedicalAddButton() {
+    var addBtn = document.getElementById('add-student-btn-medical');
+    var container = document.getElementById('support-students-medical');
     if (!addBtn || !container) return;
     var count = Number(container.getAttribute('data-student-count')) || 1;
-    if (count >= 8) {
-        addBtn.style.display = 'none';
-        return;
-    }
+    if (count >= 8) { addBtn.style.display = 'none'; return; }
     var cards = container.querySelectorAll('.support-student-card');
     var lastCard = cards[cards.length - 1];
-    if (!lastCard) {
-        addBtn.style.display = 'none';
-        return;
-    }
-    var hasCondition = lastCard.querySelectorAll('.condition-check:checked').length > 0;
+    if (!lastCard) { addBtn.style.display = 'none'; return; }
+    var hasCondition = lastCard.querySelectorAll('.condition-pill.active').length > 0;
     addBtn.style.display = hasCondition ? '' : 'none';
 }
 
-function updateRemoveButtons() {
-    var container = document.getElementById('support-students');
+function updateSocialAddButton() {
+    var addBtn = document.getElementById('add-student-btn-social');
+    var container = document.getElementById('support-students-social');
+    if (!addBtn || !container) return;
+    var count = Number(container.getAttribute('data-student-count')) || 1;
+    if (count >= 8) { addBtn.style.display = 'none'; return; }
+    var cards = container.querySelectorAll('.support-student-card');
+    var lastCard = cards[cards.length - 1];
+    if (!lastCard) { addBtn.style.display = 'none'; return; }
+    var hasMatrix = matrixData[lastCard.getAttribute('data-student-index')] && matrixData[lastCard.getAttribute('data-student-index')].applied;
+    addBtn.style.display = hasMatrix ? '' : 'none';
+}
+
+function updateMedicalRemoveButtons() {
+    var container = document.getElementById('support-students-medical');
     if (!container) return;
     var cards = container.querySelectorAll('.support-student-card');
     var count = Number(container.getAttribute('data-student-count')) || 1;
     cards.forEach(function(card, index) {
         var btn = card.querySelector('.btn-remove-student');
         if (!btn) return;
-        if (count > 1 && index === cards.length - 1) {
-            btn.style.display = '';
-        } else {
-            btn.style.display = 'none';
+        btn.style.display = (count > 1 && index === cards.length - 1) ? '' : 'none';
+    });
+}
+
+function updateSocialRemoveButtons() {
+    var container = document.getElementById('support-students-social');
+    if (!container) return;
+    var cards = container.querySelectorAll('.support-student-card');
+    var count = Number(container.getAttribute('data-student-count')) || 1;
+    cards.forEach(function(card, index) {
+        var btn = card.querySelector('.btn-remove-student');
+        if (!btn) return;
+        btn.style.display = (count > 1 && index === cards.length - 1) ? '' : 'none';
+    });
+}
+
+function updateMedicalConditionSummaries() {
+    document.querySelectorAll('#support-students-medical .support-student-card').forEach(function(card) {
+        var idx = card.getAttribute('data-student-index');
+        var selected = Array.from(card.querySelectorAll('.condition-pill.active'))
+            .map(function(pill) {
+                var key = pill.getAttribute('data-condition-key');
+                return shortConditionNames[key] || key;
+            })
+            .filter(Boolean);
+        var status = document.getElementById('student-status-medical-' + idx) ||
+                     document.getElementById('student-status-' + idx);
+        if (status) {
+            var assessment = getStudentAssessmentSource(idx);
+            if (selected.length) {
+                status.textContent = selected.join(', ') + (assessment === 'matrix' ? ' · ajustado por matriz CIF' : '');
+                status.className = 'student-card-status status-conditions';
+                status.title = selected.join(', ');
+            } else {
+                status.textContent = 'Sin condición de referencia seleccionada';
+                status.className = 'student-card-status';
+                status.title = '';
+            }
         }
     });
+}
+
+function updateSocialMatrixSummaries() {
+    document.querySelectorAll('#support-students-social .support-student-card').forEach(function(card) {
+        var idx = card.getAttribute('data-student-index');
+        updateStudentMatrixBadge(idx);
+        updateStudentStatusBadgeForContainer('support-students-social', idx, null);
+    });
+}
+
+function updateStudentStatusBadgeForContainer(containerId, idx, conditions) {
+    var status = document.getElementById('student-status-' + containerId.replace('support-students-', '') + '-' + idx) ||
+                 document.getElementById('student-status-' + idx);
+    if (!status) return;
+    var hasMatrix = matrixData[idx] && matrixData[idx].applied;
+    var hasConditions = conditions ? conditions.length > 0 : false;
+
+    if (hasMatrix) {
+        status.textContent = 'Matriz de acceso aplicada';
+        status.className = 'student-card-status status-matrix';
+    } else if (hasConditions) {
+        status.textContent = conditions.length + ' condición(es) seleccionada(s)';
+        status.className = 'student-card-status status-conditions';
+    } else {
+        status.textContent = 'Sin apoyos definidos';
+        status.className = 'student-card-status';
+    }
 }
 
 function renderReferenceCatalog() {
@@ -721,61 +1434,44 @@ function renderReferenceCatalog() {
     '<div class="ref-catalog">' + items + '</div>';
 }
 
-function updateConditionSummaries(studentIndex) {
-    document.querySelectorAll('.support-student-card').forEach(card => {
-        var idx = card.getAttribute('data-student-index');
-        var selected = Array.from(card.querySelectorAll('.condition-check:checked'))
-            .map(box => accommodationsData[box.value]?.name)
-            .filter(Boolean);
-        var count = document.getElementById('condition-count-' + idx);
-        if (count) {
-            count.textContent = selected.length
-                ? `${selected.length} seleccionada(s)`
-                : 'Sin selección';
-            count.title = selected.join(', ');
-        }
-        updateStudentStatusBadge(idx);
-    });
-}
-
 function getSelectedSupportStudentGroups() {
-    var cards = document.querySelectorAll('.support-student-card');
+    var containerId = currentMode === 'social' ? 'support-students-social' : 'support-students-medical';
+    var cards = document.querySelectorAll('#' + containerId + ' .support-student-card');
 
     if (cards.length) {
-        console.log('getSelectedSupportStudentGroups: cards encontradas=' + cards.length);
-        return Array.from(cards).map(card => {
-            const index = card.dataset.studentIndex;
-            const name = card.querySelector('.student-name')?.value.trim();
-            const checked = Array.from(card.querySelectorAll('.condition-check:checked'));
-            console.log('  card ' + index + ': checkboxes checked=' + checked.length);
-            const conditions = checked
-                .map(box => {
-                    var key = box.value;
+        return Array.from(cards).map(function(card) {
+            var index = card.dataset.studentIndex;
+            var name = (card.querySelector('.student-name')?.value || '').trim();
+            var activePills = Array.from(card.querySelectorAll('.condition-pill.active'));
+            var conditions = activePills
+                .map(function(pill) {
+                    var key = pill.getAttribute('data-condition-key');
                     var data = accommodationsData[key];
-                    if (!data) console.warn('  WARN: accommodationsData[' + key + '] no existe');
-                    return { key: key, ...data };
+                    if (!data) return null;
+                    return { key: key, name: data.name, source: data.source };
                 })
-                .filter(item => item.name);
+                .filter(Boolean);
             return {
-                label: `Estudiante ${index}`,
+                label: 'Estudiante ' + index,
                 cardIndex: Number(index),
-                name,
-                conditions
+                name: name,
+                conditions: conditions
             };
         }).filter(function(student) {
-            console.log('  filtro: card ' + student.cardIndex + ' tiene ' + student.conditions.length + ' condiciones');
             return student.conditions.length;
         });
     }
 
-    if (selectedConditionKeys.length) {
+    if (currentMode === 'medical' && selectedConditionKeys.length) {
+        var componentKeys = selectedConditionKeys.filter(function(k) { return k !== 'multiple'; });
+        if (!componentKeys.length) return [];
         return [{
             label: 'Perfil seleccionado',
             cardIndex: 1,
             name: '',
-            conditions: selectedConditionKeys.map(function(key) {
+            conditions: componentKeys.map(function(key) {
                 var data = accommodationsData[key];
-                return data ? { key: key, ...data } : null;
+                return data ? { key: key, name: data.name, source: data.source } : null;
             }).filter(Boolean)
         }];
     }
@@ -834,14 +1530,20 @@ function groupStudentsByProfile(students) {
 function getMergedRecommendations(conditionKeys) {
     const categories = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'];
     const result = {};
+    var data = recommendationsData || accommodationsData;
 
     categories.forEach(function(cat) {
         const allItems = [];
         conditionKeys.forEach(function(key) {
-            const condition = accommodationsData[key];
+            const condition = data[key];
             if (condition && condition[cat]) {
-                condition[cat].forEach(function(text) {
-                    allItems.push({ text: text, conditionKey: key, shortName: shortConditionNames[key] || key });
+                condition[cat].forEach(function(item) {
+                    allItems.push({
+                        text: item.text || item,
+                        activities: item.activities || [],
+                        conditionKey: key,
+                        shortName: shortConditionNames[key] || key
+                    });
                 });
             }
         });
@@ -859,7 +1561,14 @@ function getMergedRecommendations(conditionKeys) {
 
         applicableMerges.forEach(function(group) {
             group.texts.forEach(function(text) { usedTexts[text] = true; });
-            mergedItems.push({ text: group.mergedText, isMerged: true, shortNames: [] });
+            var mergedActivities = [];
+            group.texts.forEach(function(text) {
+                var found = allItems.filter(function(i) { return i.text === text; });
+                found.forEach(function(f) {
+                    f.activities.forEach(function(a) { if (mergedActivities.indexOf(a) === -1) mergedActivities.push(a); });
+                });
+            });
+            mergedItems.push({ text: group.mergedText, isMerged: true, shortNames: [], activities: mergedActivities });
         });
 
         allItems.forEach(function(item) {
@@ -869,12 +1578,14 @@ function getMergedRecommendations(conditionKeys) {
                 if (existing.shortNames.indexOf(item.shortName) === -1) {
                     existing.shortNames.push(item.shortName);
                 }
+                item.activities.forEach(function(a) { if (existing.activities.indexOf(a) === -1) existing.activities.push(a); });
                 return;
             }
             mergedItems.push({
                 text: item.text,
                 isMerged: false,
-                shortNames: conditionKeys.length > 1 ? [item.shortName] : []
+                shortNames: conditionKeys.length > 1 ? [item.shortName] : [],
+                activities: item.activities || []
             });
         });
 
@@ -884,38 +1595,333 @@ function getMergedRecommendations(conditionKeys) {
     return result;
 }
 
-function renderProfileGroup(group) {
-    const conditionKeys = group.conditions.map(function(c) { return c.key; });
-    const conditionNames = group.conditions.map(function(c) { return c.name; });
-    const sources = [];
-    group.conditions.forEach(function(c) {
-        if (sources.indexOf(c.source) === -1) sources.push(c.source);
+function hiddenRecommendationKey(cat, text) {
+    return cat + '|' + text;
+}
+
+function isRecommendationHidden(cat, text) {
+    return !!hiddenRecommendations[hiddenRecommendationKey(cat, text)];
+}
+
+function concreteRecommendationKey(studentIndex, item) {
+    return 'matrix-' + studentIndex + '|' + (item.id || item.text);
+}
+
+function isConcreteRecommendationHidden(studentIndex, item) {
+    return !!hiddenRecommendations[concreteRecommendationKey(studentIndex, item)];
+}
+
+function clarificationKey(studentIndex, activityId) {
+    return studentIndex + '|' + activityId;
+}
+
+function readClarification(studentIndex, activityId) {
+    return clarificationData[clarificationKey(studentIndex, activityId)] || null;
+}
+
+function hasClarificationContent(data) {
+    if (!data) return false;
+    return ['where', 'trigger', 'support', 'source'].some(function(key) {
+        return String(data[key] || '').trim().length > 0;
     });
-    const studentNames = group.students.map(function(s) { return formatStudentLabel(s); }).join(', ');
-    const hasMultiple = conditionKeys.length > 1;
-    var merged;
-    try {
-        merged = getMergedRecommendations(conditionKeys);
-    } catch (e) {
-        console.error('getMergedRecommendations falló:', e.message);
-        throw e;
-    }
-    const hasAutism = conditionKeys.indexOf('autismo') !== -1;
+}
 
-    const sourcePills = sources.map(function(s) { return '<span class="source-pill">' + s + '</span>'; }).join(' ');
+function getCategoryRequirementForGroup(group, cat) {
+    var hasMatrix = groupHasMatrixProfile(group);
+    return group.students.reduce(function(max, student) {
+        var profile = getStudentMatrixProfile(student.cardIndex);
+        if (hasMatrix && !profile) return max;
+        if (!profile) {
+            profile = mergeConditionProfiles(group.conditions.map(function(c) { return c.key; }));
+        }
+        return Math.max(max, profile[cat] || 0);
+    }, 0);
+}
 
-    const categoriesHtml = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'].map(function(cat) {
-        const items = merged[cat];
-        if (!items || !items.length) return '';
-        const itemsHtml = items.map(function(item) {
-            let tag = '';
-            if (!item.isMerged && hasMultiple && item.shortNames.length > 0) {
-                tag = ' <span class="condition-tag">' + item.shortNames.join(', ') + '</span>';
-            }
-            return '<li>' + item.text + tag + '</li>';
-        }).join('');
-        return '<article class="acc-card"><h4>' + categoryLabels[cat] + '</h4><ul class="acc-list">' + itemsHtml + '</ul></article>';
+function requirementDot(value) {
+    var level = Math.max(0, Math.min(4, Math.round(value || 0)));
+    var label = requirementLabel(level);
+    return '<span class="requirement-dot requirement-level-' + level + '" title="' + label + '"></span>';
+}
+
+function requirementLabel(value) {
+    var level = Math.max(0, Math.min(4, Math.round(value || 0)));
+    return level >= 3 ? 'Prioritario' : level === 2 ? 'Recomendado' : level === 1 ? 'Observación' : 'Sin ajuste';
+}
+
+function groupHasMatrixProfile(group) {
+    return group.students.some(function(student) {
+        return !!getStudentMatrixProfile(student.cardIndex);
+    });
+}
+
+function escapeSupportHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, function(character) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+    });
+}
+
+function renderAdvisorCommentFields(group) {
+    if (!group.students.length) return '';
+    var fields = group.students.map(function(student) {
+        var idx = student.cardIndex;
+        var label = escapeSupportHtml(formatStudentLabel(student));
+        var value = escapeSupportHtml(advisorCommentsByStudent[idx] || '');
+        return '<div class="advisor-comment-result-field">' +
+            '<label for="advisor-comments-result-' + idx + '">Recomendación adicional del asesor · ' + label + '</label>' +
+            '<textarea id="advisor-comments-result-' + idx + '" class="text-control advisor-comments-field advisor-comments-result-field" data-student-index="' + idx + '" rows="4" placeholder="Escribe una recomendación adicional para el PDF, si corresponde.">' + value + '</textarea>' +
+            '</div>';
     }).join('');
+    return '<div class="advisor-comments-section advisor-comments-results">' + fields + '</div>';
+}
+
+function bindAdvisorCommentFields() {
+    document.querySelectorAll('.advisor-comments-result-field:not([data-bound])').forEach(function(field) {
+        field.addEventListener('input', function() {
+            advisorCommentsByStudent[field.getAttribute('data-student-index')] = field.value;
+        });
+        field.setAttribute('data-bound', 'true');
+    });
+}
+
+function bindRecommendationEditing() {
+    document.querySelectorAll('.recommendation-toggle:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var key = btn.getAttribute('data-rec-key');
+            if (!key) return;
+            hiddenRecommendations[key] = !hiddenRecommendations[key];
+            renderSelectedSupportRecommendations();
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
+}
+
+function manualCategoryKey(studentIndex, categoryKey) {
+    return String(studentIndex) + '::' + categoryKey;
+}
+
+function getManualRecommendations(studentIndex, categoryKey) {
+    return manualRecommendationsByStudentCategory[manualCategoryKey(studentIndex, categoryKey)] || [];
+}
+
+function saveManualRecommendation(studentIndex, categoryKey, text, sourceActivityId, suggestedLabel) {
+    var cleanText = String(text || '').trim();
+    if (!cleanText) return;
+    var key = manualCategoryKey(studentIndex, categoryKey);
+    if (!manualRecommendationsByStudentCategory[key]) manualRecommendationsByStudentCategory[key] = [];
+    manualRecommendationsByStudentCategory[key].push({
+        id: 'manual-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+        text: cleanText,
+        sourceActivityId: sourceActivityId || '',
+        suggestedLabel: suggestedLabel || ''
+    });
+}
+
+function deleteManualRecommendation(studentIndex, categoryKey, manualId) {
+    var key = manualCategoryKey(studentIndex, categoryKey);
+    manualRecommendationsByStudentCategory[key] = getManualRecommendations(studentIndex, categoryKey).filter(function(item) {
+        return item.id !== manualId;
+    });
+}
+
+function getManualPromptLabelForCategory(prompts, categoryKey) {
+    var prompt = (prompts || []).find(function(item) {
+        return (item.dimensions || []).indexOf(categoryKey) !== -1;
+    });
+    if (!prompt) return 'Agregar recomendación';
+    var activity = prompt.activities && prompt.activities.length ? prompt.activities[0] : 'esta barrera';
+    var lower = String(activity).toLowerCase();
+    if (lower.indexOf('acceder') !== -1 || lower.indexOf('institución') !== -1) {
+        return 'Se necesita adecuación en el acceso a la institución';
+    }
+    return 'Se necesita adecuación para ' + lower;
+}
+
+function renderManualRecommendations(studentIndex, categoryKey) {
+    return getManualRecommendations(studentIndex, categoryKey).map(function(item) {
+        return '<li class="manual-recommendation-item">' +
+            '<span class="concrete-recommendation-body">' +
+                '<span class="concrete-recommendation-main"><strong class="concrete-recommendation-text">' + escapeSupportHtml(item.text) + '</strong><span class="requirement-badge requirement-level-2">Agregada manualmente</span></span>' +
+                (item.suggestedLabel ? '<small class="recommendation-reason">' + escapeSupportHtml(item.suggestedLabel) + '</small>' : '') +
+            '</span>' +
+            '<button class="manual-recommendation-delete" type="button" data-student-index="' + studentIndex + '" data-category-key="' + categoryKey + '" data-manual-id="' + escapeSupportHtml(item.id) + '">Eliminar</button>' +
+        '</li>';
+    }).join('');
+}
+
+function renderManualRecommendationControls(studentIndex, categoryKey, promptLabel) {
+    var label = promptLabel || 'Agregar recomendación';
+    return '<li class="manual-recommendation-control" data-student-index="' + studentIndex + '" data-category-key="' + categoryKey + '" data-suggested-label="' + escapeSupportHtml(label) + '">' +
+        '<button class="manual-add-button" type="button">+ ' + escapeSupportHtml(label) + '</button>' +
+        '<div class="manual-recommendation-editor" hidden>' +
+            '<textarea class="text-control manual-recommendation-text" rows="3" placeholder="Escribe la recomendación acordada para esta categoría."></textarea>' +
+            '<div class="manual-recommendation-actions">' +
+                '<button class="btn btn-primary btn-sm manual-save-button" type="button">Guardar</button>' +
+                '<button class="btn btn-secondary btn-sm manual-cancel-button" type="button">Cancelar</button>' +
+            '</div>' +
+        '</div>' +
+    '</li>';
+}
+
+function bindManualRecommendationEditing() {
+    document.querySelectorAll('.manual-add-button:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var control = btn.closest('.manual-recommendation-control');
+            if (!control) return;
+            var editor = control.querySelector('.manual-recommendation-editor');
+            if (editor) editor.hidden = false;
+            btn.style.display = 'none';
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
+
+    document.querySelectorAll('.manual-cancel-button:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var control = btn.closest('.manual-recommendation-control');
+            if (!control) return;
+            var editor = control.querySelector('.manual-recommendation-editor');
+            var addBtn = control.querySelector('.manual-add-button');
+            var field = control.querySelector('.manual-recommendation-text');
+            if (field) field.value = '';
+            if (editor) editor.hidden = true;
+            if (addBtn) addBtn.style.display = '';
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
+
+    document.querySelectorAll('.manual-save-button:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var control = btn.closest('.manual-recommendation-control');
+            if (!control) return;
+            var field = control.querySelector('.manual-recommendation-text');
+            saveManualRecommendation(
+                control.getAttribute('data-student-index'),
+                control.getAttribute('data-category-key'),
+                field ? field.value : '',
+                '',
+                control.getAttribute('data-suggested-label') || ''
+            );
+            renderSelectedSupportRecommendations();
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
+
+    document.querySelectorAll('.manual-recommendation-delete:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            deleteManualRecommendation(btn.getAttribute('data-student-index'), btn.getAttribute('data-category-key'), btn.getAttribute('data-manual-id'));
+            renderSelectedSupportRecommendations();
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
+}
+
+function bindClarificationButtons() {
+    document.querySelectorAll('.clarification-open:not([data-bound])').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openClarificationModal(btn.getAttribute('data-student-index'), btn.getAttribute('data-activity-id'));
+        });
+        btn.setAttribute('data-bound', 'true');
+    });
+}
+
+function bindClarificationModal() {
+    var overlay = document.getElementById('clarification-modal-overlay');
+    if (!overlay || overlay.dataset.bound === 'true') return;
+    var closeBtn = document.getElementById('clarification-modal-close');
+    var cancelBtn = document.getElementById('clarification-cancel');
+    var saveBtn = document.getElementById('clarification-save');
+    if (closeBtn) closeBtn.addEventListener('click', closeClarificationModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeClarificationModal);
+    if (saveBtn) saveBtn.addEventListener('click', saveClarificationResponse);
+    overlay.addEventListener('click', function(event) {
+        if (event.target === overlay) closeClarificationModal();
+    });
+    overlay.setAttribute('data-bound', 'true');
+}
+
+function openClarificationModal(studentIndex, activityId) {
+    var overlay = document.getElementById('clarification-modal-overlay');
+    if (!overlay) return;
+    var activity = (window.UiePlannerData.accessMatrixActivities || []).find(function(item) {
+        return item.id === activityId;
+    });
+    var data = readClarification(studentIndex, activityId) || {};
+    overlay.setAttribute('data-student-index', studentIndex);
+    overlay.setAttribute('data-activity-id', activityId);
+    var title = document.getElementById('clarification-modal-title');
+    var activityLabel = document.getElementById('clarification-activity-label');
+    if (title) title.textContent = 'Precisar barrera';
+    if (activityLabel) activityLabel.textContent = activity ? activity.label : 'Actividad CIF';
+    ['where', 'trigger', 'support', 'source'].forEach(function(key) {
+        var field = document.getElementById('clarification-' + key);
+        if (field) field.value = data[key] || '';
+    });
+    overlay.style.display = '';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeClarificationModal() {
+    var overlay = document.getElementById('clarification-modal-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'none';
+    overlay.removeAttribute('data-student-index');
+    overlay.removeAttribute('data-activity-id');
+    if (!document.getElementById('plan-modal-overlay') || document.getElementById('plan-modal-overlay').style.display === 'none') {
+        document.body.style.overflow = '';
+    }
+}
+
+function saveClarificationResponse() {
+    var overlay = document.getElementById('clarification-modal-overlay');
+    if (!overlay) return;
+    var studentIndex = overlay.getAttribute('data-student-index');
+    var activityId = overlay.getAttribute('data-activity-id');
+    if (!studentIndex || !activityId) return;
+    clarificationData[clarificationKey(studentIndex, activityId)] = {
+        where: (document.getElementById('clarification-where')?.value || '').trim(),
+        trigger: (document.getElementById('clarification-trigger')?.value || '').trim(),
+        support: (document.getElementById('clarification-support')?.value || '').trim(),
+        source: (document.getElementById('clarification-source')?.value || '').trim()
+    };
+    closeClarificationModal();
+    renderSelectedSupportRecommendations();
+}
+
+function renderManualCategoryExtras(students, categoryKey, prompts) {
+    return (students || []).map(function(student) {
+        var studentIndex = student.cardIndex || student.index;
+        var manualHtml = renderManualRecommendations(studentIndex, categoryKey);
+        var promptLabel = getManualPromptLabelForCategory(prompts || [], categoryKey);
+        return manualHtml + (editingMode ? renderManualRecommendationControls(studentIndex, categoryKey, promptLabel) : '');
+    }).join('');
+}
+
+function getReferenceScores(conditionKeys) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    var scores = {};
+    activities.forEach(function(act) {
+        var maxSev = 0;
+        conditionKeys.forEach(function(ck) {
+            var profile = barrierProfiles[ck];
+            if (!profile) return;
+            act.dims.forEach(function(dim) {
+                maxSev = Math.max(maxSev, profile[dim] || 0);
+            });
+        });
+        scores[act.id] = maxSev === 0 ? 4 : maxSev === 1 ? 3 : maxSev === 2 ? 2 : 1;
+    });
+    return scores;
+}
+
+function renderProfileGroup(group) {
+    const hasMatrixProfile = groupHasMatrixProfile(group);
+    if (hasMatrixProfile) {
+        return renderMatrixAdjustedProfileGroup(group);
+    }
+
+    var conditionKeys = group.conditions.map(function(c) { return c.key; });
+    var mainHtml = renderStandardRecommendationGroup(group, { hasMatrixProfile: false });
+    const hasAutism = conditionKeys.indexOf('autismo') !== -1;
 
     let highlightHtml = '';
     let regulationHtml = '';
@@ -940,26 +1946,499 @@ function renderProfileGroup(group) {
             autismMyths.map(function(item) { return '<article class="myth-item">' + item + '</article>'; }).join('') + '</div></div>';
     }
 
+    var lastClose = mainHtml.lastIndexOf('</article>');
+    if (lastClose !== -1) {
+        mainHtml = mainHtml.slice(0, lastClose) + highlightHtml + regulationHtml + mythsHtml + '</article>' + mainHtml.slice(lastClose + 10);
+    }
+    return mainHtml;
+}
+
+function renderMatrixAdjustedProfileGroup(group) {
+    var matrixStudents = group.students.filter(function(student) {
+        return !!getStudentMatrixProfile(student.cardIndex);
+    });
+    var standardStudents = group.students.filter(function(student) {
+        return !getStudentMatrixProfile(student.cardIndex);
+    });
+    var conditionNames = group.conditions.map(function(c) { return c.name; }).join(' - ');
+    var standardHtml = '';
+
+    if (standardStudents.length) {
+        standardHtml = renderStandardRecommendationGroup({
+            conditions: group.conditions,
+            students: standardStudents
+        }, { hasMatrixProfile: false });
+    }
+
+    return matrixStudents.map(function(student) {
+        var entry = matrixData[student.cardIndex] || {};
+        var label = escapeSupportHtml(formatStudentLabel(student));
+        var scores = entry.scores || {};
+        var studentGroup = {
+            conditions: group.conditions,
+            students: [student]
+        };
+        var studentHtml = renderStandardRecommendationGroup(studentGroup, {
+            hasMatrixProfile: true,
+            studentScores: scores
+        });
+
+        return studentHtml;
+    }).join('') + standardHtml;
+}
+
+function renderStandardRecommendationGroup(group, options) {
+    options = options || {};
+    var conditionKeys = group.conditions.map(function(c) { return c.key; });
+    var conditionNames = group.conditions.map(function(c) { return c.name; });
+    var sources = [];
+    group.conditions.forEach(function(c) {
+        if (sources.indexOf(c.source) === -1) sources.push(c.source);
+    });
+    var studentNames = group.students.map(function(s) { return formatStudentLabel(s); }).join(', ');
+    var hasMultiple = conditionKeys.length > 1;
+    var hasMatrixProfile = options.hasMatrixProfile;
+    var studentScores = options.studentScores || getFirstStudentScores(group);
+    var merged = getMergedRecommendations(conditionKeys);
+    var sourcePills = sources.filter(function(s) { return s !== 'Adecuaciones de Acceso'; }).map(function(s) { return '<span class="source-pill">' + s + '</span>'; }).join(' ');
+    var categoriesHtml = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'].map(function(cat) {
+        var items = merged[cat];
+        var requirement = getCategoryRequirementForGroup(group, cat);
+        var itemsHtml = '';
+        if (items && items.length) {
+            var itemsWithPriority = items.map(function(item) {
+                var priority = 0;
+                if (hasMatrixProfile) {
+                    var level = getSemaforo(item.activities, studentScores);
+                    if (level) {
+                        priority = getMatrixSeverity(level).requirement;
+                    }
+                }
+                return { item: item, priority: priority };
+            });
+            itemsWithPriority.sort(function(a, b) {
+                return b.priority - a.priority;
+            });
+            itemsHtml = itemsWithPriority.map(function(entry) {
+                var item = entry.item;
+                var tag = '';
+                if (!item.isMerged && hasMultiple && item.shortNames.length > 0) {
+                    tag = ' <span class="condition-tag">' + item.shortNames.join(', ') + '</span>';
+                }
+                var activityTags = getActivityTagString(item.activities);
+                var badgeHtml = '';
+                if (hasMatrixProfile) {
+                    badgeHtml = requirementDot(entry.priority > 0 ? entry.priority : 0);
+                }
+                var key = hiddenRecommendationKey(cat, item.text);
+                var hidden = isRecommendationHidden(cat, item.text);
+                return '<li class="' + (hidden ? 'recommendation-hidden' : '') + '">' +
+                    '<span class="standard-recommendation-main"><span>' + item.text + tag + activityTags + '</span>' + badgeHtml + '</span>' +
+                    '<button class="recommendation-toggle" type="button" data-rec-key="' + key + '">' + (hidden ? 'Restaurar' : 'Ocultar') + '</button>' +
+                    '</li>';
+            }).join('');
+        } else {
+            itemsHtml = '<li class="empty-dimension">Sin recomendaciones específicas para esta dimensión.</li>';
+        }
+        var manualHtml = renderManualCategoryExtras(group.students, cat, []);
+        return '<article class="acc-card"><h4>' + categoryLabels[cat] + '</h4><ul class="acc-list">' + itemsHtml + manualHtml + '</ul></article>';
+    }).join('');
+
+    var hasActiveScores = hasMatrixProfile && studentScores && Object.values(studentScores).some(function(v) { return Number(v || 0) > 0 && Number(v || 0) < 4; });
+    var legendHtml = '';
+    if (hasActiveScores) {
+        legendHtml = '<div class="rec-legend">' +
+            [0,1,2,3].map(function(lvl) {
+                var label = requirementLabel(lvl);
+                return '<span class="rec-legend-item"><span class="requirement-dot requirement-level-' + lvl + '"></span>' + label + '</span>';
+            }).join('') +
+            '</div>';
+    }
+
     return '<article class="support-recommendation-group">' +
         '<div class="results-title-header"><div>' +
         sourcePills + ' ' +
-        '<h3>' + conditionNames.join(' · ') + '</h3>' +
+        '<h3>' + conditionNames.join(' - ') + '</h3>' +
         '<p><strong>Aplica a:</strong> ' + studentNames + '</p>' +
         '</div></div>' +
+        legendHtml +
         '<div class="support-grid">' + categoriesHtml + '</div>' +
-        highlightHtml + regulationHtml + mythsHtml +
+        renderAdvisorCommentFields(group) +
         '</article>';
 }
 
+function getFirstStudentScores(group) {
+    if (!group || !group.students || !group.students.length) return null;
+    var entry = matrixData[group.students[0].cardIndex];
+    return entry ? entry.scores : null;
+}
+
+function getManualItemsForStudent(studentIndex) {
+    return ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'].flatMap(function(cat) {
+        return getManualRecommendations(studentIndex, cat).map(function(item) {
+            return {
+                id: item.id,
+                kind: 'manual',
+                text: item.text,
+                activities: item.suggestedLabel ? [item.suggestedLabel] : [],
+                activityIds: item.sourceActivityId ? [item.sourceActivityId] : [],
+                dimensions: [cat],
+                dimensionLabels: [categoryLabels[cat] || cat],
+                priorityLevel: 2,
+                scores: [],
+                evidenceCount: 0,
+                maxRequirement: 0,
+                weights: {}
+            };
+        });
+    });
+}
+
+function getVisibleMatrixItems(student, options) {
+    options = options || {};
+    var idx = student.cardIndex || student.index;
+    var items = computePrioritizedRecommendations(student.matrixScores || {}, student.conditionKeys || student.conditions.map(function(c) { return c.key; }))
+        .filter(function(item) { return item.kind !== 'manual_prompt' && !isConcreteRecommendationHidden(idx, item); });
+    return options.includeManual ? items.concat(getManualItemsForStudent(idx)) : items;
+}
+
+function groupMatrixItemsByDimension(items) {
+    return barrierDimensions.map(function(dim) {
+        return {
+            key: dim.key,
+            label: categoryLabels[dim.key] || dim.label,
+            items: (items || []).filter(function(item) {
+                return (item.dimensions || []).indexOf(dim.key) !== -1;
+            })
+        };
+    }).filter(function(group) { return group.items.length > 0; });
+}
+
+function formatClarificationEvidence(studentIndex, item) {
+    var activityId = (item.activityIds || [])[0] || '';
+    var data = activityId ? readClarification(studentIndex, activityId) : null;
+    if (!hasClarificationContent(data)) return '';
+    return [
+        data.where ? 'Contexto: ' + data.where : '',
+        data.trigger ? 'Causa observada: ' + data.trigger : '',
+        data.support ? 'Apoyo usado: ' + data.support : '',
+        data.source ? 'Fuente: ' + data.source : ''
+    ].filter(Boolean).join(' | ');
+}
 
 function readStudentMatrixScores(studentIndex) {
     var scores = {};
     var activities = window.UiePlannerData.accessMatrixActivities;
     activities.forEach(function(act) {
-        var checked = document.querySelector('input[name="student-matrix-' + studentIndex + '-' + act.id + '"]:checked');
+        var checked = document.querySelector('input[name="social-matrix-' + studentIndex + '-' + act.id + '"]:checked') ||
+                      document.querySelector('input[name="student-matrix-' + studentIndex + '-' + act.id + '"]:checked');
         scores[act.id] = checked ? Number(checked.value) : 0;
     });
     return scores;
+}
+
+function readMedicalConditionKeys(studentIndex) {
+    var card = document.querySelector('#support-students-medical .support-student-card[data-student-index="' + studentIndex + '"]');
+    if (!card) return [];
+    return Array.from(card.querySelectorAll('.condition-pill.active')).map(function(pill) {
+        return pill.getAttribute('data-condition-key');
+    }).filter(function(key) { return key && key !== 'multiple' && accommodationsData[key]; });
+}
+
+function ruleMatchesMatrixActivity(rule, activity, score, conditionKeys) {
+    if (rule.activities.indexOf(activity.id) === -1) return false;
+    if (rule.scores.indexOf(score) === -1) return false;
+    return conditionKeys.some(function(key) { return rule.conditions.indexOf(key) !== -1; });
+}
+
+function getRuleWeights(rule) {
+    if (rule.dimensionWeights) return rule.dimensionWeights;
+    if (ruleDimensionWeights[rule.id]) return ruleDimensionWeights[rule.id];
+    return (rule.dimensions || []).reduce(function(weights, dim, index) {
+        weights[dim] = index === 0 ? 1 : 0.7;
+        return weights;
+    }, {});
+}
+
+function scoreToRequirement(score) {
+    return getMatrixSeverity(Number(score || 0)).requirement;
+}
+
+function weightedValueToLevel(value) {
+    if (value >= 2.5) return 3;
+    if (value >= 1.5) return 2;
+    if (value >= 0.75) return 1;
+    return 0;
+}
+
+function getActivityLabelById(activityId) {
+    var activity = (window.UiePlannerData.accessMatrixActivities || []).find(function(item) {
+        return item.id === activityId;
+    });
+    return activity ? activity.label : activityId;
+}
+
+function addPrioritizedItem(items, byId, itemId, itemData, activity, score, severity) {
+    if (!byId[itemId]) {
+        byId[itemId] = {
+            id: itemId,
+            kind: itemData.kind || 'recommendation',
+            text: itemData.text,
+            activities: [],
+            activityIds: [],
+            dimensions: itemData.dimensions || [],
+            dimensionLabels: (itemData.dimensions || []).map(function(dim) { return categoryLabels[dim] || dim; }),
+            priorityLevel: 0,
+            scores: [],
+            evidenceCount: 0,
+            maxRequirement: 0,
+            weights: itemData.weights || {}
+        };
+        items.push(byId[itemId]);
+    }
+
+    var item = byId[itemId];
+    var activityLabel = activity.label || getActivityLabelById(activity.id);
+    if (item.activities.indexOf(activityLabel) === -1) item.activities.push(activityLabel);
+    if (item.activityIds.indexOf(activity.id) === -1) item.activityIds.push(activity.id);
+    item.scores.push(score);
+    item.evidenceCount += 1;
+    item.maxRequirement = Math.max(item.maxRequirement, severity.requirement);
+    item.priorityLevel = Math.max(item.priorityLevel, severity.requirement);
+}
+
+function addCatalogRecommendationsForActivity(items, byId, conditionKey, activity, score, severity) {
+    var data = accommodationsData[conditionKey];
+    var cifMap = accommodationCifMap && accommodationCifMap[conditionKey];
+    var added = 0;
+
+    if (!data || !cifMap) return 0;
+
+    ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'].forEach(function(cat) {
+        var recommendations = data[cat] || [];
+        var activityMaps = cifMap[cat] || [];
+        recommendations.forEach(function(text, index) {
+            var activityIds = activityMaps[index] || [];
+            if (activityIds.indexOf(activity.id) === -1) return;
+            var weights = {};
+            weights[cat] = 1;
+            addPrioritizedItem(items, byId, 'catalog-' + conditionKey + '-' + cat + '-' + index, {
+                text: text,
+                dimensions: [cat],
+                weights: weights
+            }, activity, score, severity);
+            added += 1;
+        });
+    });
+
+    return added;
+}
+
+function computePrioritizedRecommendations(scores, conditionKeys) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    var filterKeys = (conditionKeys || []).filter(function(key) { return accommodationsData[key]; });
+    var byId = {};
+    var items = [];
+
+    if (!filterKeys.length) return [];
+
+    activities.forEach(function(activity) {
+        var score = Number(scores[activity.id] || 0);
+        if (!score || score === 4) return;
+        var severity = getMatrixSeverity(score);
+
+        var catalogMatches = 0;
+        filterKeys.forEach(function(conditionKey) {
+            catalogMatches += addCatalogRecommendationsForActivity(items, byId, conditionKey, activity, score, severity);
+        });
+
+        if (catalogMatches > 0) return;
+
+        if (score === 3) {
+            items.push({
+                id: 'observation-' + activity.id,
+                kind: 'observation',
+                text: getMatrixObservation(activity.label),
+                activities: [activity.label],
+                activityIds: [activity.id],
+                dimensions: activity.dims || [],
+                dimensionLabels: (activity.dims || []).map(function(dim) { return categoryLabels[dim] || dim; }),
+                priorityLevel: 1,
+                scores: [score],
+                severityClass: severity.className
+            });
+            return;
+        }
+
+        var matchingRules = (matrixRecommendationRules || []).filter(function(rule) {
+            return ruleMatchesMatrixActivity(rule, activity, score, filterKeys);
+        });
+
+        if (!matchingRules.length) {
+            var fallbackId = 'manual-prompt-' + activity.id + '-' + filterKeys.join('-');
+            if (!byId[fallbackId]) {
+                byId[fallbackId] = {
+                    id: fallbackId,
+                    kind: 'manual_prompt',
+                    text: getManualPromptLabelForCategory([{ activities: [activity.label], dimensions: activity.dims || [] }], (activity.dims || [])[0]),
+                    activities: [],
+                    activityIds: [],
+                    dimensions: activity.dims || [],
+                    dimensionLabels: (activity.dims || []).map(function(dim) { return categoryLabels[dim] || dim; }),
+                    priorityLevel: Math.min(2, severity.requirement),
+                    scores: [],
+                    evidenceCount: 0,
+                    maxRequirement: 0,
+                    weights: {}
+                };
+                items.push(byId[fallbackId]);
+            }
+            byId[fallbackId].activities.push(activity.label);
+            byId[fallbackId].activityIds.push(activity.id);
+            byId[fallbackId].scores.push(score);
+            byId[fallbackId].evidenceCount += 1;
+            byId[fallbackId].maxRequirement = Math.max(byId[fallbackId].maxRequirement, severity.requirement);
+            return;
+        }
+
+        matchingRules.forEach(function(rule) {
+            if (!byId[rule.id]) {
+                var dims = rule.dimensions || [];
+                byId[rule.id] = {
+                    id: rule.id,
+                    kind: 'recommendation',
+                    text: rule.text,
+                    activities: [],
+                    activityIds: [],
+                    dimensions: dims,
+                    dimensionLabels: dims.map(function(dim) { return categoryLabels[dim] || dim; }),
+                    priorityLevel: 0,
+                    scores: [],
+                    evidenceCount: 0,
+                    maxRequirement: 0,
+                    weights: getRuleWeights(rule)
+                };
+                items.push(byId[rule.id]);
+            }
+
+            var item = byId[rule.id];
+            var weights = item.weights || {};
+            var primaryWeight = Object.keys(weights).reduce(function(max, dimKey) {
+                return Math.max(max, Number(weights[dimKey]) || 0);
+            }, 0);
+            var weightedRequirement = severity.requirement * Math.max(0.7, primaryWeight);
+            var level = weightedValueToLevel(weightedRequirement);
+
+            if (item.activities.indexOf(activity.label) === -1) item.activities.push(activity.label);
+            if (item.activityIds.indexOf(activity.id) === -1) item.activityIds.push(activity.id);
+            item.scores.push(score);
+            item.evidenceCount += 1;
+            item.maxRequirement = Math.max(item.maxRequirement, severity.requirement);
+            item.priorityLevel = Math.max(item.priorityLevel, level);
+        });
+    });
+
+    items.forEach(function(item) {
+        if (item.kind === 'recommendation' && item.priorityLevel === 2 && item.evidenceCount >= 2 && item.maxRequirement >= 3) {
+            item.priorityLevel = 3;
+        }
+        item.priorityLevel = Math.max(1, Math.min(3, item.priorityLevel || 1));
+    });
+
+    return items.sort(function(a, b) {
+        if (b.priorityLevel !== a.priorityLevel) return b.priorityLevel - a.priorityLevel;
+        if (b.evidenceCount !== a.evidenceCount) return (b.evidenceCount || 0) - (a.evidenceCount || 0);
+        return String(a.text).localeCompare(String(b.text));
+    });
+}
+
+function computeProfileFromPrioritizedRecommendations(items) {
+    var evidence = {};
+    barrierDimensions.forEach(function(dim) {
+        evidence[dim.key] = { maxValue: 0, strongCount: 0, primaryCount: 0 };
+    });
+
+    (items || []).forEach(function(item) {
+        if (item.kind === 'manual_prompt') return;
+        if (item.kind === 'observation') {
+            (item.dimensions || []).forEach(function(dimKey) {
+                if (!evidence[dimKey]) return;
+                evidence[dimKey].maxValue = Math.max(evidence[dimKey].maxValue, 1);
+            });
+            return;
+        }
+        var level = item.priorityLevel || 0;
+        var weights = item.weights || {};
+        var dims = Object.keys(weights).length ? Object.keys(weights) : (item.dimensions || []);
+        dims.forEach(function(dimKey, index) {
+            if (!evidence[dimKey]) return;
+            var weight = Object.keys(weights).length ? Math.max(0, Math.min(1, Number(weights[dimKey]) || 0)) : (index === 0 ? 1 : 0.7);
+            var value = level * weight;
+            evidence[dimKey].maxValue = Math.max(evidence[dimKey].maxValue, value);
+            if (weightedValueToLevel(value) >= 2) evidence[dimKey].strongCount += 1;
+            if (weight >= 1) evidence[dimKey].primaryCount += 1;
+        });
+    });
+
+    return barrierDimensions.reduce(function(profile, dim) {
+        var item = evidence[dim.key];
+        var level = weightedValueToLevel(item.maxValue);
+        if (level === 2 && item.strongCount >= 2) level = 3;
+        if (level === 3 && item.primaryCount === 0 && item.strongCount < 2) level = 2;
+        profile[dim.key] = level;
+        return profile;
+    }, {});
+}
+
+function computeWeightedMatrixProfile(scores, conditionKeys) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    var filterKeys = (conditionKeys || []).filter(function(key) { return accommodationsData[key]; });
+    var evidence = {};
+
+    barrierDimensions.forEach(function(dim) {
+        evidence[dim.key] = { maxValue: 0, strongCount: 0, primaryCount: 0 };
+    });
+
+    activities.forEach(function(activity) {
+        var score = scores[activity.id] || 0;
+        var requirement = scoreToRequirement(score);
+        if (!requirement) return;
+
+        var matchingRules = filterKeys.length ? (matrixRecommendationRules || []).filter(function(rule) {
+            return ruleMatchesMatrixActivity(rule, activity, score, filterKeys);
+        }) : [];
+
+        if (matchingRules.length) {
+            matchingRules.forEach(function(rule) {
+                var weights = getRuleWeights(rule);
+                Object.keys(weights).forEach(function(dimKey) {
+                    if (!evidence[dimKey]) return;
+                    var weight = Math.max(0, Math.min(1, Number(weights[dimKey]) || 0));
+                    var value = requirement * weight;
+                    evidence[dimKey].maxValue = Math.max(evidence[dimKey].maxValue, value);
+                    if (weightedValueToLevel(value) >= 2) evidence[dimKey].strongCount += 1;
+                    if (weight >= 1) evidence[dimKey].primaryCount += 1;
+                });
+            });
+            return;
+        }
+
+        (activity.dims || []).forEach(function(dimKey) {
+            if (!evidence[dimKey]) return;
+            var value = requirement * 0.7;
+            evidence[dimKey].maxValue = Math.max(evidence[dimKey].maxValue, value);
+            if (weightedValueToLevel(value) >= 2) evidence[dimKey].strongCount += 1;
+        });
+    });
+
+    return barrierDimensions.reduce(function(profile, dim) {
+        var item = evidence[dim.key];
+        var level = weightedValueToLevel(item.maxValue);
+        if (level === 2 && item.strongCount >= 2) level = 3;
+        if (level === 3 && item.primaryCount === 0 && item.strongCount < 2) level = 2;
+        profile[dim.key] = level;
+        return profile;
+    }, {});
 }
 
 function computeRadarProfile(scores) {
@@ -969,63 +2448,53 @@ function computeRadarProfile(scores) {
     activities.forEach(function(act) {
         var score = scores[act.id] || 0;
         if (!score) return;
-        var radarValue = 5 - score;
+        var radarValue = Math.max(0, 4 - score);
         act.dims.forEach(function(dim) {
             dims[dim].push(radarValue);
         });
     });
 
     return barrierDimensions.reduce(function(profile, dim) {
-        var values = dims[dim.key] || [1];
-        profile[dim.key] = values.length ? Math.max.apply(null, values) : 1;
+        var values = dims[dim.key] || [];
+        profile[dim.key] = values.length ? Math.max.apply(null, values) : 0;
         return profile;
     }, {});
-}
-
-function computeConditionSuggestions(scores) {
-    var activities = window.UiePlannerData.accessMatrixActivities;
-    var weights = {};
-
-    activities.forEach(function(act) {
-        var score = scores[act.id] || 0;
-        if (score <= 2 && score >= 1) {
-            var weight = 3 - score;
-            act.conds.forEach(function(cond) {
-                weights[cond] = (weights[cond] || 0) + weight;
-            });
-        }
-    });
-
-    var entries = Object.keys(weights).map(function(k) { return { key: k, weight: weights[k] }; });
-    entries.sort(function(a, b) { return b.weight - a.weight; });
-
-    var threshold = 2;
-    var suggested = entries.filter(function(e) { return e.weight >= threshold; }).map(function(e) { return e.key; });
-
-    return suggested;
 }
 
 function applyStudentMatrix(studentIndex) {
     var scores = readStudentMatrixScores(studentIndex);
     var scored = Object.values(scores).filter(function(v) { return v > 0; });
     if (!scored.length) return;
-
-    var profile = computeRadarProfile(scores);
-    var suggested = computeConditionSuggestions(scores);
-
-    matrixData[studentIndex] = { scores: scores, profile: profile, applied: true };
-
-    var card = document.querySelector('.support-student-card[data-student-index="' + studentIndex + '"]');
-    if (card) {
-        card.querySelectorAll('.condition-check').forEach(function(box) {
-            box.checked = suggested.indexOf(box.value) !== -1;
-        });
-        updateConditionSummaries(studentIndex);
+    var conditionKeys = readMedicalConditionKeys(studentIndex);
+    if (!conditionKeys.length) conditionKeys = readSocialConditionKeys(studentIndex);
+    if (!conditionKeys.length) {
+        alert('Selecciona la condición registrada en la ficha antes de identificar barreras. Esto evita sugerir apoyos que no corresponden.');
+        return;
     }
 
+    var prioritizedRecommendations = computePrioritizedRecommendations(scores, conditionKeys);
+    var profile = computeProfileFromPrioritizedRecommendations(prioritizedRecommendations);
+
+    matrixData[studentIndex] = {
+        scores: scores,
+        profile: profile,
+        prioritizedRecommendations: prioritizedRecommendations,
+        conditionKeys: conditionKeys,
+        applied: true,
+        source: 'matrix'
+    };
+
+    var card = document.querySelector('.support-student-card[data-student-index="' + studentIndex + '"]');
+    if (card) card.setAttribute('data-assessment-source', 'matrix');
+
     updateStudentMatrixBadge(studentIndex);
-    updateAddButton();
-    updateRemoveButtons();
+    updateSocialConditionSummary(studentIndex);
+    updateMedicalConditionSummaries();
+    updateStudentStatusBadgeForContainer('support-students-social', studentIndex, null);
+    updateSocialAddButton();
+    updateSocialRemoveButtons();
+    updateMedicalAddButton();
+    updateMedicalRemoveButtons();
     renderSelectedSupportRecommendations();
 }
 
@@ -1034,31 +2503,40 @@ function clearStudentMatrix(studentIndex) {
 
     var card = document.querySelector('.support-student-card[data-student-index="' + studentIndex + '"]');
     if (card) {
+        card.setAttribute('data-assessment-source', 'standard');
+        card.querySelectorAll('input[type="radio"][name^="social-matrix"]').forEach(function(radio) {
+            radio.checked = false;
+        });
         card.querySelectorAll('input[type="radio"][name^="student-matrix"]').forEach(function(radio) {
             radio.checked = false;
         });
     }
 
     updateStudentMatrixBadge(studentIndex);
+    updateStudentStatusBadgeForContainer('support-students-social', studentIndex, null);
     updateStudentStatusBadge(studentIndex);
+    updateMedicalConditionSummaries();
     renderSelectedSupportRecommendations();
 }
 
 function updateStudentMatrixBadge(studentIndex) {
     var badge = document.getElementById('student-matrix-badge-' + studentIndex);
     if (!badge) return;
-    var scores = readStudentMatrixScores(studentIndex);
-    var scored = Object.values(scores).filter(function(v) { return v > 0; }).length;
-    badge.textContent = scored ? scored + '/11' : '';
+    var matrixScores = readStudentMatrixScores(studentIndex);
+    var scored = Object.values(matrixScores).filter(function(v) { return v > 0; }).length;
+    var source = getStudentAssessmentSource(studentIndex);
+    badge.textContent = scored ? (source === 'matrix' ? 'Matriz ' : '') + scored + '/11' : '';
     updateStudentStatusBadge(studentIndex);
 }
 
 function updateStudentStatusBadge(studentIndex) {
-    var status = document.getElementById('student-status-' + studentIndex);
+    var status = document.getElementById('student-status-' + studentIndex) ||
+                 document.getElementById('student-status-medical-' + studentIndex) ||
+                 document.getElementById('student-status-social-' + studentIndex);
     if (!status) return;
 
     var card = document.querySelector('.support-student-card[data-student-index="' + studentIndex + '"]');
-    var hasConditions = card ? card.querySelectorAll('.condition-check:checked').length > 0 : false;
+    var hasConditions = card ? card.querySelectorAll('.condition-check:checked, .condition-pill.active:not(.multiple), .social-condition-pill.active:not(.multiple)').length > 0 : false;
     var hasMatrix = !!matrixData[studentIndex] && matrixData[studentIndex].applied;
     var hasMatrixScores = Object.values(readStudentMatrixScores(studentIndex)).filter(function(v) { return v > 0; }).length > 0;
 
@@ -1069,7 +2547,7 @@ function updateStudentStatusBadge(studentIndex) {
         status.textContent = 'Con condiciones seleccionadas';
         status.className = 'student-card-status status-conditions';
     } else if (hasMatrixScores) {
-        status.textContent = 'Matriz sin aplicar';
+        status.textContent = 'Ajuste CIF sin aplicar';
         status.className = 'student-card-status status-pending';
     } else {
         status.textContent = 'Sin apoyos definidos';
@@ -1082,7 +2560,6 @@ function openPlanModal(onStudentChange) {
     if (!overlay) return;
     overlay.style.display = '';
     document.body.style.overflow = 'hidden';
-    renderPlanStudents();
     bindPlanModalEvents(onStudentChange);
 }
 
@@ -1093,85 +2570,9 @@ function closePlanModal() {
     document.body.style.overflow = '';
 }
 
-function getPlanMode() {
-    var active = document.querySelector('.plan-modal-tab.active');
-    return active ? active.getAttribute('data-tab') : 'basic';
-}
-
-function renderPlanStudents() {
-    var container = document.getElementById('plan-students');
-    var countSelect = document.getElementById('plan-student-count');
-    if (!container || !countSelect) return;
-
-    var count = Number(countSelect.value) || 1;
-    var mode = getPlanMode();
-
-    container.innerHTML = '';
-    for (var i = 1; i <= count; i++) {
-        container.appendChild(createPlanStudentCard(i, mode));
-    }
-}
-
-function createPlanStudentCard(index, mode) {
-    var card = document.createElement('article');
-    card.className = 'plan-student-card';
-
-    var html = '<h4>Estudiante ' + index + '</h4>';
-
-    if (mode === 'personalized') {
-        html += '<div class="plan-personal-fields">' +
-            '<label for="plan-name-' + index + '">Nombre (opcional)</label>' +
-            '<input id="plan-name-' + index + '" class="text-control plan-student-name" type="text" placeholder="Ej: Juan Pérez">' +
-            '<label for="plan-rut-' + index + '">RUT (opcional)</label>' +
-            '<input id="plan-rut-' + index + '" class="text-control plan-student-rut" type="text" placeholder="Ej: 12.345.678-9">' +
-            '<label for="plan-career-' + index + '">Carrera (opcional)</label>' +
-            '<input id="plan-career-' + index + '" class="text-control plan-student-career" type="text" placeholder="Ej: Ingeniería en Informática">' +
-            '</div>';
-    }
-
-    html += '<details class="plan-condition-list">' +
-        '<summary>Seleccionar condiciones</summary>' +
-        '<div class="plan-checklist">' +
-        Object.keys(accommodationsData).map(function(key) {
-            return '<label class="plan-check-option">' +
-                '<input type="checkbox" class="plan-condition-check" value="' + key + '">' +
-                '<span>' + accommodationsData[key].name + '</span></label>';
-        }).join('') +
-        '</div>' +
-        '</details>';
-
-    if (mode === 'personalized') {
-        var activities = window.UiePlannerData.accessMatrixActivities;
-        var matrixRows = activities.map(function(act) {
-            var cells = [4, 3, 2, 1].map(function(val) {
-                return '<td class="matrix-col-score"><label class="matrix-radio-group">' +
-                    '<input type="radio" name="plan-matrix-' + index + '-' + act.id + '" value="' + val + '">' +
-                    '<span>' + val + '</span></label></td>';
-            }).join('');
-            return '<tr><td class="matrix-activity-label">' + act.label + '</td>' + cells + '</tr>';
-        }).join('');
-
-        html += '<details class="plan-matrix-toggle">' +
-            '<summary>Matriz de acceso (CIF/OMS) — opcional</summary>' +
-            '<div class="student-matrix-wrap"><table class="student-matrix-table">' +
-            '<thead><tr><th>Actividad</th><th class="matrix-col-score">4</th><th class="matrix-col-score">3</th><th class="matrix-col-score">2</th><th class="matrix-col-score">1</th></tr></thead>' +
-            '<tbody>' + matrixRows + '</tbody></table>' +
-            '<div class="student-matrix-legend">' +
-            '<span><strong>4</strong> Compatibilidad perfecta</span>' +
-            '<span><strong>3</strong> Compatibilidad buena</span>' +
-            '<span><strong>2</strong> Compatibilidad parcial</span>' +
-            '<span><strong>1</strong> Incompatibilidad</span></div></div></details>';
-    }
-
-    card.innerHTML = html;
-    return card;
-}
-
 function bindPlanModalEvents(onStudentChange) {
     var closeBtn = document.getElementById('plan-modal-close');
     var overlay = document.getElementById('plan-modal-overlay');
-    var countSelect = document.getElementById('plan-student-count');
-    var tabs = document.querySelectorAll('.plan-modal-tab');
     var genBtn = document.getElementById('btn-generate-pdf');
 
     if (closeBtn && closeBtn.dataset.bound !== 'true') {
@@ -1186,23 +2587,6 @@ function bindPlanModalEvents(onStudentChange) {
         overlay.setAttribute('data-bound', 'true');
     }
 
-    if (countSelect && countSelect.dataset.boundPlan !== 'true') {
-        countSelect.addEventListener('change', renderPlanStudents);
-        countSelect.setAttribute('data-boundPlan', 'true');
-    }
-
-    tabs.forEach(function(tab) {
-        if (tab.dataset.boundPlan !== 'true') {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.plan-modal-tab').forEach(function(t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-                renderPlanStudents();
-            });
-            tab.setAttribute('data-boundPlan', 'true');
-        }
-    });
-
     if (genBtn && genBtn.dataset.bound !== 'true') {
         genBtn.addEventListener('click', generatePlanPDF);
         genBtn.setAttribute('data-bound', 'true');
@@ -1213,53 +2597,214 @@ function bindPlanModalEvents(onStudentChange) {
         emailBtn.addEventListener('click', generatePlanEmail);
         emailBtn.setAttribute('data-bound', 'true');
     }
+
+    var chartsCb = document.getElementById('plan-include-charts');
+    if (chartsCb && chartsCb.dataset.bound !== 'true') {
+        chartsCb.addEventListener('change', function() {
+            if (!this.checked) return;
+            var students = collectPlanStudents();
+            var hasMatrix = students.some(function(s) {
+                var scores = getStudentMatrixScores(s.cardIndex || 1);
+                return Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
+            });
+            if (!hasMatrix) {
+                this.checked = false;
+                showToast('Para incluir gráficos, completa la rúbrica CIF de al menos un estudiante.');
+            }
+        });
+        chartsCb.setAttribute('data-bound', 'true');
+    }
 }
 
 function collectPlanStudents() {
-    var mode = getPlanMode();
+    return collectMedicalStudents();
+}
+
+function readAdvisorComments(card) {
+    var idx = card ? card.getAttribute('data-student-index') : '';
+    return (advisorCommentsByStudent[idx] || '').trim();
+}
+
+function collectMedicalStudents() {
     var students = [];
-    var cards = document.querySelectorAll('.plan-student-card');
+    var cards = document.querySelectorAll('#support-students-medical .support-student-card');
 
-    cards.forEach(function(card, i) {
-        var checked = card.querySelectorAll('.plan-condition-check:checked');
-        if (!checked.length && mode === 'basic') return;
+    cards.forEach(function(card) {
+        var studentIndex = Number(card.getAttribute('data-student-index'));
+        var name = (card.querySelector('.student-name')?.value?.trim() || '');
 
-        var conditions = Array.from(checked).map(function(cb) {
-            var data = accommodationsData[cb.value];
-            return data ? { key: cb.value, name: data.name } : null;
+        var activePills = card.querySelectorAll('.condition-pill.active');
+        var conditions = Array.from(activePills).map(function(pill) {
+            var key = pill.getAttribute('data-condition-key');
+            var data = accommodationsData[key];
+            return data ? { key: key, name: data.name, source: data.source } : null;
         }).filter(Boolean);
 
         if (!conditions.length) return;
 
-        var student = {
-            index: i + 1,
-            name: mode === 'personalized' ? (card.querySelector('.plan-student-name')?.value?.trim() || '') : '',
-            rut: mode === 'personalized' ? (card.querySelector('.plan-student-rut')?.value?.trim() || '') : '',
-            career: mode === 'personalized' ? (card.querySelector('.plan-student-career')?.value?.trim() || '') : '',
-            conditions: conditions
-        };
-        students.push(student);
+        students.push({
+            index: studentIndex,
+            name: name,
+            conditions: conditions,
+            conditionKeys: conditions.map(function(c) { return c.key; }),
+            assessmentSource: getStudentAssessmentSource(studentIndex),
+            matrixScores: getStudentMatrixScores(studentIndex),
+            cardIndex: studentIndex,
+            mode: 'medical',
+            advisorComments: readAdvisorComments(card)
+        });
     });
 
     return students;
 }
 
+function collectSocialStudents() {
+    var students = [];
+    var cards = document.querySelectorAll('#support-students-social .support-student-card');
+
+    cards.forEach(function(card) {
+        var studentIndex = Number(card.getAttribute('data-student-index'));
+        var name = (card.querySelector('.student-name')?.value?.trim() || '');
+
+        var hasMatrix = matrixData[studentIndex] && matrixData[studentIndex].applied;
+        var matrixScores = hasMatrix ? matrixData[studentIndex].scores : {};
+        var conditionKeys = hasMatrix ? (matrixData[studentIndex].conditionKeys || readSocialConditionKeys(studentIndex)) : readSocialConditionKeys(studentIndex);
+        var hasScores = hasMatrix && Object.values(matrixScores).filter(function(v) { return v > 0; }).length > 0;
+
+        if (!hasScores) return;
+
+        students.push({
+            index: studentIndex,
+            name: name,
+            conditions: conditionKeys.map(function(key) {
+                var data = accommodationsData[key];
+                return data ? { key: key, name: data.name, source: data.source } : null;
+            }).filter(Boolean),
+            conditionKeys: conditionKeys,
+            matrixScores: matrixScores,
+            cardIndex: studentIndex,
+            mode: 'social',
+            advisorComments: readAdvisorComments(card)
+        });
+    });
+
+    return students;
+}
+
+function getMatrixSeverity(score) {
+    if (score === 1) return { requirement: 3, label: 'Ajuste prioritario', className: 'severity-high' };
+    if (score === 2) return { requirement: 2, label: 'Ajuste recomendado', className: 'severity-medium' };
+    if (score === 3) return { requirement: 1, label: 'Observación situacional', className: 'severity-watch' };
+    return { requirement: 0, label: 'Sin ajuste', className: 'severity-none' };
+}
+
+function getMatrixObservation(activityLabel) {
+    return 'Compatibilidad buena: no requiere ajuste permanente. Observa si en esta asignatura, evaluación o contexto aparece una barrera específica en "' + activityLabel + '".';
+}
+
+function getClarificationPrompt(activity) {
+    if (activity.id === 'acceder') {
+        return 'Precisa la causa de la barrera antes de definir el ajuste: desplazamiento físico, orientación/señalética, sobrecarga sensorial, cambios de rutina, transporte u otra condición del entorno.';
+    }
+    return 'No hay una recomendación automática pertinente para la condición seleccionada. Precisa la barrera con el estudiante antes de definir el ajuste.';
+}
+
+function ruleMatchesMatrixContext(rule, activity, dimKey, score, conditionKeys) {
+    if (rule.activities.indexOf(activity.id) === -1) return false;
+    if (rule.dimensions.indexOf(dimKey) === -1) return false;
+    if (rule.scores.indexOf(score) === -1) return false;
+    return conditionKeys.some(function(key) { return rule.conditions.indexOf(key) !== -1; });
+}
+
+function getBarrierBasedRecommendations(scores, conditionKeys) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    var rules = matrixRecommendationRules || [];
+    var filterKeys = (conditionKeys || []).filter(function(key) { return accommodationsData[key]; });
+    if (!filterKeys.length) return [];
+
+    var groupsByDim = {};
+
+    activities.forEach(function(activity) {
+        var score = scores[activity.id] || 0;
+        if (!score || score === 4) return;
+        var severity = getMatrixSeverity(score);
+
+        activity.dims.forEach(function(dimKey) {
+            if (!groupsByDim[dimKey]) {
+                groupsByDim[dimKey] = {
+                    dimension: dimKey,
+                    label: categoryLabels[dimKey] || dimKey,
+                    activities: [],
+                    items: []
+                };
+            }
+
+            if (groupsByDim[dimKey].activities.indexOf(activity.label) === -1) {
+                groupsByDim[dimKey].activities.push(activity.label);
+            }
+
+            var matchingRules = score === 3 ? [] : rules.filter(function(rule) {
+                return ruleMatchesMatrixContext(rule, activity, dimKey, score, filterKeys);
+            });
+
+            var recs = [];
+            matchingRules.forEach(function(rule) {
+                if (recs.indexOf(rule.text) === -1) recs.push(rule.text);
+            });
+
+            var item = {
+                activityId: activity.id,
+                activity: activity.label,
+                score: score,
+                requirement: severity.requirement,
+                severity: severity.label,
+                severityClass: severity.className,
+                recommendations: recs,
+                observations: [],
+                clarification: ''
+            };
+
+            if (score === 3) {
+                item.observations.push(getMatrixObservation(activity.label));
+            } else if (!recs.length) {
+                item.clarification = getClarificationPrompt(activity);
+            }
+
+            groupsByDim[dimKey].items.push(item);
+        });
+    });
+
+    return barrierDimensions.map(function(dim) {
+        return groupsByDim[dim.key];
+    }).filter(Boolean);
+}
+
 function generatePlanPDF() {
     var students = collectPlanStudents();
     if (!students.length) {
-        alert('Selecciona al menos una condición para algún estudiante.');
+        var msg = 'Selecciona al menos una condición de referencia para algún estudiante.';
+        alert(msg);
         return;
     }
 
-    var mode = getPlanMode();
     var includeDua = document.getElementById('plan-include-dua')?.checked || false;
     var includeCharts = document.getElementById('plan-include-charts')?.checked || false;
+
+    if (includeCharts) {
+        var hasMatrix = students.some(function(s) {
+            var scores = getStudentMatrixScores(s.cardIndex || 1);
+            return Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
+        });
+        if (!hasMatrix) {
+            showToast('Para incluir gráficos, completa la rúbrica CIF de al menos un estudiante.');
+            return;
+        }
+    }
 
     imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
         var docDef;
         try {
-            docDef = buildPlanPDFDocument(students, mode, includeDua, includeCharts);
-            // Agregar encabezado institucional al inicio del contenido
+            docDef = buildPlanPDFDocument(students, includeDua, includeCharts);
             var headerContent = buildPdfHeader(logoBase64);
             docDef.content = headerContent.concat(docDef.content);
         } catch (e) {
@@ -1273,7 +2818,8 @@ function generatePlanPDF() {
             return;
         }
         try {
-            window.pdfMake.createPdf(docDef).download('plan-de-apoyo.pdf');
+            var filename = 'plan-de-apoyo-por-condicion.pdf';
+            window.pdfMake.createPdf(docDef).download(filename);
         } catch (e) {
             console.error('Error generando PDF:', e);
             alert('Error al generar el PDF: ' + e.message);
@@ -1281,20 +2827,48 @@ function generatePlanPDF() {
     });
 }
 
-function renderStudentRadarChart(student, label) {
-    var dims = barrierDimensions;
-    var dimCount = dims.length;
-
+function renderStudentBarChartCanvas(student, label) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
     var studentIndex = student.cardIndex || student.index || 1;
-    var matrixProfile = getStudentMatrixProfile(studentIndex);
-    var values = matrixProfile || mergeConditionProfiles(student.conditions.map(function(c) { return c.key; }));
-    var color = matrixProfile ? '#7c3aed' : radarColors[((student.index || 1) - 1) % radarColors.length];
+    var matrixScores = getStudentMatrixScores(studentIndex);
+    var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
 
-    var w = 450;
-    var h = 400;
-    var cx = 170;
-    var cy = 155;
-    var maxR = 110;
+    var rows;
+    if (hasMatrix) {
+        rows = activities.map(function(act) {
+            var score = Number(matrixScores[act.id] || 0);
+            var requirement = scoreToRequirement(score);
+            return { label: shortActivityLabels[act.id] || act.label, score: score, severity: requirement };
+        });
+    } else {
+        var condKeys = student.conditions.map(function(c) { return c.key; });
+        rows = activities.map(function(act) {
+            var maxSev = 0;
+            condKeys.forEach(function(ck) {
+                var profile = barrierProfiles[ck];
+                if (!profile) return;
+                act.dims.forEach(function(dim) {
+                    maxSev = Math.max(maxSev, profile[dim] || 0);
+                });
+            });
+            return { label: shortActivityLabels[act.id] || act.label, score: 0, severity: maxSev };
+        });
+    }
+
+    var barColors = { 0: '#9aa0a6', 1: '#34a853', 2: '#fbbc04', 3: '#ea4335' };
+    var barBorderColors = { 0: '#9aa0a6', 1: '#34a853', 2: '#fbbc04', 3: '#ea4335' };
+    var rowH = 24;
+    var gap = 4;
+    var labelW = 100;
+    var trackW = 200;
+    var scoreW = 30;
+    var tagW = 100;
+    var marginL = 20;
+    var marginT = 30;
+    var marginB = 10;
+    var w = marginL + labelW + 8 + trackW + 8 + scoreW + 8 + tagW + marginL;
+    var h = marginT + rows.length * (rowH + gap) + marginB;
+    var maxSev = 3;
 
     var canvas = document.createElement('canvas');
     canvas.width = w;
@@ -1304,94 +2878,196 @@ function renderStudentRadarChart(student, label) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, w, h);
 
-    function getPoint(r, i) {
-        var angle = -Math.PI / 2 + (Math.PI * 2 * i) / dimCount;
-        return { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
-    }
-
-    for (var lvl = 1; lvl <= 4; lvl++) {
-        var r = (maxR / 4) * lvl;
-        ctx.beginPath();
-        for (var i = 0; i < dimCount; i++) {
-            var p = getPoint(r, i);
-            i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = '#d1d5db';
-        ctx.lineWidth = lvl === 4 ? 1.5 : 1;
-        ctx.stroke();
-    }
-
-    for (var a = 0; a < dimCount; a++) {
-        var ap = getPoint(maxR, a);
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(ap.x, ap.y);
-        ctx.strokeStyle = '#d1d5db';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
-
-    ctx.beginPath();
-    for (var d = 0; d < dimCount; d++) {
-        var val = Math.max(0, Math.min(4, values[dims[d].key] || 0));
-        var vr = (val / 4) * maxR;
-        var pt = getPoint(vr, d);
-        d === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y);
-    }
-    ctx.closePath();
-    if (color.charAt(0) === '#') {
-        var rc = parseInt(color.substr(1,2), 16);
-        var gc = parseInt(color.substr(3,2), 16);
-        var bc = parseInt(color.substr(5,2), 16);
-        ctx.fillStyle = 'rgba(' + rc + ',' + gc + ',' + bc + ',0.15)';
-    }
-    ctx.fill();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    for (var d2 = 0; d2 < dimCount; d2++) {
-        var val2 = Math.max(0, Math.min(4, values[dims[d2].key] || 0));
-        var vr2 = (val2 / 4) * maxR;
-        var pt2 = getPoint(vr2, d2);
-        ctx.beginPath();
-        ctx.arc(pt2.x, pt2.y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-    }
-
     ctx.fillStyle = '#111827';
-    ctx.font = 'bold 11px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    for (var l = 0; l < dimCount; l++) {
-        var lp = getPoint(maxR + 20, l);
-        ctx.fillText(dims[l].label, lp.x, lp.y);
-    }
-
-    ctx.fillStyle = '#111827';
-    ctx.font = 'bold 13px Arial';
+    ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    ctx.fillText(label, 20, 10);
+    ctx.fillText(label, marginL, 4);
 
-    var scaleY = cy + maxR + 38;
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '10px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('1-2 = Apoyo bajo / moderado (centro)    3-4 = Apoyo alto / requiere coordinación (borde)', 20, scaleY);
+    rows.forEach(function(row, i) {
+        var y = marginT + i * (rowH + gap);
+        var sev = Math.min(maxSev, Math.max(0, row.severity));
+        var barW = sev > 0 ? (sev / maxSev) * trackW : 0;
+        var fillColor = barColors[sev];
+        var borderColor = barBorderColors[sev];
+        var scoreText = row.score > 0 ? String(row.score) : '\u2014';
+        var tagText = requirementLabel(sev);
+        var alpha = hasMatrix ? 1.0 : 0.55;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        ctx.fillStyle = '#111827';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(row.label, marginL, y + rowH / 2);
+
+        ctx.fillStyle = '#f3f4f6';
+        ctx.beginPath();
+        ctx.roundRect(marginL + labelW + 8, y, trackW, rowH, 4);
+        ctx.fill();
+
+        if (barW > 0) {
+            ctx.fillStyle = fillColor;
+            ctx.beginPath();
+            ctx.roundRect(marginL + labelW + 8, y, barW, rowH, 4);
+            ctx.fill();
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(marginL + labelW + 8, y, barW, rowH, 4);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = '#374151';
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(scoreText, marginL + labelW + 8 + trackW + 4 + scoreW / 2, y + rowH / 2);
+
+        var tagX = marginL + labelW + 8 + trackW + 8 + scoreW + 8;
+        var tagColors = { 0: { bg: '#9aa0a6', text: '#ffffff' }, 1: { bg: '#34a853', text: '#ffffff' }, 2: { bg: '#fbbc04', text: '#374151' }, 3: { bg: '#ea4335', text: '#ffffff' } };
+        var tc = tagColors[sev] || tagColors[0];
+        ctx.fillStyle = tc.bg;
+        ctx.beginPath();
+        ctx.roundRect(tagX, y, tagW, rowH, 12);
+        ctx.fill();
+        ctx.fillStyle = tc.text;
+        ctx.font = 'bold 9px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(tagText, tagX + tagW / 2, y + rowH / 2);
+
+        ctx.restore();
+    });
 
     return canvas.toDataURL('image/png');
 }
 
-function buildPlanPDFDocument(students, mode, includeDua, includeCharts) {
+function renderPdfCIFChart(students) {
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    if (!activities || !students || !students.length) return [];
+    var hasAnyMatrix = students.some(function(s) {
+        var scores = getStudentMatrixScores(s.cardIndex || s.index || 1);
+        return Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
+    });
+    if (!hasAnyMatrix) return [];
+    var levelColors = { 0: '#9aa0a6', 1: '#34a853', 2: '#fbbc04', 3: '#ea4335', 4: '#ea4335' };
+
+    var cols = [];
+    students.slice(0, 4).forEach(function(student, index) {
+        var studentIndex = student.cardIndex || student.index || (index + 1);
+        var matrixScores = getStudentMatrixScores(studentIndex);
+        var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
+        var rows;
+        if (hasMatrix) {
+            rows = activities.map(function(act) {
+                var score = Number(matrixScores[act.id] || 0);
+                return { score: score, severity: scoreToRequirement(score) };
+            });
+        } else {
+            var condKeys = student.conditions.map(function(c) { return c.key; });
+            rows = activities.map(function(act) {
+                var maxSev = 0;
+                condKeys.forEach(function(ck) {
+                    var profile = barrierProfiles[ck];
+                    if (!profile) return;
+                    act.dims.forEach(function(dim) {
+                        maxSev = Math.max(maxSev, profile[dim] || 0);
+                    });
+                });
+                return { score: 0, severity: maxSev };
+            });
+        }
+        cols.push({ label: formatStudentLabel(student), rows: rows });
+    });
+
+    var colW = 100;
+    var hPad = 4;
+
+    var body = [];
+    var headerRow = [{ text: 'Actividad CIF', fontSize: 8, bold: true, color: '#374151', fillColor: '#f3f4f6', alignment: 'right', margin: [0, 3, 6, 3] }];
+    cols.forEach(function(col) {
+        headerRow.push({ text: col.label, fontSize: 8, bold: true, color: '#374151', fillColor: '#f3f4f6', alignment: 'center', margin: [0, 3, 0, 3] });
+    });
+    body.push(headerRow);
+
+    activities.forEach(function(act, ai) {
+        var label = shortActivityLabels[act.id] || act.label;
+        var row = [{ text: label, fontSize: 8, alignment: 'left', color: '#6b7280', margin: [6, 1, 6, 1] }];
+        cols.forEach(function(col) {
+            var rd = col.rows[ai];
+            var level = rd.severity;
+            var color = levelColors[level] || '#9aa0a6';
+            var bw = level > 0 ? Math.min(Math.round((level / 3) * (colW - hPad * 2 - 4) * 1.5), colW - hPad * 2) : 0;
+            row.push({
+                stack: [
+                    bw > 0 ? { canvas: [{ type: 'rect', x: 0, y: 0, w: bw, h: 10, r: 3, color: color }], margin: [0, 0, 0, 0] } : { text: '', fontSize: 1 }
+                ],
+                alignment: 'left',
+                margin: [hPad, 1, hPad, 1]
+            });
+        });
+        body.push(row);
+    });
+
+    var legendStack = [
+        { text: 'Niveles:', fontSize: 7, color: '#6b7280', margin: [0, 0, 0, 3] }
+    ];
+    [0, 1, 2, 3].forEach(function(lvl) {
+        var l = lvl === 0 ? 'Sin ajuste' : lvl === 1 ? 'Observaci\u00f3n' : lvl === 2 ? 'Recomendado' : 'Prioritario';
+        var c = levelColors[lvl];
+        legendStack.push({
+            columns: [
+                { canvas: [{ type: 'rect', x: 0, y: 0, w: 8, h: 8, r: 2, color: c }], width: 10 },
+                { text: l, fontSize: 7, color: '#6b7280', width: '*' }
+            ],
+            margin: [0, 0, 0, 2]
+        });
+    });
+
+    return [
+        { text: 'Apoyos por actividad CIF', style: 'subSectionTitle' },
+        { text: 'Cada barra muestra el nivel de apoyo sugerido seg\u00fan la actividad CIF.', style: 'bodyText', fontSize: 8, color: '#6b7280', italics: true, margin: [0, 0, 0, 4] },
+        {
+            columns: [
+                { width: '*', text: '' },
+                { width: 'auto', table: { widths: [Math.round(90 * 1.2)].concat(cols.map(function() { return colW; })), body: body }, layout: 'lightHorizontalLines', fontSize: 8 },
+                { width: 'auto', stack: legendStack, margin: [10, 0, 0, 0] },
+                { width: '*', text: '' }
+            ],
+            margin: [0, 0, 0, 4]
+        },
+        { text: '' }
+    ];
+}
+
+function buildPlanPDFDocument(students, includeDua, includeCharts) {
     var content = [];
     var cats = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'];
     var catNames = { context: 'Contexto aula', materials: 'Materiales de estudio', methods: 'Métodos de enseñanza', interaction: 'Interacción en aula', evaluacion: 'De las evaluaciones', tech: 'Tecnologías asistivas' };
 
-    content.push({ text: 'Plan de apoyo docente', style: 'mainTitle' });
+    var matrixTableLayout = {
+        hLineWidth: function() { return 0.5; },
+        vLineWidth: function() { return 0.5; },
+        hLineColor: function() { return '#d1d5db'; },
+        vLineColor: function() { return '#d1d5db'; },
+        paddingLeft: function() { return 3; },
+        paddingRight: function() { return 3; },
+        paddingTop: function() { return 1.5; },
+        paddingBottom: function() { return 1.5; }
+    };
+    var isSocial = students.length > 0 && students[0].mode === 'social';
+    var modeTitle = isSocial ? 'Plan de apoyo docente — Ficha o matriz de acceso' : 'Plan de apoyo docente — Consultor por condición';
+
+    content.push({ text: modeTitle, style: 'mainTitle' });
     content.push({ text: 'Documento orientativo para acordar una base DUA de clase y adecuaciones curriculares de acceso.', style: 'introText' });
+
+    if (isSocial) {
+        content.push({ text: 'Este plan se generó desde el modelo social CIF/OMS, alineado con la Guía de Adecuaciones Curriculares de Acceso de Duoc UC. La discapacidad no está en la persona, sino en las barreras del entorno. Los datos de la matriz deben ser extraídos de la ficha del estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 4, 0, 10] });
+    }
+
     content.push({ text: '' });
 
     if (includeDua) {
@@ -1400,13 +3076,12 @@ function buildPlanPDFDocument(students, mode, includeDua, includeCharts) {
         content.push({ text: '' });
 
         var duaStages = window.UiePlannerData.duaStagesData || [];
-
         if (duaStages.length) {
             duaStages.forEach(function(stage) {
                 content.push({ text: stage.label + ' — ' + stage.badge, style: 'subSectionTitle' });
                 var items = stage.checklist || [];
                 items.forEach(function(item) {
-                    content.push({ text: '[ ] ' + item, style: 'bodyText', margin: [10, 2, 0, 2] });
+                    content.push(checkboxItem(item, false));
                 });
                 content.push({ text: '' });
             });
@@ -1422,52 +3097,140 @@ function buildPlanPDFDocument(students, mode, includeDua, includeCharts) {
 
     content.push({ text: 'Las adecuaciones curriculares de acceso son ajustes que eliminan barreras sin modificar los objetivos de aprendizaje. A continuación el detalle por estudiante.', style: 'bodyText', italics: true, margin: [0, 6, 0, 8] });
 
+    if (!includeCharts) {
+        var legColors = ['#ea4335', '#fbbc04', '#34a853', '#9aa0a6'];
+        var legLabels = ['Prioritario', 'Recomendado', 'Observar', 'Sin ajuste'];
+        var legCols = [];
+        for (var i = 0; i < 4; i++) {
+            legCols.push({ width: 'auto', canvas: [{ type: 'rect', x: 0, y: 0, w: 8, h: 8, r: 2, color: legColors[i] }], margin: [0, 2, 3, 0] });
+            legCols.push({ width: 'auto', text: legLabels[i], fontSize: 8, color: '#6b7280', margin: [0, 0, 12, 0] });
+        }
+        content.push({ columns: legCols, margin: [0, 0, 0, 6] });
+    }
+
     students.forEach(function(student, sIdx) {
         var nameLabel = student.name || ('Estudiante ' + student.index);
-        var condKeys = student.conditions.map(function(c) { return c.key; });
-        var condNames = student.conditions.map(function(c) { return c.name; });
-        var hasMultiple = condKeys.length > 1;
-        var condLabel = hasMultiple ? ('Múltiples (' + condNames.join(', ') + ')') : condNames[0];
-
         content.push({ text: nameLabel, style: 'sectionTitle' });
 
-        var infoParts = [];
-        if (student.rut) infoParts.push('RUT: ' + student.rut);
-        if (student.career) infoParts.push('Carrera: ' + student.career);
-        if (infoParts.length) {
-            content.push({ text: infoParts.join(' | '), style: 'bodyText', color: '#4b5563', margin: [0, 0, 0, 6] });
+        if (student.conditions && student.conditions.length) {
+            content.push({ text: 'Condición registrada en ficha: ' + student.conditions.map(function(c) { return c.name; }).join(', '), style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
         }
 
-        content.push({ text: condLabel, style: 'subSectionTitle' });
-
         if (includeCharts) {
-            content.push({ text: 'Mapa de barreras', style: 'subSectionTitle' });
-            content.push({ text: 'Este gráfico muestra en 6 dimensiones la intensidad estimada de apoyo. Los valores 1 y 2 (cercanos al centro) indican apoyo bajo o moderado. Los valores 3 y 4 (hacia el borde) señalan áreas que requieren apoyo alto o coordinación. Usa esta información para priorizar las recomendaciones.', style: 'bodyText', color: '#4b5563', italics: true, fontSize: 9.5, margin: [10, 0, 0, 4] });
-            var chartImg = renderStudentRadarChart(student, nameLabel);
-            if (chartImg) {
-                content.push({ image: chartImg, width: 430, margin: [10, 6, 10, 2] });
-                var studentIndex = student.cardIndex || student.index || 1;
-                var isMatrix = !!(getStudentMatrixProfile(studentIndex));
-                var disclaimer = isMatrix
-                    ? 'Este perfil se construyó desde la matriz de acceso (CIF/OMS). Los puntajes de compatibilidad (1 incompatible → 4 compatible) se transforman en intensidad de apoyo (1 bajo → 4 requiere coordinación). Cuanto más se expande la figura hacia el borde, más apoyo se anticipa en esa dimensión.'
-                    : 'Mapa orientativo según la condición seleccionada. No diagnostica ni describe a la persona: ajusta con observación directa y conversación con el estudiante.';
-                content.push({ text: disclaimer, style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [10, 0, 0, 6] });
+            var studentChartContent = renderPdfCIFChart([student]);
+            studentChartContent.forEach(function(item) { content.push(item); });
+        }
+
+        if (student.mode === 'social') {
+
+            content.push({ text: 'Recomendaciones por dimensión del mapa', style: 'subSectionTitle' });
+            content.push({ text: 'Cada recomendación se filtra por la condición registrada en la ficha y se agrupa en las mismas dimensiones del mapa de barreras.', style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
+
+            var barrierRecs = getBarrierBasedRecommendations(student.matrixScores || {}, student.conditionKeys || []);
+            if (barrierRecs.length) {
+                barrierRecs.forEach(function(group) {
+                    content.push({ text: group.label, style: 'bodyText', bold: true, margin: [0, 8, 0, 2] });
+                    content.push({ text: 'Barreras en: ' + group.activities.join(', '), style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [10, 0, 0, 2] });
+                    group.items.forEach(function(item) {
+                        content.push({ text: item.activity + ' (' + item.score + ' - ' + item.severity + ')', style: 'bodyText', bold: true, margin: [10, 5, 0, 1] });
+                        item.recommendations.forEach(function(rec) {
+                            content.push({ text: '• ' + rec, style: 'bodyText', margin: [18, 1, 0, 1] });
+                        });
+                        item.observations.forEach(function(obs) {
+                            content.push({ text: '• ' + obs, style: 'bodyText', color: '#6b7280', italics: true, margin: [18, 1, 0, 1] });
+                        });
+                        if (item.clarification) {
+                            content.push({ text: item.clarification, style: 'bodyText', color: '#6b7280', italics: true, margin: [18, 1, 0, 1] });
+                        }
+                    });
+                });
+            } else {
+                content.push({ text: 'No se identificaron barreras significativas o falta registrar condición para filtrar apoyos pertinentes.', style: 'bodyText', margin: [10, 4, 0, 4] });
+            }
+
+        } else {
+            var condKeys = student.conditions.map(function(c) { return c.key; });
+            var condNames = student.conditions.map(function(c) { return c.name; });
+            var hasMultiple = condKeys.length > 1;
+            var matrixProfile = getStudentMatrixProfile(student.cardIndex || student.index);
+
+            if (student.assessmentSource && student.assessmentSource !== 'standard') {
+                content.push({ text: 'Perfil ajustado por matriz de acceso CIF/OMS.', style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
+            }
+
+            content.push({ text: 'Recomendaciones', style: 'subSectionTitle' });
+            content.push({ text: 'Revisa cada categoría y acuerda con el estudiante cuáles apoyos implementar. No es necesario aplicar todas: selecciona las que mejor respondan a las barreras identificadas.', style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
+
+            if (matrixProfile) {
+                var groupedMatrixItems = groupMatrixItemsByDimension(getVisibleMatrixItems(student, { includeManual: true }));
+                if (groupedMatrixItems.length) {
+                    groupedMatrixItems.forEach(function(group) {
+                        content.push({ text: group.label, style: 'bodyText', bold: true, margin: [0, 6, 0, 2] });
+                        var priorityBuckets = { 3: [], 2: [], 1: [], 0: [], manual: [], clarification: [], observation: [] };
+                        group.items.forEach(function(item) {
+                            var bucket = item.kind === 'manual' ? 'manual' : item.kind === 'clarification' ? 'clarification' : item.kind === 'observation' ? 'observation' : (item.priorityLevel >= 3 ? 3 : item.priorityLevel === 2 ? 2 : item.priorityLevel === 1 ? 1 : 0);
+                            if (priorityBuckets[bucket] !== undefined) priorityBuckets[bucket].push(item);
+                        });
+                        var priorityHeaders = { 3: 'Ajustes prioritarios', 2: 'Ajustes recomendados', 1: 'Observar', 0: 'Sin ajuste' };
+                        var priorityColors = { 3: '#ea4335', 2: '#fbbc04', 1: '#34a853', 0: '#9aa0a6' };
+                        [3, 2, 1, 0].forEach(function(level) {
+                            var bucket = priorityBuckets[level];
+                            if (!bucket || !bucket.length) return;
+                            content.push({
+                                columns: [
+                                    { width: 'auto', text: priorityHeaders[level], style: 'bodyText', bold: true, italics: true, color: '#4b5563', margin: [0, 0, 4, 0] },
+                                    { width: 'auto', canvas: [{ type: 'rect', x: 0, y: 0, w: 9, h: 9, r: 2, color: priorityColors[level] }], margin: [0, 3, 0, 0] }
+                                ],
+                                margin: [8, 2, 0, 1]
+                            });
+                            bucket.forEach(function(item) {
+                                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [16, 1, 0, 1] });
+                                content.push({ text: 'Actividad CIF: ' + item.activities.join(', '), style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [22, 0, 0, 1] });
+                                var evidence = formatClarificationEvidence(student.cardIndex || student.index, item);
+                                if (evidence) {
+                                    content.push({ text: 'Evidencia: ' + evidence, style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [22, 0, 0, 1] });
+                                }
+                            });
+                        });
+                        if (priorityBuckets.clarification.length) {
+                            content.push({ text: 'Precisar barrera', style: 'bodyText', bold: true, italics: true, color: '#4b5563', margin: [8, 2, 0, 1] });
+                            priorityBuckets.clarification.forEach(function(item) {
+                                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [16, 1, 0, 1] });
+                            });
+                        }
+                        if (priorityBuckets.manual.length) {
+                            content.push({ text: 'Agregadas manualmente', style: 'bodyText', bold: true, italics: true, color: '#4b5563', margin: [8, 2, 0, 1] });
+                            priorityBuckets.manual.forEach(function(item) {
+                                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [16, 1, 0, 1] });
+                            });
+                        }
+                    });
+                } else {
+                    content.push({ text: 'No se activaron ajustes recomendados o prioritarios desde la matriz.', style: 'bodyText', margin: [10, 4, 0, 4] });
+                }
+            } else {
+            var merged = getMergedRecommendations(condKeys);
+            cats.forEach(function(cat) {
+                var items = merged[cat];
+                var manualItems = getManualRecommendations(student.cardIndex || student.index, cat);
+                if ((!items || !items.length) && !manualItems.length) return;
+                content.push({ text: catNames[cat], style: 'bodyText', bold: true, margin: [0, 6, 0, 2] });
+
+                (items || []).forEach(function(item) {
+                    if (isRecommendationHidden(cat, item.text)) return;
+                    content.push({ text: '• ' + item.text, style: 'bodyText', margin: [10, 1, 0, 1] });
+                });
+                manualItems.forEach(function(item) {
+                    content.push({ text: '• [Agregada manualmente] ' + item.text, style: 'bodyText', margin: [10, 1, 0, 1] });
+                });
+            });
             }
         }
 
-        var merged = getMergedRecommendations(condKeys);
-
-        content.push({ text: 'Recomendaciones', style: 'subSectionTitle' });
-        content.push({ text: 'Revisa cada categoría y acuerda con el estudiante cuáles apoyos implementar. No es necesario aplicar todas: selecciona las que mejor respondan a las barreras identificadas.', style: 'bodyText', color: '#4b5563', italics: true, fontSize: 9.5, margin: [10, 0, 0, 4] });
-
-        cats.forEach(function(cat) {
-            var items = merged[cat];
-            if (!items || !items.length) return;
-            content.push({ text: catNames[cat], style: 'bodyText', bold: true, margin: [0, 6, 0, 2] });
-            items.forEach(function(item) {
-                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [10, 1, 0, 1] });
-            });
-        });
+        if (student.advisorComments && student.advisorComments.trim()) {
+            content.push({ text: 'Recomendación adicional del asesor', style: 'subSectionTitle' });
+            content.push({ text: student.advisorComments.trim(), style: 'bodyText', margin: [10, 2, 0, 6] });
+        }
 
         content.push({ text: '' });
     });
@@ -1482,10 +3245,11 @@ function buildPlanPDFDocument(students, mode, includeDua, includeCharts) {
             headerOrg: { fontSize: 13, bold: true, color: '#b42318' },
             headerMeta: { fontSize: 8.5, color: '#6b7280' },
             mainTitle: { fontSize: 20, bold: true, color: '#111827', margin: [0, 0, 0, 8] },
-            sectionTitle: { fontSize: 14, bold: true, color: '#111827', margin: [0, 14, 0, 8] },
-            subSectionTitle: { fontSize: 11, bold: true, color: '#b42318', margin: [0, 10, 0, 4] },
-            introText: { fontSize: 10.5, color: '#4b5563', margin: [0, 0, 0, 16], italics: true },
-            bodyText: { fontSize: 10.5, color: '#111827', margin: [0, 3, 0, 3] },
+            sectionTitle: { fontSize: 14, bold: true, color: '#111827', margin: [0, 10, 0, 6] },
+            subSectionTitle: { fontSize: 11, bold: true, color: '#b42318', margin: [0, 6, 0, 3] },
+            introText: { fontSize: 9.5, color: '#4b5563', margin: [0, 0, 0, 12], italics: true },
+            bodyText: { fontSize: 9.5, color: '#111827', margin: [0, 2, 0, 2] },
+            tableHeader: { fontSize: 10, bold: true, color: '#111827', fillColor: '#f3f4f6' },
             footerText: { fontSize: 8.5, color: '#9ca3af', margin: [0, 6, 0, 0], italics: true }
         },
         defaultStyle: { fontSize: 10.5, color: '#111827' },
@@ -1528,10 +3292,24 @@ function imageToBase64(url, callback) {
     img.src = url;
 }
 
+function showToast(msg) {
+    var existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.className = 'toast-notification';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { t.classList.add('toast-show'); }, 10);
+    setTimeout(function() {
+        t.classList.remove('toast-show');
+        setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 400);
+    }, 3500);
+}
+
 function buildPdfHeader(logoBase64) {
     var columns = [];
     if (logoBase64) {
-        columns.push({ image: logoBase64, width: 130, margin: [0, 0, 14, 0] });
+        columns.push({ image: logoBase64, width: 110, margin: [0, 0, 14, 0] });
     }
     columns.push({
         stack: [
@@ -1554,34 +3332,21 @@ function downloadDuaChecklist() {
         return;
     }
     var checkedDua = window.UiePlannerDua.getCheckedDuaItems() || [];
-    var summary = window.UiePlannerDua.getDuaStageSummary();
     
     imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
         var content = buildPdfHeader(logoBase64);
         
         content.push({ text: 'Checklist DUA para la clase', style: 'mainTitle' });
-        content.push({ text: [{ text: 'Decisiones seleccionadas: ', bold: true }, summary.checked + '.'], style: 'bodyText' });
-        if (summary.checked > 0) {
-            content.push({ text: [{ text: 'Lectura orientadora: ', bold: true }, summary.level.label + '. ' + summary.level.text], style: 'bodyText' });
-        }
         content.push({ text: '' });
 
+        var checkedTexts = {};
+        checkedDua.forEach(function(item) { checkedTexts[item.text] = true; });
         var stages = window.UiePlannerData.duaStagesData || [];
         stages.forEach(function(stage) {
-            var stageChecked = summary.stages.find(function(s) { return s.label === stage.label; });
-            var items = stage.checklist || [];
-            if (stageChecked && stageChecked.items.length) {
-                content.push({ text: stage.label + ' — ' + stage.badge + ' (' + stageChecked.items.length + ' seleccionadas)', style: 'subSectionTitle' });
-                items.forEach(function(item) {
-                    var isChecked = stageChecked.items.some(function(si) { return si.text === item; });
-                    content.push({ text: (isChecked ? '[x] ' : '[ ] ') + item, style: 'bodyText', margin: [10, 2, 0, 2] });
-                });
-            } else {
-                content.push({ text: stage.label + ' — ' + stage.badge + ' (sin selección)', style: 'subSectionTitle' });
-                items.forEach(function(item) {
-                    content.push({ text: '[ ] ' + item, style: 'bodyText', margin: [10, 2, 0, 2] });
-                });
-            }
+            content.push({ text: stage.label + ' — ' + stage.badge, style: 'subSectionTitle' });
+            stage.checklist.forEach(function(item) {
+                content.push(checkboxItem(item, !!checkedTexts[item]));
+            });
             content.push({ text: '' });
         });
 
@@ -1616,43 +3381,112 @@ function downloadDuaChecklist() {
     });
 }
 
+function checkboxItem(text, checked) {
+    var s = 9;
+    var canvas = [
+        { type: 'rect', x: 0, y: 0, w: s, h: s, r: 1.5, lineWidth: 1, lineColor: '#6b7280' }
+    ];
+    if (checked) {
+        canvas.push(
+            { type: 'line', x1: 2, y1: 5, x2: 4, y2: 7.5, lineWidth: 2.5, lineColor: '#16a34a' },
+            { type: 'line', x1: 4, y1: 7.5, x2: 8, y2: 2, lineWidth: 2.5, lineColor: '#16a34a' }
+        );
+    }
+    return { columns: [{ canvas: canvas, width: s + 4, margin: [0, 1.5, 0, 0] }, { text: text, fontSize: 9, width: '*' }], margin: [0, 2, 0, 2] };
+}
+
 function generatePlanEmail() {
     var students = collectPlanStudents();
     if (!students.length) {
-        alert('Selecciona al menos una condición para algún estudiante.');
+        var msg = 'Selecciona al menos una condición de referencia para algún estudiante.';
+        alert(msg);
         return;
     }
 
-    var mode = getPlanMode();
     var includeDua = document.getElementById('plan-include-dua')?.checked || false;
     var today = new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    var body = 'Plan de apoyo docente\n' +
-        'Generado: ' + today + '\n\n' +
-        'ESTUDIANTES Y CONDICIONES\n' +
-        '------------------------\n\n';
+    var isSocial = students[0].mode === 'social';
+    var body = isSocial ? 'Plan de apoyo docente — Ficha o matriz de acceso\n' : 'Plan de apoyo docente — Consultor por condición\n';
+    body += 'Generado: ' + today + '\n\n';
+    body += 'ESTUDIANTES\n-----------\n\n';
+
+    var cats = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'];
+    var catNames = { context: 'Contexto aula', materials: 'Materiales', methods: 'Métodos', interaction: 'Interacción', evaluacion: 'Evaluaciones', tech: 'Tecnologías' };
+    var scoreLabel = { 4: 'Perfecta', 3: 'Buena', 2: 'Parcial', 1: 'Incompatible' };
 
     students.forEach(function(student) {
         var label = student.name || ('Estudiante ' + student.index);
         body += label + '\n';
-        if (student.rut) body += 'RUT: ' + student.rut + '\n';
-        if (student.career) body += 'Carrera: ' + student.career + '\n';
-        body += 'Condiciones: ' + student.conditions.map(function(c) { return c.name; }).join(', ') + '\n\n';
 
-        student.conditions.forEach(function(cond) {
-            body += cond.name + ':\n';
-            var data = accommodationsData[cond.key];
-            if (!data) return;
-            var cats = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'];
-            var catNames = { context: 'Contexto aula', materials: 'Materiales', methods: 'Métodos', interaction: 'Interacción', evaluacion: 'Evaluaciones', tech: 'Tecnologías' };
-            cats.forEach(function(cat) {
-                var items = data[cat];
-                if (!items || !items.length) return;
-                body += '  ' + catNames[cat] + ':\n';
-                items.forEach(function(item) { body += '    - ' + item + '\n'; });
+        if (student.mode === 'social') {
+            body += '\nMATRIZ DE ACCESO CIF/OMS\n';
+            var activities = window.UiePlannerData.accessMatrixActivities;
+            activities.forEach(function(act) {
+                var s = (student.matrixScores || {})[act.id] || 0;
+                if (s > 0) {
+                    body += '  ' + act.label + ': ' + s + ' (' + (scoreLabel[s] || '') + ')\n';
+                }
             });
+
+            if (student.conditions && student.conditions.length) {
+                body += '\nCondición registrada en ficha: ' + student.conditions.map(function(c) { return c.name; }).join(', ') + '\n';
+            }
+
+            body += '\nRECOMENDACIONES POR DIMENSIÓN DEL MAPA\n';
+            var barrierRecs = getBarrierBasedRecommendations(student.matrixScores || {}, student.conditionKeys || []);
+            barrierRecs.forEach(function(group) {
+                body += '  ' + group.label + '\n';
+                body += '  Barreras en: ' + group.activities.join(', ') + '\n';
+                group.items.forEach(function(item) {
+                    body += '    ' + item.activity + ' (' + item.score + ' - ' + item.severity + ')\n';
+                    item.recommendations.forEach(function(rec) {
+                        body += '      - ' + rec + '\n';
+                    });
+                    item.observations.forEach(function(obs) {
+                        body += '      - ' + obs + '\n';
+                    });
+                    if (item.clarification) {
+                        body += '      - ' + item.clarification + '\n';
+                    }
+                });
+                body += '\n';
+            });
+
+        } else {
+            var condNames = student.conditions.map(function(c) { return c.name; });
+            body += 'Condiciones: ' + condNames.join(', ') + '\n\n';
+            var condKeys = student.conditions.map(function(c) { return c.key; });
+            var matrixProfile = getStudentMatrixProfile(student.cardIndex || student.index);
+
+            if (matrixProfile) {
+                body += 'RECOMENDACIONES POR DIMENSION\n';
+                groupMatrixItemsByDimension(getVisibleMatrixItems(student)).forEach(function(group) {
+                    body += '  ' + group.label + ':\n';
+                    group.items.forEach(function(item) {
+                        var label = item.kind === 'clarification' ? 'Precisar barrera' : item.kind === 'observation' ? 'Observacion situacional' : (item.priorityLevel >= 3 ? 'Ajuste prioritario' : 'Ajuste recomendado');
+                        body += '    - [' + label + '] ' + item.text + '\n';
+                        body += '      Actividad CIF: ' + item.activities.join(', ') + '\n';
+                        var evidence = formatClarificationEvidence(student.cardIndex || student.index, item);
+                        if (evidence) body += '      Evidencia: ' + evidence + '\n';
+                    });
+                });
+            } else {
+                var merged = getMergedRecommendations(condKeys);
+                var standardProfile = mergeConditionProfiles(condKeys);
+                cats.forEach(function(cat) {
+                    var items = merged[cat];
+                    if (!items || !items.length) return;
+                    var requirement = Math.max(1, standardProfile[cat] || 0);
+                    body += '  ' + catNames[cat] + ':\n';
+                    items.forEach(function(item) {
+                        if (isRecommendationHidden(cat, item.text)) return;
+                        body += '    - [' + requirementLabel(requirement) + '] ' + item.text + '\n';
+                    });
+                });
+            }
             body += '\n';
-        });
+        }
     });
 
     if (includeDua) {
@@ -1678,11 +3512,11 @@ window.UiePlannerSupports = {
     renderSelectedSupportRecommendations,
     renderGoodPractices,
     renderSupportStudents,
-    addStudentCard,
-    removeLastStudent,
-    updateAddButton,
-    updateRemoveButtons,
-    updateConditionSummaries,
+    addMedicalStudentCard,
+    removeLastMedicalStudent,
+    updateMedicalAddButton,
+    updateMedicalRemoveButtons,
+    updateMedicalConditionSummaries,
     getSelectedSupportStudentGroups,
     recommendationCategories,
     countRecommendations,
@@ -1705,6 +3539,10 @@ window.UiePlannerSupports = {
     updateStudentStatusBadge,
     getStudentMatrixProfile,
     getStudentMatrixScores,
+    getReferenceScores,
+    scoreToRequirement,
+    renderCIFBarChart,
+    barrierProfiles,
     openPlanModal,
     closePlanModal,
     generatePlanPDF,

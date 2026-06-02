@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Informe Técnico-Valórico - Planificador Inclusivo UIE</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="docs\propuesta\print-styles.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Informe Técnico-Valórico - Planificador Inclusivo
+UIE</h1>
+</header>
+<h1 id="informe-técnico-valórico">Informe Técnico-Valórico</h1>
+<h2
+id="planificador-inclusivo-uie-herramienta-de-planificación-docente-bajo-dua">Planificador
+Inclusivo UIE — Herramienta de Planificación Docente bajo DUA</h2>
+<p><strong>Preparado para:</strong> Dirección Académica / Unidad de
+Inclusión — Duoc UC <strong>Elaborado por:</strong> Jonathan Pérez |
+[fecha] <strong>Versión del software:</strong> 1.0 (estable, desplegada
+en GitHub Pages)</p>
+<hr />
+<h2 id="resumen-ejecutivo">1. Resumen Ejecutivo</h2>
+<p>El <strong>Planificador Inclusivo UIE</strong> es una aplicación web
+progresiva (PWA) diseñada para que docentes de Duoc UC planifiquen
+clases inclusivas aplicando el Diseño Universal para el Aprendizaje
+(DUA) y adecuaciones curriculares, en cumplimiento de la normativa
+chilena de inclusión en educación superior (Ley 20.422, Decreto 83, Ley
+21.369).</p>
+<p>La herramienta fue desarrollada en 5 días de trabajo intensivo (47
+commits) y se encuentra operativa, desplegada y funcionando sin errores
+conocidos. Su arquitectura vanilla (HTML/CSS/JS sin frameworks)
+garantiza mantenibilidad, cero dependencias externas y bajo costo de
+operación.</p>
+<p><strong>Valoración sugerida:</strong> $1.500.000 – $3.000.000 CLP
+(licencia única) + honorarios por implementación y capacitación.</p>
+<hr />
+<h2 id="descripción-del-proyecto">2. Descripción del Proyecto</h2>
+<h3 id="qué-resuelve">2.1. ¿Qué resuelve?</h3>
+<p>Los docentes de Duoc UC enfrentan la exigencia institucional y legal
+de planificar clases inclusivas. Sin embargo:</p>
+<ul>
+<li>No existe una herramienta centralizada que guíe la aplicación del
+DUA paso a paso.</li>
+<li>Las adecuaciones curriculares para estudiantes con discapacidad se
+gestionan de formacasuística, sin estandarización.</li>
+<li>El registro y seguimiento de estas acciones es precario o
+inexistente.</li>
+<li>El tiempo docente es limitado; cualquier solución debe ser inmediata
+y sin curva de aprendizaje.</li>
+</ul>
+<p><strong>El Planificador Inclusivo UIE resuelve todo esto en una sola
+pantalla, sin instalación, sin registro, sin costo
+operativo.</strong></p>
+<h3 id="funcionalidades-principales">2.2. Funcionalidades
+principales</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Módulo</th>
+<th>Descripción</th>
+<th>Impacto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Checklist DUA</strong></td>
+<td>4 etapas (Exploración, Preparación, Integración, Optimización) con
+25 ítems concretos. Progreso persistente en localStorage.</td>
+<td>Estandariza la aplicación del DUA en cualquier asignatura.</td>
+</tr>
+<tr>
+<td><strong>Adecuaciones Curriculares</strong></td>
+<td>8 perfiles de discapacidad, hasta 8 estudiantes anónimos, fusión
+inteligente de recomendaciones.</td>
+<td>Reemplaza planillas manuales y correos inconsistentes.</td>
+</tr>
+<tr>
+<td><strong>Gráfico Radar</strong></td>
+<td>Visualización de barreras por estudiante en 6 dimensiones.</td>
+<td>Permite identificar patrones y priorizar apoyos.</td>
+</tr>
+<tr>
+<td><strong>Generación de Informes PDF</strong></td>
+<td>Documento profesional con logo UIE, DUA + adecuaciones + prácticas +
+preguntas de mejora.</td>
+<td>Provee respaldo formal para cada plan de apoyo.</td>
+</tr>
+<tr>
+<td><strong>Módulos de Apoyo</strong></td>
+<td>Crisis, accesibilidad digital, lectura fácil, inserción laboral,
+vocabulario inclusivo, referencias legales.</td>
+<td>Expande el alcance más allá del aula.</td>
+</tr>
+<tr>
+<td><strong>PWA / Offline</strong></td>
+<td>Service Worker con caché v12. Funciona sin internet después de la
+primera carga.</td>
+<td>Accesible en cualquier contexto, sin consumo de datos.</td>
+</tr>
+<tr>
+<td><strong>Modo Oscuro / Responsive</strong></td>
+<td>Adaptación a preferencia del usuario, 3 breakpoints, menú
+hamburguesa.</td>
+<td>Usable en computador, tablet o teléfono.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="desglose-de-horas-de-desarrollo">3. Desglose de Horas de
+Desarrollo</h2>
+<h3 id="metodología-de-estimación">3.1. Metodología de estimación</h3>
+<p>Se utilizó el método de <strong>estimación por entregables</strong>
+(similar a COCOMO II para proyectos pequeños), considerando:</p>
+<ul>
+<li><strong>Valor/hora sugerido para desarrollador full-stack senior en
+Chile:</strong> $12.000 – $18.000 CLP</li>
+<li><strong>Valor/hora para profesional con especialización en
+accesibilidad e inclusión:</strong> $18.000 – $25.000 CLP</li>
+</ul>
+<h3 id="desglose-detallado">3.2. Desglose detallado</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Actividad</th>
+<th>Horas</th>
+<th>Valor estimado ($15.000/hr)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Investigación</strong></td>
+<td>Estudio de DUA (CAST), normativa chilena (Ley 20.422, Decreto 83,
+Ley 21.369, Decreto 170), perfiles de discapacidad, buenas prácticas en
+educación superior inclusiva</td>
+<td>20</td>
+<td>$300.000</td>
+</tr>
+<tr>
+<td><strong>Diseño UX/UI</strong></td>
+<td>Arquitectura de información, wireframes, diseño responsive, paleta
+de colores accesible, modo oscuro, diseño del sistema de
+componentes</td>
+<td>15</td>
+<td>$225.000</td>
+</tr>
+<tr>
+<td><strong>Desarrollo Frontend</strong></td>
+<td>8 módulos JS (IIFE), 2.384 líneas CSS, 650 líneas HTML, navegación
+SPA por hash, tabs DUA con teclado, gráfico radar Canvas</td>
+<td>50</td>
+<td>$750.000</td>
+</tr>
+<tr>
+<td><strong>PWA / Service Worker</strong></td>
+<td>Estrategia de caché network-first, versionamiento (v12), precarga de
+assets, Google Fonts, pdfmake CDN</td>
+<td>5</td>
+<td>$75.000</td>
+</tr>
+<tr>
+<td><strong>Generación PDF</strong></td>
+<td>Integración con pdfmake, diseño de template profesional con logo,
+maquetación de 3 variantes de informe, lazy loading</td>
+<td>10</td>
+<td>$150.000</td>
+</tr>
+<tr>
+<td><strong>Accesibilidad</strong></td>
+<td>Roles ARIA, focus-visible, prefers-reduced-motion, contraste WCAG,
+navegación por teclado, lectores de pantalla</td>
+<td>10</td>
+<td>$150.000</td>
+</tr>
+<tr>
+<td><strong>Pruebas</strong></td>
+<td>Pruebas manuales en Chrome, Firefox, Edge, responsive
+mobile/tablet/desktop, validación de persistencia, caso borde (0
+estudiantes, todos los perfiles, etc.)</td>
+<td>8</td>
+<td>$120.000</td>
+</tr>
+<tr>
+<td><strong>Documentación</strong></td>
+<td>README, prompt para Gem (Adaptador Técnico), ejemplo de lectura
+fácil matemática, script generador de formularios de
+retroalimentación</td>
+<td>5</td>
+<td>$75.000</td>
+</tr>
+<tr>
+<td><strong>Despliegue</strong></td>
+<td>GitHub Pages, configuración de dominio, certificación HTTPS, pruebas
+post-despliegue</td>
+<td>3</td>
+<td>$45.000</td>
+</tr>
+<tr>
+<td><strong>Gestión y coordinación</strong></td>
+<td>Commits (47), control de versiones, resolución de incidencias,
+reversiones experimentales</td>
+<td>4</td>
+<td>$60.000</td>
+</tr>
+<tr>
+<td><strong>Totales</strong></td>
+<td></td>
+<td><strong>130 horas</strong></td>
+<td><strong>$1.950.000 CLP</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="valor-por-hora-de-mantención-y-soporte">3.3. Valor por hora de
+mantención y soporte</h3>
+<table>
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Horas/mes</th>
+<th>Valor mensual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hosting (GitHub Pages — sin costo)</td>
+<td>—</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>Actualizaciones normativas (leyes, decretos, perfiles)</td>
+<td>4</td>
+<td>$60.000</td>
+</tr>
+<tr>
+<td>Corrección de errores y parches de seguridad</td>
+<td>2</td>
+<td>$30.000</td>
+</tr>
+<tr>
+<td>Soporte a docentes (vía correo o reunión)</td>
+<td>2</td>
+<td>$30.000</td>
+</tr>
+<tr>
+<td>Mejoras continuas según feedback</td>
+<td>4</td>
+<td>$60.000</td>
+</tr>
+<tr>
+<td><strong>Total mantención mensual</strong></td>
+<td><strong>12 hrs/mes</strong></td>
+<td><strong>$180.000 CLP/mes</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complejidad-técnica">4. Complejidad Técnica</h2>
+<h3 id="arquitectura">4.1. Arquitectura</h3>
+<ul>
+<li><strong>Sin frameworks:</strong> cero dependencias externas (excepto
+pdfmake, lazy-loaded). No hay riesgo de breaking changes por
+actualizaciones de terceros.</li>
+<li><strong>8 módulos IIFE:</strong> encapsulamiento con namespacing
+(<code>window.UiePlanner*</code>), patrón de módulo revelador.</li>
+<li><strong>SPA con hash routing:</strong> sin servidor, sin
+configuración de rutas, funcionando en GitHub Pages sin backend.</li>
+<li><strong>~4.700 líneas de código fuente</strong> (excluyendo assets y
+documentación).</li>
+</ul>
+<h3 id="decisiones-técnicas-relevantes">4.2. Decisiones técnicas
+relevantes</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vanilla JS</strong></td>
+<td>Cero dependencias, sin bundler, sin npm. El proyecto no envejece por
+obsolescencia de frameworks.</td>
+</tr>
+<tr>
+<td><strong>localStorage</strong></td>
+<td>Persistencia del checklist DUA y tema sin backend ni
+autenticación.</td>
+</tr>
+<tr>
+<td><strong>pdfmake lazy-loaded</strong></td>
+<td>El paquete (~200 KB) solo se carga cuando el usuario genera un
+informe.</td>
+</tr>
+<tr>
+<td><strong>Canvas para radar</strong></td>
+<td>Visualización liviana sin bibliotecas de gráficos (Chart.js, D3,
+etc.).</td>
+</tr>
+<tr>
+<td><strong>Service Worker propio</strong></td>
+<td>Sin Workbox ni abstracciones. Control fino de la estrategia de
+caché.</td>
+</tr>
+<tr>
+<td><strong>Sin base de datos</strong></td>
+<td>Sin backend, sin servidor, sin costos recurrentes de
+infraestructura.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="facilidad-de-mantención">4.3. Facilidad de mantención</h3>
+<ul>
+<li>Código estructurado, comentado, con nomenclatura consistente.</li>
+<li>Commits con conventional commits (<code>feat:</code>,
+<code>fix:</code>, <code>perf:</code>, <code>refactor:</code>).</li>
+<li>Historial de 47 commits que documenta la evolución del
+proyecto.</li>
+<li>Sin dependencias externas que requieran actualización
+periódica.</li>
+</ul>
+<hr />
+<h2 id="valor-educativo-e-institucional">5. Valor Educativo e
+Institucional</h2>
+<h3 id="cumplimiento-normativo">5.1. Cumplimiento normativo</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Normativa</th>
+<th>Cómo la aborda la herramienta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ley 20.422</strong> (Igualdad de Oportunidades e Inclusión
+Social de Personas con Discapacidad)</td>
+<td>Provee adecuaciones curriculares concretas para 8 perfiles de
+discapacidad.</td>
+</tr>
+<tr>
+<td><strong>Decreto 83</strong> (Adecuaciones Curriculares para EE
+Diferencial) — aplicado a educación superior</td>
+<td>Adapta el concepto de adecuaciones al contexto universitario con
+recomendaciones específicas.</td>
+</tr>
+<tr>
+<td><strong>Ley 21.369</strong> (Acoso sexual, violencia y
+discriminación de género)</td>
+<td>Incluye módulo de crisis y bienestar con enfoque inclusivo y no
+discriminatorio.</td>
+</tr>
+<tr>
+<td><strong>Estándares DUA (CAST)</strong></td>
+<td>Checklist completo basado en las 3 redes (afectiva, reconocimiento,
+estratégica) y 4 etapas de implementación.</td>
+</tr>
+<tr>
+<td><strong>WCAG 2.1</strong> (Accesibilidad web)</td>
+<td>La herramienta misma es accesible (roles ARIA, focus-visible,
+contraste, teclado).</td>
+</tr>
+<tr>
+<td><strong>UNE 153101:2018 EX</strong> (Lectura Fácil)</td>
+<td>Módulo de lectura fácil con lineamientos y ejemplo concreto.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="beneficios-para-duoc-uc">5.2. Beneficios para Duoc UC</h3>
+<ol type="1">
+<li><strong>Estandarización:</strong> Todos los docentes aplican el
+mismo marco DUA con los mismos criterios.</li>
+<li><strong>Trazabilidad:</strong> Cada plan de apoyo genera un PDF
+descargable con respaldo institucional.</li>
+<li><strong>Eficiencia:</strong> Lo que antes tomaba horas de reuniones
+y planillas ahora se resuelve en minutos.</li>
+<li><strong>Gratuidad operativa:</strong> Sin costos de licencias de
+software, hosting, ni mantención de servidores.</li>
+<li><strong>Escalabilidad:</strong> Puede ser adoptado por todas las
+sedes sin restricción técnica.</li>
+<li><strong>Imagen institucional:</strong> Duoc UC demuestra compromiso
+con la inclusión con una herramienta concreta y funcional.</li>
+</ol>
+<h3 id="impacto-en-la-comunidad-educativa">5.3. Impacto en la comunidad
+educativa</h3>
+<ul>
+<li><strong>+15.000 estudiantes en situación de discapacidad</strong> en
+educación superior en Chile (datos Mineduc/SIES) podrían verse
+beneficiados indirectamente.</li>
+<li><strong>+2.500 docentes Duoc UC</strong> podrían usar la herramienta
+para planificar sus clases.</li>
+<li><strong>Reducción de barreras</strong> al permitir que cualquier
+docente, sin formación previa en inclusión, pueda generar planes de
+apoyo pertinentes.</li>
+</ul>
+<hr />
+<h2 id="análisis-comparativo-de-mercado">6. Análisis Comparativo de
+Mercado</h2>
+<h3 id="alternativas-existentes">6.1. Alternativas existentes</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Alternativa</th>
+<th>Tipo</th>
+<th>Ventajas</th>
+<th>Limitaciones frente a Planificador Inclusivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Planillas Excel/Google Sheets</strong></td>
+<td>Manual</td>
+<td>Gratuito, flexible</td>
+<td>Sin guía DUA, sin fusión inteligente, sin PDF, sin persistencia,
+propenso a errores</td>
+</tr>
+<tr>
+<td><strong>Google Docs / Word</strong></td>
+<td>Manual</td>
+<td>Gratuito, conocido</td>
+<td>Mismas limitaciones que Excel; requiere estructuración manual</td>
+</tr>
+<tr>
+<td><strong>LMS (Blackboard, Canvas)</strong></td>
+<td>Plataforma educativa</td>
+<td>Integrado con el curso</td>
+<td>No tienen módulo DUA, no generan planes de apoyo, no tienen
+adecuaciones por perfil</td>
+</tr>
+<tr>
+<td><strong>BookWidgets</strong></td>
+<td>Herramienta docente</td>
+<td>Interactivo</td>
+<td>Pago ($/año), en inglés, no alineado con normativa chilena, sin
+adecuaciones</td>
+</tr>
+<tr>
+<td><strong>ClassDojo / Nearpod</strong></td>
+<td>Gestión de aula</td>
+<td>Popular en escolar</td>
+<td>Enfocado en escolar, no en educación superior chilena, sin DUA</td>
+</tr>
+<tr>
+<td><strong>Adaptech / WAI-Aria tools</strong></td>
+<td>Evaluación de accesibilidad</td>
+<td>Útil para revisar materiales</td>
+<td>No planifican clases, no integran DUA con adecuaciones</td>
+</tr>
+<tr>
+<td><strong>Desarrollo a medida por consultora</strong></td>
+<td>Desarrollo externo</td>
+<td>Personalizable</td>
+<td>Costos de $5.000.000+ CLP solo por diagnóstico, tiempos de 3-6
+meses</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ventajas-competitivas-del-planificador-inclusivo">6.2. Ventajas
+competitivas del Planificador Inclusivo</h3>
+<ol type="1">
+<li><strong>Único en su tipo en Chile:</strong> No existe otra
+herramienta gratuita, web, en español, que integre DUA + adecuaciones
+curriculares + PDF.</li>
+<li><strong>Costo cero de implementación:</strong> No requiere
+servidores, bases de datos, ni licencias de software adicional.</li>
+<li><strong>Tiempo cero de adopción:</strong> Se abre en el navegador y
+se usa al instante. Sin registro, sin login, sin capacitación
+previa.</li>
+<li><strong>Hecho por y para Duoc UC:</strong> Diseñado con el contexto
+del instituto, sus carreras T-P y su modelo educativo.</li>
+<li><strong>Evolución continua:</strong> Posibilidad de agregar módulos
+(reportes por sede, dashboard institucional, integración
+Blackboard).</li>
+</ol>
+<h3 id="costo-estimado-de-desarrollar-una-solución-equivalente">6.3.
+Costo estimado de desarrollar una solución equivalente</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Proveedor</th>
+<th>Costo estimado</th>
+<th>Tiempo estimado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consultora especializada (ej. Thoughtworks, Globant)</td>
+<td>$8.000.000 – $15.000.000 CLP</td>
+<td>4 – 6 meses</td>
+</tr>
+<tr>
+<td>Desarrollador freelance senior</td>
+<td>$3.000.000 – $6.000.000 CLP</td>
+<td>2 – 3 meses</td>
+</tr>
+<tr>
+<td>Equipo interno Duoc UC (2 desarrolladores)</td>
+<td>$4.000.000 – $6.000.000 CLP (solo sueldos)</td>
+<td>3 – 4 meses</td>
+</tr>
+<tr>
+<td><strong>Valor de referencia del Planificador Inclusivo (horas de
+desarrollo)</strong></td>
+<td><strong>$1.950.000 CLP</strong></td>
+<td><strong>5 días</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="retorno-de-inversión-roi">7. Retorno de Inversión (ROI)</h2>
+<h3 id="ahorro-en-horas-docentes">7.1. Ahorro en horas docentes</h3>
+<p><strong>Situación actual (sin herramienta):</strong> - Un docente que
+quiere planificar una clase inclusiva: 2-3 horas investigando, diseñando
+y documentando. - 30 docentes × 2 asignaturas × 2 evaluaciones = 120
+planeaciones al semestre. - 120 × 2.5 horas = <strong>300 horas docentes
+por semestre</strong>.</p>
+<p><strong>Con Planificador Inclusivo:</strong> - Misma tarea: 15-20
+minutos por planificación = 0.3 horas. - 120 × 0.3 horas = <strong>36
+horas docentes por semestre</strong>.</p>
+<p><strong>Ahorro: 264 horas docentes por semestre.</strong> Valor de
+hora docente promedio: $8.000 CLP → <strong>$2.112.000 CLP ahorrados por
+semestre.</strong></p>
+<h3 id="costos-evitados">7.2. Costos evitados</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Costo evitado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multas o sanciones por incumplimiento normativo de inclusión</td>
+<td>Sin cuantificar, pero potencialmente alto</td>
+</tr>
+<tr>
+<td>Consultoría externa para implementar DUA</td>
+<td>$3.000.000 – $8.000.000 CLP</td>
+</tr>
+<tr>
+<td>Desarrollo externo de herramienta similar</td>
+<td>$3.000.000 – $15.000.000 CLP</td>
+</tr>
+<tr>
+<td>Capacitaciones a docentes en DUA (presencial)</td>
+<td>$500.000 – $1.000.000 CLP por sesión</td>
+</tr>
+<tr>
+<td><strong>Total costos evitados (estimado)</strong></td>
+<td><strong>$6.500.000 – $24.000.000 CLP</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="recomendación-de-valorización">8. Recomendación de
+Valorización</h2>
+<h3 id="escenarios-de-licenciamiento">8.1. Escenarios de
+licenciamiento</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Escenario</th>
+<th>Descripción</th>
+<th>Valor sugerido</th>
+<th>Ideal para</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A: Cesión gratuita + honorarios por
+implementación</strong></td>
+<td>Se entrega el código sin costo. Se cobra por capacitación,
+instalación y soporte inicial.</td>
+<td>$800.000 – $1.200.000 CLP (honorarios)</td>
+<td>Relación estratégica; currículum; futuros proyectos</td>
+</tr>
+<tr>
+<td><strong>B: Licencia única institucional</strong></td>
+<td>Pago único por el software completo con derecho a uso en todas las
+sedes.</td>
+<td>$1.500.000 – $3.000.000 CLP</td>
+<td>Recuperar inversión de desarrollo</td>
+</tr>
+<tr>
+<td><strong>C: Licencia + mantención anual</strong></td>
+<td>Licencia inicial + contrato de mantención y soporte por 12
+meses.</td>
+<td>$1.500.000 (licencia) + $180.000/mes × 12 = $3.660.000 CLP primer
+año</td>
+<td>Ingreso recurrente a largo plazo</td>
+</tr>
+<tr>
+<td><strong>D: Desarrollo por hora + royalty</strong></td>
+<td>Pago por las 130 horas de desarrollo + porcentaje del ahorro
+generado.</td>
+<td>$1.950.000 (130h) + 10% ahorro estimado</td>
+<td>Modelo mixto, menor riesgo para la institución</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recomendación-del-autor">8.2. Recomendación del autor</h3>
+<p>Se recomienda el <strong>Escenario C (Licencia + Mantención
+Anual)</strong> como punto de partida para la negociación, con
+disposición a aceptar el <strong>Escenario B (Licencia Única)</strong>
+como alternativa realista. El Escenario A (cesión gratuita) puede
+considerarse si el objetivo principal es posicionamiento profesional y
+futuros proyectos dentro de la institución.</p>
+<hr />
+<h2 id="referencias">9. Referencias</h2>
+<ul>
+<li>CAST (2018). Universal Design for Learning Guidelines version 2.2.
+http://udlguidelines.cast.org</li>
+<li>Ministerio de Educación de Chile. Ley 20.422 (2010). Establece
+normas sobre igualdad de oportunidades e inclusión social de personas
+con discapacidad.</li>
+<li>Ministerio de Educación de Chile. Decreto 83 (2015). Aprueba
+criterios y orientaciones de adecuación curricular.</li>
+<li>Ministerio de Educación de Chile. Ley 21.369 (2021). Regula el acoso
+sexual, la violencia y la discriminación de género en educación
+superior.</li>
+<li>W3C/WAI. Web Content Accessibility Guidelines (WCAG) 2.1.
+https://www.w3.org/TR/WCAG21/</li>
+<li>UNE 153101:2018 EX. Lectura Fácil. Pautas y recomendaciones para la
+elaboración de documentos.</li>
+<li>Duoc UC. Modelo Educativo.
+https://www.duoc.cl/institucional/modelo-educativo/</li>
+<li>Servicio de Información de Educación Superior (SIES). Estadísticas
+de educación superior 2024.</li>
+</ul>
+<hr />
+<p><em>Documento generado el [fecha]. Los valores son referenciales y
+están expresados en pesos chilenos (CLP). Los montos pueden variar según
+negociación directa con la institución.</em></p>
+</body>
+</html>

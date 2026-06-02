@@ -589,6 +589,162 @@ const accessMatrixActivities = [
     { id: 'acceder',       label: 'Acceder a la institución',         dims: ['context'],                    conds: ['fisica','visual','vestibular'] }
 ];
 
+const matrixRecommendationRules = [
+    { id: 'fisica_escribir_teclado', text: 'Permitir uso de computador, teclado adaptado, dictado u otra ayuda técnica para responder por escrito.', conditions: ['fisica','tactil'], activities: ['escribir'], dimensions: ['evaluacion','tech'], scores: [1,2], priority: 'alta' },
+    { id: 'fisica_escribir_tiempo', text: 'Otorgar tiempo adicional o pausas si la escritura manual genera fatiga, dolor o lentitud motora.', conditions: ['fisica','tactil'], activities: ['escribir'], dimensions: ['evaluacion'], scores: [1,2], priority: 'media' },
+    { id: 'intelectual_escribir_pasos', text: 'Entregar pauta de respuesta con pasos visibles, ejemplo breve y criterios de logro antes de comenzar.', conditions: ['intelectual'], activities: ['escribir'], dimensions: ['evaluacion'], scores: [1,2], priority: 'alta' },
+    { id: 'visual_leer_formato', text: 'Entregar textos digitales accesibles, editables y compatibles con lector de pantalla o ampliación.', conditions: ['visual','sordoceguera'], activities: ['leer'], dimensions: ['materials','tech'], scores: [1,2], priority: 'alta' },
+    { id: 'visual_leer_descripcion', text: 'Describir imágenes, gráficos, tablas o información visual relevante en formato textual o verbal.', conditions: ['visual','sordoceguera'], activities: ['leer'], dimensions: ['materials','methods'], scores: [1,2], priority: 'alta' },
+    { id: 'intelectual_leer_claridad', text: 'Reformular instrucciones extensas con lenguaje claro, secuencia de pasos y apoyo visual cuando corresponda.', conditions: ['intelectual'], activities: ['leer'], dimensions: ['materials','methods'], scores: [1,2], priority: 'media' },
+    { id: 'auditiva_hablar_acceso_comunicacional', text: 'Acordar el canal de comunicación: lengua de señas, lectura labial, transcripción, subtítulos o apoyo escrito según preferencia.', conditions: ['auditiva','sordoceguera'], activities: ['hablar'], dimensions: ['interaction','tech'], scores: [1,2], priority: 'alta' },
+    { id: 'auditiva_hablar_turnos', text: 'Ordenar turnos de habla, hablar de frente y repetir por escrito instrucciones o acuerdos relevantes.', conditions: ['auditiva','sordoceguera'], activities: ['hablar','sala_clases'], dimensions: ['interaction','context'], scores: [1,2], priority: 'alta' },
+    { id: 'autismo_hablar_preparada', text: 'Permitir respuestas escritas, visuales o preparadas cuando la participación oral espontánea sea una barrera.', conditions: ['autismo','psiquica'], activities: ['hablar','sala_clases'], dimensions: ['interaction','evaluacion'], scores: [1,2], priority: 'alta' },
+    { id: 'autismo_hablar_anticipacion', text: 'Anticipar preguntas, roles o momentos de participación y evitar exposición oral sorpresiva.', conditions: ['autismo','psiquica'], activities: ['hablar','sociales','sala_clases'], dimensions: ['interaction'], scores: [1,2], priority: 'alta' },
+    { id: 'autismo_recordar_estructura', text: 'Usar agenda, checklist, calendario o recordatorios visibles para organizar tareas, fechas y pasos.', conditions: ['autismo','psiquica','intelectual'], activities: ['recordar'], dimensions: ['methods','tech'], scores: [1,2], priority: 'alta' },
+    { id: 'intelectual_recordar_modelado', text: 'Dividir tareas en pasos breves, modelar el procedimiento y verificar comprensión antes del trabajo autónomo.', conditions: ['intelectual','autismo'], activities: ['recordar'], dimensions: ['methods'], scores: [1,2], priority: 'alta' },
+    { id: 'evaluacion_instrucciones_claras', text: 'Entregar instrucciones de evaluación por escrito, segmentadas y con criterios claros antes de iniciar.', conditions: ['autismo','intelectual','psiquica','auditiva','sordoceguera','visual'], activities: ['examenes'], dimensions: ['evaluacion','materials'], scores: [1,2], priority: 'alta' },
+    { id: 'evaluacion_tiempo_pausas', text: 'Otorgar tiempo adicional, pausas acordadas o división de la evaluación cuando la barrera afecte el acceso a la respuesta.', conditions: ['fisica','visual','sordoceguera','tactil','vestibular','visceral','intelectual','psiquica','autismo'], activities: ['examenes'], dimensions: ['evaluacion','context'], scores: [1,2], priority: 'media' },
+    { id: 'evaluacion_auditiva_formato', text: 'Evitar instrucciones exclusivamente orales y asegurar subtítulos, transcripción o mediación comunicacional si la evaluación depende de audio.', conditions: ['auditiva','sordoceguera'], activities: ['examenes'], dimensions: ['evaluacion','tech'], scores: [1,2], priority: 'alta' },
+    { id: 'evaluacion_visual_formato', text: 'Permitir formato digital accesible, ampliación, lector de pantalla o alternativa textual para contenidos visuales.', conditions: ['visual','sordoceguera'], activities: ['examenes'], dimensions: ['evaluacion','tech'], scores: [1,2], priority: 'alta' },
+    { id: 'practicos_fisica_alternativa', text: 'Ajustar el puesto, herramienta, postura o secuencia de ejecución para participar sin alterar el resultado de aprendizaje.', conditions: ['fisica','tactil','vestibular','visceral'], activities: ['practicos','practicas_rec'], dimensions: ['methods','context'], scores: [1,2], priority: 'alta' },
+    { id: 'practicos_visual_descripcion', text: 'Anticipar procedimientos prácticos con descripciones, guías táctiles o apoyo verbal para acceder a información visual.', conditions: ['visual','sordoceguera'], activities: ['practicos','practicas_rec'], dimensions: ['methods','interaction'], scores: [1,2], priority: 'alta' },
+    { id: 'practicos_autismo_roles', text: 'Asignar roles explícitos, pasos observables y criterios de colaboración para reducir ambigüedad en actividades prácticas.', conditions: ['autismo','intelectual','psiquica'], activities: ['practicos'], dimensions: ['methods','interaction'], scores: [1,2], priority: 'media' },
+    { id: 'sala_auditiva_visibilidad', text: 'Ubicar al estudiante con buena visibilidad del docente, pizarra, intérprete o apoyos escritos.', conditions: ['auditiva','sordoceguera','visual'], activities: ['sala_clases'], dimensions: ['context','interaction'], scores: [1,2], priority: 'alta' },
+    { id: 'sala_autismo_previsibilidad', text: 'Mantener estructura de clase predecible, reglas explícitas y anticipación de cambios relevantes.', conditions: ['autismo','psiquica','intelectual'], activities: ['sala_clases'], dimensions: ['context','methods'], scores: [1,2], priority: 'alta' },
+    { id: 'sala_psiquica_exposicion', text: 'Ofrecer participación gradual o alternativa cuando la exposición pública aumente ansiedad o bloquee la participación.', conditions: ['psiquica','autismo'], activities: ['sala_clases','sociales'], dimensions: ['interaction','context'], scores: [1,2], priority: 'media' },
+    { id: 'sociales_autismo_roles', text: 'Estructurar interacciones sociales con roles claros, acuerdos de comunicación y opción de participación gradual.', conditions: ['autismo','psiquica','intelectual'], activities: ['sociales'], dimensions: ['interaction'], scores: [1,2], priority: 'alta' },
+    { id: 'sociales_auditiva_acceso', text: 'Asegurar que actividades sociales relevantes tengan turnos visibles, apoyo escrito o mediación comunicacional.', conditions: ['auditiva','sordoceguera'], activities: ['sociales'], dimensions: ['interaction'], scores: [1,2], priority: 'media' },
+    { id: 'ayuda_canal_explicito', text: 'Acordar un canal explícito y discreto para pedir ayuda: mensaje, señal, horario de consulta o persona referente.', conditions: ['autismo','psiquica','intelectual','auditiva','sordoceguera'], activities: ['ayuda'], dimensions: ['interaction'], scores: [1,2], priority: 'alta' },
+    { id: 'ayuda_checklist', text: 'Entregar una lista breve de pasos para intentar antes de pedir apoyo y reducir incertidumbre al solicitar ayuda.', conditions: ['autismo','intelectual','psiquica'], activities: ['ayuda'], dimensions: ['methods','interaction'], scores: [1,2], priority: 'media' },
+    { id: 'acceder_fisica_ruta', text: 'Verificar ruta accesible, sala, mobiliario, tiempos de desplazamiento y alternativas si hay barreras físicas.', conditions: ['fisica','vestibular'], activities: ['acceder'], dimensions: ['context'], scores: [1,2], priority: 'alta' },
+    { id: 'acceder_visual_orientacion', text: 'Anticipar ubicación de salas, cambios de espacio y referencias de orientación accesibles.', conditions: ['visual','sordoceguera'], activities: ['acceder'], dimensions: ['context'], scores: [1,2], priority: 'alta' }
+];
+
+const accommodationCifMap = {
+    fisica: {
+        context: [["acceder","sala_clases"],["acceder","sala_clases"],["sala_clases"],["sala_clases"]],
+        materials: [["leer"]],
+        methods: [["practicos","practicas_rec","sala_clases"],["practicos","practicas_rec"],["sala_clases"]],
+        interaction: [["escribir","sala_clases"],["ayuda","sala_clases"],["escribir","sala_clases"],["sala_clases"]],
+        evaluacion: [["examenes"],["examenes"],["examenes","escribir"]],
+        tech: [["escribir","examenes"],["escribir","examenes"]]
+    },
+    auditiva: {
+        context: [["leer","sala_clases"],["sala_clases","sociales"]],
+        materials: [["leer","sala_clases"],["leer","sala_clases"],["leer","examenes"]],
+        methods: [["leer","sala_clases"],["ayuda","sala_clases"]],
+        interaction: [["hablar","sala_clases","sociales"],["sala_clases"],["sala_clases","sociales"]],
+        evaluacion: [["leer","examenes"],["hablar","leer","escribir","examenes"]],
+        tech: [["hablar","leer","examenes"]]
+    },
+    visual: {
+        context: [["sala_clases"],["sala_clases"]],
+        materials: [["leer","escribir"],["leer","sala_clases"],["leer"]],
+        methods: [["sala_clases"],["leer","sala_clases"],["practicas_rec","practicos"],["leer"]],
+        interaction: [["leer","escribir","ayuda"],["sala_clases"]],
+        evaluacion: [["leer","escribir","examenes"],["leer","examenes"],["leer","escribir","examenes"]],
+        tech: [["leer","escribir"],["leer","escribir"]]
+    },
+    sordoceguera: {
+        context: [["acceder","sala_clases"],["acceder","sala_clases","recordar"],["acceder","sala_clases"]],
+        materials: [["leer"],["leer"]],
+        methods: [["recordar","sala_clases"],["sala_clases"]],
+        interaction: [["hablar","sala_clases","sociales"],["ayuda","practicas_rec"]],
+        evaluacion: [["examenes","escribir","hablar","leer"],["examenes"]],
+        tech: [["leer","escribir","hablar"]]
+    },
+    tactil: {
+        context: [["escribir"],["escribir","sala_clases"]],
+        materials: [["leer"]],
+        methods: [["practicos","practicas_rec"]],
+        interaction: [["sala_clases"]],
+        evaluacion: [["escribir","hablar","examenes"],["escribir","examenes"],["examenes"]],
+        tech: [["escribir"]]
+    },
+    vestibular: {
+        context: [["sala_clases"],["sala_clases"],["sala_clases"]],
+        materials: [["leer"],["leer"]],
+        methods: [["sala_clases"],["sala_clases"]],
+        interaction: [["sala_clases","acceder"],["sociales"]],
+        evaluacion: [["examenes","leer","escribir"],["examenes"]],
+        tech: [["examenes"]]
+    },
+    visceral: {
+        context: [["sala_clases","acceder"],["sala_clases","acceder"],["sala_clases"]],
+        materials: [["leer"],["leer"]],
+        methods: [["sala_clases"],["escribir"]],
+        interaction: [["ayuda"],["sala_clases"]],
+        evaluacion: [["examenes","escribir"],["examenes","escribir"]],
+        tech: [["leer","escribir"]]
+    },
+    intelectual: {
+        context: [["sala_clases"],["sala_clases","recordar"],["sala_clases","ayuda"],["recordar","sala_clases"]],
+        materials: [["leer","recordar"],["leer","recordar"],["leer","recordar"],["leer","recordar"]],
+        methods: [["recordar"],["recordar"]],
+        interaction: [["sala_clases"],["sala_clases","sociales"],["sala_clases"],["sala_clases"],["sala_clases","recordar"]],
+        evaluacion: [["leer","recordar","examenes"],["leer","recordar","examenes"],["leer","examenes"],["examenes","hablar","escribir","practicos"],["examenes","escribir"]],
+        tech: [["recordar","leer","escribir"]]
+    },
+    psiquica: {
+        context: [["sala_clases","ayuda"],["sala_clases","sociales"]],
+        materials: [["leer"],["leer"]],
+        methods: [["recordar","sala_clases"],["hablar","sociales","sala_clases"]],
+        interaction: [["ayuda","sala_clases"],["ayuda"],["ayuda"]],
+        evaluacion: [["hablar","examenes"],["sala_clases"],["examenes","escribir"],["examenes","escribir"]],
+        tech: [["escribir"]]
+    },
+    autismo: {
+        context: [["sala_clases","recordar"],["recordar","sala_clases"],["sala_clases"]],
+        materials: [["leer","recordar"],["leer","sala_clases","examenes"]],
+        methods: [["recordar"],["hablar","sociales","sala_clases"]],
+        interaction: [["sala_clases"],["ayuda","sala_clases"]],
+        evaluacion: [["examenes","escribir"],["examenes","leer","ayuda"],["examenes","escribir"]],
+        tech: [["sala_clases","examenes"]]
+    }
+};
+
+const shortActivityLabels = {
+    'escribir': 'Escribir',
+    'leer': 'Leer',
+    'hablar': 'Hablar',
+    'recordar': 'Recordar',
+    'examenes': 'Evaluación',
+    'practicos': 'Prácticos',
+    'sala_clases': 'Aula',
+    'sociales': 'Social',
+    'practicas_rec': 'Prácticas',
+    'ayuda': 'Ayuda',
+    'acceder': 'Acceso'
+};
+
+const prioridadLabels = {
+    1: { icon: '🔴', label: 'Prioridad alta' },
+    2: { icon: '🟡', label: 'Prioridad media' },
+    3: { icon: '🟢', label: 'Observar' }
+};
+
+function buildRecommendationsData() {
+    var data = {};
+    var dims = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'];
+    Object.keys(accommodationsData).forEach(function(cond) {
+        data[cond] = { name: accommodationsData[cond].name, source: accommodationsData[cond].source };
+        dims.forEach(function(dim) {
+            var items = [];
+            var accItems = accommodationsData[cond][dim] || [];
+            var cifMap = accommodationCifMap[cond] && accommodationCifMap[cond][dim] ? accommodationCifMap[cond][dim] : [];
+            accItems.forEach(function(text, idx) {
+                items.push({ text: text, activities: cifMap[idx] || [] });
+            });
+            if (items.length) data[cond][dim] = items;
+        });
+        if (accommodationsData[cond].highlights) data[cond].highlights = accommodationsData[cond].highlights;
+        if (accommodationsData[cond].regulation) data[cond].regulation = accommodationsData[cond].regulation;
+    });
+    return data;
+}
+
+const recommendationsData = buildRecommendationsData();
+
 window.UiePlannerData = {
     referencesData,
     principleCards,
@@ -600,7 +756,12 @@ window.UiePlannerData = {
     vocabularyData,
     autismMyths,
     glossaryData,
-    accessMatrixActivities
+    accessMatrixActivities,
+    matrixRecommendationRules,
+    accommodationCifMap,
+    shortActivityLabels,
+    prioridadLabels,
+    recommendationsData
 };
 
 })();
