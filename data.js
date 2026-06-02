@@ -1,13 +1,13 @@
 (function () {
 const referencesData = [
     { code: 'DUA 3.0', title: 'Diseño Universal para el Aprendizaje, versión 3.0', source: 'CAST', url: 'https://udlguidelines.cast.org/' },
-    { code: 'ORG', title: 'Organizador gráfico DUA 3.0 (español)', source: 'CAST', url: 'https://udlguidelines.cast.org/static/udlg3-graphicorganizer_spanish_update_8142024.pdf' },
-    { code: 'DUA Duoc', title: 'Experiencia DUA en Duoc UC', source: 'Duoc UC' },
-    { code: 'ADE', title: 'Guía de Adecuaciones Curriculares de Acceso', source: 'Duoc UC' },
-    { code: 'ACC', title: 'Guía de Introducción a la Accesibilidad Digital', source: 'Duoc UC' },
-    { code: 'AUT', title: 'Orientaciones docentes para estudiantes del espectro autista', source: 'Duoc UC' },
-    { code: 'VOC', title: 'Orientaciones para un vocabulario inclusivo', source: 'Duoc UC' },
-    { code: 'PRÁCTICA', title: 'Cuadernillo de apoyo: De la formación a la práctica', source: 'Duoc UC' },
+    { code: 'ORG', title: 'Organizador gráfico DUA 3.0 (español)', source: 'CAST', url: 'docs/investigacion/udlg3-graphicorganizer-digital-numbers-a11y-spanish-latin-america.pdf' },
+    { code: 'DUA Duoc', title: 'Experiencia DUA en Duoc UC', source: 'Duoc UC', url: 'docs/investigacion/Experiencia%20DUA.pdf' },
+    { code: 'ADE', title: 'Guía de Adecuaciones Curriculares de Acceso', source: 'Duoc UC', url: 'docs/guias/Gu%C3%ADa%20Adecuaciones%20Curriculares%20de%20Acceso.pdf' },
+    { code: 'ACC', title: 'Guía de Introducción a la Accesibilidad Digital', source: 'Duoc UC', url: 'docs/guias/Gu%C3%ADa%20de%20Introducci%C3%B3n%20a%20la%20Accesibilidad%20Digital.pdf' },
+    { code: 'AUT', title: 'Orientaciones docentes para estudiantes del espectro autista', source: 'Duoc UC', url: 'docs/guias/Guia%20Orientaciones%20Autismo%20v2024.pdf' },
+    { code: 'VOC', title: 'Orientaciones para un vocabulario inclusivo', source: 'Duoc UC', url: 'docs/guias/Orientaciones%20Vocabulario%20Inclusivo.pdf' },
+    { code: 'PRÁCTICA', title: 'De la formación a la práctica — Cuadernillo de apoyo', source: 'Duoc UC', url: 'docs/guias/Cuadernillo%20de%20la%20Formaci%C3%B3n%20a%20la%20Pr%C3%A1ctica.pdf' },
     { code: 'CAST', title: 'Universal Design for Learning', source: 'CAST', url: 'https://www.cast.org/' },
     { code: 'WCAG', title: 'Web Content Accessibility Guidelines 2.2', source: 'W3C WAI', url: 'https://www.w3.org/WAI/standards-guidelines/wcag/' },
     { code: 'UNE LF', title: 'UNE 153101:2018 EX Lectura Fácil: pautas y recomendaciones para elaborar documentos', source: 'AENOR' },
@@ -25,7 +25,14 @@ const referencesData = [
     { code: 'RETRO', title: 'Infografía: Yo retroalimento para todos', source: 'Duoc UC' },
     { code: 'LENG', title: 'Infografía: Mis palabras crean una comunidad inclusiva', source: 'Duoc UC' },
     { code: 'CRISIS', title: 'Infografía: Cómo apoyar a un estudiante que se descompensa en mi aula', source: 'Duoc UC' },
-    { code: 'CIERRE', title: 'Plantilla de reflexión de cierre de semestre', source: 'Duoc UC' }
+    { code: 'CIERRE', title: 'Plantilla de reflexión de cierre de semestre', source: 'Duoc UC' },
+    { code: 'ART DUA 3.0', title: 'Artículo: DUA 3.0 — hacia un modelo educativo más inclusivo', source: 'Morilla & Álvarez', url: 'docs/investigacion/articulo-dua-3.0-morilla-y-alvarez.pdf' },
+    { code: 'CIF MANUAL', title: 'Manual Práctico CIF (Clasificación Internacional del Funcionamiento)', source: 'OMS / OPS', url: 'docs/investigacion/Documentos%20ICF/Manual%20Pr%C3%A1ctico%20ICF.pdf' },
+    { code: 'CIF BAS', title: 'Guía para principiantes de la CIF (Clasificación Internacional del Funcionamiento)', source: 'OMS / OPS', url: 'docs/investigacion/Documentos%20ICF/Gu%C3%ADa%20para%20principiantes%20de%20la%20ICF.pdf' },
+    { code: 'CIF INTRO', title: 'Clasificación Internacional del Funcionamiento — introducción (inglés)', source: 'WHO', url: 'docs/investigacion/Documentos%20ICF/International%20classification%20of%20functioning%20ICF.pdf' },
+    { code: 'ADEC CIF', title: 'Guía de Adecuaciones Curriculares con enfoque CIF', source: 'Duoc UC', url: 'docs/guias/adecuaciones-curriculares-cif.md' },
+    { code: 'GEM LF', title: 'Gem — Adaptador técnico a Lectura Fácil (instrucciones)', source: 'Duoc UC', url: 'docs/lectura-facil/gem_adaptador_tecnico_lectura_facil.md' },
+    { code: 'GEM EJ', title: 'Gem — Ejemplo de adaptación a Lectura Fácil (matemática)', source: 'Duoc UC', url: 'docs/lectura-facil/ejemplo_gem_lectura_facil_matematica.md' }
 ];
 
 const principleCards = [

@@ -44,13 +44,50 @@ function renderGlossary(data) {
 function renderReferences() {
     const container = document.getElementById('references-grid');
     if (!container) return;
-    container.innerHTML = referencesData.map(item => {
-        const content = '<span>' + item.title + '</span><span class="ref-source">' + item.source + '</span>';
-        if (item.url) {
-            return '<a class="ref-card" href="' + item.url + '" target="_blank" rel="noopener">' + content + '</a>';
-        }
-        return '<div class="ref-card">' + content + '</div>';
-    }).join('');
+
+    const categoryOrder = ['Duoc UC', 'CAST', 'W3C WAI', 'AENOR', 'Chile', 'SENADIS', 'OIT', 'OMS / OPS', 'Morilla & Álvarez', 'WHO'];
+    const categoryLabels = {
+        'Duoc UC': 'Documentos Duoc UC',
+        'CAST': 'Estándares internacionales DUA',
+        'W3C WAI': 'Estándares de accesibilidad web',
+        'AENOR': 'Normas UNE',
+        'Chile': 'Normativa chilena',
+        'SENADIS': 'SENADIS',
+        'OIT': 'Organización Internacional del Trabajo',
+        'OMS / OPS': 'Clasificación CIF (OMS/OPS)',
+        'Morilla & Álvarez': 'Artículos académicos',
+        'WHO': 'Clasificación CIF (WHO)'
+    };
+
+    function categoryKey(source) {
+        var idx = categoryOrder.indexOf(source);
+        return idx === -1 ? 99 : idx;
+    }
+
+    var groups = {};
+    referencesData.forEach(function (item) {
+        var key = item.source;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+    });
+
+    var sortedKeys = Object.keys(groups).sort(function (a, b) { return categoryKey(a) - categoryKey(b); });
+
+    var html = '';
+    sortedKeys.forEach(function (key) {
+        var label = categoryLabels[key] || key;
+        html += '<div class="ref-category"><h3 class="ref-category-title">' + label + '</h3><div class="ref-grid">';
+        groups[key].forEach(function (item) {
+            var content = '<strong class="ref-code">' + item.code + '</strong><span>' + item.title + '</span><span class="ref-source">' + item.source + '</span>';
+            if (item.url) {
+                html += '<a class="ref-card" href="' + item.url + '" target="_blank" rel="noopener">' + content + '</a>';
+            } else {
+                html += '<div class="ref-card">' + content + '</div>';
+            }
+        });
+        html += '</div></div>';
+    });
+    container.innerHTML = html;
 }
 
 function normalize(value) {
