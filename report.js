@@ -294,7 +294,7 @@ function renderProfileSection(grouped, index, firstSupportNumber) {
                 var level = getSemaforo(item.activities, scores) || 1;
                 buckets[level].push(item);
             });
-            var priorityHeaders = { 1: 'Ajustes prioritarios', 2: 'Ajustes recomendados', 3: 'Observar' };
+            var priorityHeaders = { 1: 'Barrera significativa — intervenir', 2: 'Barrera moderada — ajustar', 3: 'Barrera leve — observar' };
             [1, 2, 3].forEach(function(level) {
                 var bucket = buckets[level];
                 if (!bucket || !bucket.length) return;
@@ -358,7 +358,7 @@ function renderProfilePdfSection(grouped, index, firstSupportNumber) {
                 var level = getSemaforo(item.activities, scores) || 0;
                 buckets[level].push(item);
             });
-            var priorityHeaders = { 1: 'Ajustes prioritarios', 2: 'Ajustes recomendados', 3: 'Observar', 0: 'Sin ajuste' };
+            var priorityHeaders = { 1: 'Barrera significativa — intervenir', 2: 'Barrera moderada — ajustar', 3: 'Barrera leve — observar', 0: 'Sin barrera detectada' };
             var priorityColors = { 1: '#ea4335', 2: '#fbbc04', 3: '#34a853', 0: '#9aa0a6' };
             [1, 2, 3, 0].forEach(function(level) {
                 var bucket = buckets[level];
@@ -399,7 +399,7 @@ function renderProfilePdfSection(grouped, index, firstSupportNumber) {
 
 function pdfRequirementLabel(value) {
     var level = Math.max(0, Math.min(4, Math.round(value || 0)));
-    return level >= 3 ? 'Prioritario' : level === 2 ? 'Recomendado' : level === 1 ? 'Observaci\u00f3n' : 'Sin ajuste';
+    return level >= 3 ? 'Barrera significativa — intervenir' : level === 2 ? 'Barrera moderada — ajustar' : level === 1 ? 'Barrera leve — observar' : 'Sin barrera detectada';
 }
 
 function renderCIFChartPdfSection(students) {
@@ -473,7 +473,7 @@ function renderCIFChartPdfSection(students) {
         { text: 'Niveles:', fontSize: 7, color: '#6b7280', margin: [0, 0, 0, 3] }
     ];
     [0, 1, 2, 3].forEach(function(lvl) {
-        var l = lvl === 0 ? 'Sin ajuste' : lvl === 1 ? 'Observaci\u00f3n' : lvl === 2 ? 'Recomendado' : 'Prioritario';
+        var l = lvl === 0 ? 'Sin barrera detectada' : lvl === 1 ? 'Barrera leve \u2014 observar' : lvl === 2 ? 'Barrera moderada \u2014 ajustar' : 'Barrera significativa \u2014 intervenir';
         var c = levelColors[lvl];
         legendStack.push({
             columns: [
