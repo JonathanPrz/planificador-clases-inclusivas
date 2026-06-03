@@ -711,7 +711,7 @@ function renderCIFBarChart(students, options) {
 
     var legendHtml = '<div class="cif-legend">' +
         [0,1,2,3].map(function(lvl) {
-            return '<span class="cif-legend-item"><span class="cif-legend-swatch requirement-level-' + lvl + '"></span>' + requirementLabel(lvl) + '</span>';
+            return '<span class="level-badge level-badge-' + lvl + '">' + requirementLabel(lvl) + '</span>';
         }).join('') +
         '</div>';
 
@@ -812,15 +812,15 @@ function getCIFRadarDataset(student, index) {
         label: formatStudentLabel(student),
         data: data,
         borderColor: color.border,
-        backgroundColor: color.bg,
-        borderWidth: 2,
+        backgroundColor: 'transparent',
+        borderWidth: 3,
         pointBackgroundColor: color.border,
         pointBorderColor: '#fff',
-        pointBorderWidth: 1,
-        pointRadius: 4,
+        pointBorderWidth: 1.5,
+        pointRadius: 3.5,
         pointHoverRadius: 6,
-        fill: true,
-        tension: 0.2
+        fill: false,
+        tension: 0.15
     };
 }
 
@@ -853,13 +853,17 @@ function renderCIFRadarChart(students, containerId, options) {
 
     if (options.height) container.style.height = options.height;
 
+    var card = document.createElement('div');
+    card.className = 'cif-radar-card';
+
     var wrapper = document.createElement('div');
     wrapper.className = 'cif-radar-wrapper';
     if (options.height) wrapper.style.height = options.height;
 
     var canvas = document.createElement('canvas');
     wrapper.appendChild(canvas);
-    container.appendChild(wrapper);
+    card.appendChild(wrapper);
+    container.appendChild(card);
 
     var labels = getCIFRadarLabels();
     var datasets = filteredStudents.map(function(s, i) {

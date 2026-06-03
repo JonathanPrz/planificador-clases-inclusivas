@@ -1937,6 +1937,49 @@ body.theme-dark .theme-icon-dark {
     color: #ffffff;
 }
 
+.level-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    line-height: 1.6;
+    vertical-align: middle;
+}
+.level-badge-0 {
+    background: #e8eaed;
+    color: #5f6368;
+}
+.level-badge-1 {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+.level-badge-2 {
+    background: #fef7e0;
+    color: #b06000;
+}
+.level-badge-3 {
+    background: #fce8e6;
+    color: #c5221f;
+}
+body.theme-dark .level-badge-0 {
+    background: #3c4043;
+    color: #9aa0a6;
+}
+body.theme-dark .level-badge-1 {
+    background: #1e3a2f;
+    color: #81c995;
+}
+body.theme-dark .level-badge-2 {
+    background: #3d2e1a;
+    color: #fdd663;
+}
+body.theme-dark .level-badge-3 {
+    background: #3c1e1e;
+    color: #f28b82;
+}
+
 body.theme-dark .cif-cell-score {
     color: var(--text-primary);
 }
@@ -2107,6 +2150,18 @@ body.theme-dark .cif-minibar {
     width: 100%;
     margin: 12px 0 20px;
     background: transparent;
+}
+.cif-radar-card {
+    background: var(--bg-card, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    padding: 20px 16px 16px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+body.theme-dark .cif-radar-card {
+    background: var(--bg-card, #1e1e1e);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
 }
 .cif-radar-wrapper {
     position: relative;
