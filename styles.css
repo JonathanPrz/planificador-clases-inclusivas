@@ -2103,6 +2103,33 @@ body.theme-dark .cif-minibar {
     display: none;
 }
 
+.cif-radar-container {
+    width: 100%;
+    margin: 12px 0 20px;
+    background: transparent;
+}
+.cif-radar-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    min-height: 340px;
+    height: 380px;
+}
+.cif-radar-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+@media print {
+    .cif-radar-container { break-inside: avoid; }
+    .cif-radar-wrapper { max-width: 100%; height: 340px !important; }
+}
+
+@media (max-width: 600px) {
+    .cif-radar-wrapper { min-height: 300px; height: 340px; }
+}
+
 .privacy-option input {
     accent-color: var(--support);
 }

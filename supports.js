@@ -361,13 +361,11 @@ function renderConditionDetail() {
         return;
     }
 
-    var profilesHtml = students.map(function(student) {
-        var studentChartHtml = '';
-        try {
-            studentChartHtml = renderCIFBarChart([student]);
-        } catch (e) {
-            console.error('renderCIFBarChart falló:', e.message);
-        }
+    var radarContainers = [];
+    var profilesHtml = students.map(function(student, sIdx) {
+        var radarId = 'cif-radar-detail-' + sIdx;
+        var studentChartHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>';
+        radarContainers.push({ id: radarId, student: student });
         var group = {
             conditions: student.conditions,
             students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
@@ -388,6 +386,10 @@ function renderConditionDetail() {
             '</div>' +
         '</div>' +
         profilesHtml;
+
+    radarContainers.forEach(function(rc) {
+        renderCIFRadarChart([rc.student], rc.id, { height: '380px' });
+    });
 }
 
 function getStudentMatrixProfile(studentIndex) {
@@ -459,29 +461,32 @@ function renderSelectedSupportRecommendations() {
         ? 'Estas orientaciones combinan condiciones seleccionadas y evitan duplicar apoyos. Úsalas como referencia inicial mientras identificas barreras concretas.'
         : 'Estas orientaciones sirven como referencia cuando no hay ficha disponible. La decisión final debe ajustarse a la barrera observada y al diálogo con el estudiante.';
 
+    var radarContainers = [];
     var profilesHtml = '';
     try {
-        profilesHtml = students.map(function(student) {
+        profilesHtml = students.map(function(student, sIdx) {
+            var radarId = 'cif-radar-results-' + sIdx;
             var studentChartHtml = '';
             try {
                 var card = document.querySelector('#support-students-medical .support-student-card[data-student-index="' + student.cardIndex + '"]');
                 var showChart = card ? (card.querySelector('.show-in-chart')?.checked ?? false) : true;
                 if (showChart) {
-                    studentChartHtml = renderCIFBarChart([student]);
+                    studentChartHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>';
+                    radarContainers.push({ id: radarId, student: student });
                 }
             } catch (e) {
-                console.error('renderCIFBarChart falló:', e.message, e.stack);
-                studentChartHtml = '<p style=\"color:red\">Error en gráfico: ' + e.message + '</p>';
+                console.error('Error preparando radar:', e.message);
+                studentChartHtml = '<p style="color:red">Error en gráfico: ' + e.message + '</p>';
             }
             var group = {
                 conditions: student.conditions,
                 students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
             };
-            try { return studentChartHtml + renderProfileGroup(group); } catch (e) { return '<p style=\"color:red\">Error en recomendaciones: ' + e.message + '</p>'; }
+            try { return studentChartHtml + renderProfileGroup(group); } catch (e) { return '<p style="color:red">Error en recomendaciones: ' + e.message + '</p>'; }
         }).join('');
     } catch (e) {
         console.error('Error general en profiles:', e.message);
-        profilesHtml = '<p style=\"color:red\">Error en recomendaciones: ' + e.message + '</p>';
+        profilesHtml = '<p style="color:red">Error en recomendaciones: ' + e.message + '</p>';
     }
 
     results.innerHTML =
@@ -493,7 +498,9 @@ function renderSelectedSupportRecommendations() {
             '</div>' +
         '</div>' +
         profilesHtml;
-    bindCIFBarToggles();
+    radarContainers.forEach(function(rc) {
+        renderCIFRadarChart([rc.student], rc.id, { height: '380px' });
+    });
     bindRecommendationEditing();
     bindManualRecommendationEditing();
     bindAdvisorCommentFields();
@@ -532,16 +539,14 @@ function renderSocialResults() {
 
     results.classList.remove('hidden');
 
-    var recsHtml = students.map(function(student) {
+    var radarContainers = [];
+    var recsHtml = students.map(function(student, sIdx) {
         var label = student.name || ('Estudiante ' + student.cardIndex);
 
         if (student.hasMatrix) {
-            var studentChartHtml = '';
-            try {
-                studentChartHtml = renderCIFBarChart([student]);
-            } catch (e) {
-                console.error('renderCIFBarChart social falló:', e.message);
-            }
+            var radarId = 'cif-radar-social-' + sIdx;
+            var studentChartHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>';
+            radarContainers.push({ id: radarId, student: student });
             var barrierRecs = getBarrierBasedRecommendations(student.matrixScores, student.conditionKeys || []);
 
             if (!barrierRecs.length) {
@@ -627,6 +632,9 @@ function renderSocialResults() {
             '</div>' +
         '</div>' +
         recsHtml;
+    radarContainers.forEach(function(rc) {
+        renderCIFRadarChart([rc.student], rc.id, { height: '380px' });
+    });
     bindBarrierMapToggles();
     bindRecommendationEditing();
     bindManualRecommendationEditing();
@@ -746,6 +754,170 @@ function bindCIFBarToggles() {
         });
         btn.setAttribute('data-bound', 'true');
     });
+}
+
+var CIF_RADAR_COLORS = [
+    { border: '#4361ee', bg: 'rgba(67,97,238,0.12)' },
+    { border: '#f72585', bg: 'rgba(247,37,133,0.12)' },
+    { border: '#06d6a0', bg: 'rgba(6,214,160,0.12)' },
+    { border: '#ffb703', bg: 'rgba(255,183,3,0.12)' },
+    { border: '#7209b7', bg: 'rgba(114,9,183,0.12)' },
+    { border: '#e36414', bg: 'rgba(227,100,20,0.12)' },
+    { border: '#4cc9f0', bg: 'rgba(76,201,240,0.12)' },
+    { border: '#f94144', bg: 'rgba(249,65,68,0.12)' }
+];
+
+function getCIFRadarLabels() {
+    return window.UiePlannerData.accessMatrixActivities.map(function(a) {
+        return shortActivityLabels[a.id] || a.label;
+    });
+}
+
+function getCIFRadarDataset(student, index) {
+    var studentIndex = student.cardIndex || (index + 1);
+    var matrixScores = getStudentMatrixScores(studentIndex);
+    var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
+    var color = CIF_RADAR_COLORS[index % CIF_RADAR_COLORS.length];
+
+    var data;
+    if (hasMatrix) {
+        data = window.UiePlannerData.accessMatrixActivities.map(function(act) {
+            var score = Number(matrixScores[act.id] || 0);
+            return score;
+        });
+    } else {
+        var condKeys = student.conditions.map(function(c) { return c.key; });
+        data = window.UiePlannerData.accessMatrixActivities.map(function(act) {
+            var maxSev = 0;
+            condKeys.forEach(function(ck) {
+                var profile = barrierProfiles[ck];
+                if (!profile) return;
+                act.dims.forEach(function(dim) {
+                    maxSev = Math.max(maxSev, profile[dim] || 0);
+                });
+            });
+            return maxSev;
+        });
+    }
+
+    return {
+        label: formatStudentLabel(student),
+        data: data,
+        borderColor: color.border,
+        backgroundColor: color.bg,
+        borderWidth: 2,
+        pointBackgroundColor: color.border,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.2
+    };
+}
+
+function renderCIFRadarChart(students, containerId, options) {
+    options = options || {};
+    if (typeof Chart === 'undefined') return;
+
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    var prevChart = container.__cifRadarChart;
+    if (prevChart) { prevChart.destroy(); container.__cifRadarChart = null; }
+    container.innerHTML = '';
+
+    if (!students || !students.length) return;
+
+    var filteredStudents = [];
+    students.forEach(function(student, idx) {
+        var studentIndex = student.cardIndex || (idx + 1);
+        var matrixScores = getStudentMatrixScores(studentIndex);
+        var hasMatrix = Object.values(matrixScores).some(function(v) {
+            return Number(v || 0) > 0;
+        });
+        if (hasMatrix || student.conditions) filteredStudents.push(student);
+    });
+    if (!filteredStudents.length) return;
+
+    if (options.height) container.style.height = options.height;
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'cif-radar-wrapper';
+    if (options.height) wrapper.style.height = options.height;
+
+    var canvas = document.createElement('canvas');
+    wrapper.appendChild(canvas);
+    container.appendChild(wrapper);
+
+    var labels = getCIFRadarLabels();
+    var datasets = filteredStudents.map(function(s, i) {
+        return getCIFRadarDataset(s, i);
+    });
+
+    var ctx = canvas.getContext('2d');
+    try {
+        var chart = new Chart(ctx, {
+            type: 'radar',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 4,
+                        ticks: {
+                            stepSize: 1,
+                            font: { size: 10 },
+                            backdropColor: 'transparent'
+                        },
+                        pointLabels: {
+                            font: { size: 11, weight: '600' },
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#202124'
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.08)'
+                        },
+                        angleLines: {
+                            color: 'rgba(0,0,0,0.06)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 11, weight: '600' },
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.dataset.label || '';
+                                var val = context.raw;
+                                var scoreLabel = val === 4 ? 'Perfecta' : val === 3 ? 'Buena' : val === 2 ? 'Parcial' : val === 1 ? 'Incompatible' : 'Sin dato';
+                                return label + ': ' + val + ' (' + scoreLabel + ')';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        container.__cifRadarChart = chart;
+    } catch (e) {
+        console.error('Error al crear radar chart:', e);
+    }
+}
+
+function destroyCIFRadarChart(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var chart = container.__cifRadarChart;
+    if (chart) { chart.destroy(); container.__cifRadarChart = null; }
 }
 
 function mergeConditionProfiles(conditionKeys) {
@@ -3542,6 +3714,8 @@ window.UiePlannerSupports = {
     getReferenceScores,
     scoreToRequirement,
     renderCIFBarChart,
+    renderCIFRadarChart,
+    destroyCIFRadarChart,
     barrierProfiles,
     openPlanModal,
     closePlanModal,
