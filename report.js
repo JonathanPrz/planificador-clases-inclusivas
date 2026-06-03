@@ -322,7 +322,7 @@ function renderProfileSection(grouped, index, firstSupportNumber) {
         return html;
     }).join('');
 
-    return '<section class="print-report-section"><h2>' + (index + firstSupportNumber) + '. ' + conditionNames.join(' · ') + '</h2><p><strong>Aplica a:</strong> ' + studentNames + '</p>' + categoriesHtml + '<p class="print-source">Fuente: ' + sources.join(', ') + '</p></section>';
+    return '<section class="print-report-section"><h2>' + (index + firstSupportNumber) + '. ' + studentNames + '</h2><p><strong>Condición:</strong> ' + conditionNames.join(' · ') + ' <span class="print-source">Fuente: ' + sources.join(', ') + '</span></p>' + categoriesHtml + '</section>';
 }
 
 function renderProfilePdfSection(grouped, index, firstSupportNumber) {
@@ -338,8 +338,8 @@ function renderProfilePdfSection(grouped, index, firstSupportNumber) {
     var hasMatrixProfile = groupHasMatrixProfile(grouped);
 
     var content = [];
-    content.push({ text: (index + firstSupportNumber) + '. ' + conditionNames.join(' · '), style: 'sectionTitle' });
-    content.push({ text: [{ text: 'Aplica a: ', bold: true }, studentNames], style: 'bodyText' });
+    content.push({ text: (index + firstSupportNumber) + '. ' + studentNames, style: 'sectionTitle' });
+    content.push({ text: [{ text: 'Condición: ', bold: true }, conditionNames.join(' · ')], style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
     content.push({ text: '' });
 
     var hasReferenceProfile = !hasMatrixProfile && conditionKeys.length > 0 && conditionKeys.some(function(k) { return barrierProfiles[k]; });

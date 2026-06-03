@@ -379,8 +379,8 @@ function renderConditionDetail() {
     detail.innerHTML =
         '<div class="results-title-header">' +
             '<div>' +
-                '<h3>' + (componentKeys.length > 1 ? 'Múltiple: ' + conditionNames : conditionNames) + '</h3>' +
-                '<p>Las recomendaciones están agrupadas por categoría. Ajusta según observación directa y conversación con el estudiante.</p>' +
+                '<h3>Recomendaciones por estudiante</h3>' +
+                '<p>Cada sección muestra los apoyos sugeridos según la condición registrada. Ajusta según observación directa y conversación con el estudiante.</p>' +
             '</div>' +
         '</div>' +
         profilesHtml;
@@ -962,13 +962,13 @@ function formatStudentConditionLabel(student) {
 
 function supportRecommendationGroup(grouped) {
     const data = grouped.condition;
+    const studentNames = grouped.students.map(student => formatStudentLabel(student)).join(', ');
     return `
         <article class="support-recommendation-group">
             <div class="results-title-header">
                 <div>
-                    <span class="source-pill">${data.source}</span>
-                    <h3>${data.name}</h3>
-                    <p><strong>Aplica a:</strong> ${grouped.students.map(student => formatStudentLabel(student)).join(', ')}</p>
+                    <h3>${studentNames}</h3>
+                    <p><span class="source-pill">${data.source}</span> <strong>Condición:</strong> ${data.name}</p>
                 </div>
             </div>
             <div class="support-grid">
@@ -2252,9 +2252,8 @@ function renderStandardRecommendationGroup(group, options) {
 
     return '<article class="support-recommendation-group">' +
         '<div class="results-title-header"><div>' +
-        sourcePills + ' ' +
-        '<h3>' + conditionNames.join(' - ') + '</h3>' +
-        '<p><strong>Aplica a:</strong> ' + studentNames + '</p>' +
+        '<h3>' + studentNames + '</h3>' +
+        '<p>' + sourcePills + ' <strong>Condición:</strong> ' + conditionNames.join(' - ') + '</p>' +
         '</div></div>' +
         legendHtml +
         '<div class="support-grid">' + categoriesHtml + '</div>' +
