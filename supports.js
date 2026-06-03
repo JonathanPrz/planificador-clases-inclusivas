@@ -767,6 +767,16 @@ var CIF_RADAR_COLORS = [
     { border: '#f94144', bg: 'rgba(249,65,68,0.12)' }
 ];
 
+function getRadarThemeColors() {
+    var isDark = document.body.classList.contains('theme-dark');
+    return {
+        textColor: isDark ? '#e8eaed' : '#202124',
+        gridColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)',
+        angleColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
+        tickColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'
+    };
+}
+
 function getCIFRadarLabels() {
     return window.UiePlannerData.accessMatrixActivities.map(function(a) {
         return shortActivityLabels[a.id] || a.label;
@@ -840,6 +850,9 @@ function renderCIFRadarChart(students, containerId, options) {
     });
     if (!filteredStudents.length) return;
 
+    container.__radarStudents = students;
+    container.__radarOptions = options;
+
     if (options.height) container.style.height = options.height;
 
     var wrapper = document.createElement('div');
@@ -856,6 +869,7 @@ function renderCIFRadarChart(students, containerId, options) {
     });
 
     var ctx = canvas.getContext('2d');
+    var theme = getRadarThemeColors();
     try {
         var chart = new Chart(ctx, {
             type: 'radar',
@@ -870,17 +884,18 @@ function renderCIFRadarChart(students, containerId, options) {
                         ticks: {
                             stepSize: 1,
                             font: { size: 10 },
+                            color: theme.tickColor,
                             backdropColor: 'transparent'
                         },
                         pointLabels: {
                             font: { size: 11, weight: '600' },
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#202124'
+                            color: theme.textColor
                         },
                         grid: {
-                            color: 'rgba(0,0,0,0.08)'
+                            color: theme.gridColor
                         },
                         angleLines: {
-                            color: 'rgba(0,0,0,0.06)'
+                            color: theme.angleColor
                         }
                     }
                 },
@@ -889,6 +904,7 @@ function renderCIFRadarChart(students, containerId, options) {
                         position: 'bottom',
                         labels: {
                             font: { size: 11, weight: '600' },
+                            color: theme.textColor,
                             padding: 16,
                             usePointStyle: true,
                             pointStyle: 'circle'

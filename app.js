@@ -19,6 +19,32 @@ function initApp() {
     bindGlobalActions();
     bindSectionNavigation();
     initConditionPills();
+    window.UiePlannerSupports.initJustificationModal();
+    initRadarThemeObserver();
+}
+
+function initRadarThemeObserver() {
+    if (document.body.dataset.radarObserver === 'true') return;
+    document.body.dataset.radarObserver = 'true';
+    var renderFn = window.UiePlannerSupports.renderCIFRadarChart;
+    if (!renderFn) return;
+    var observer = new MutationObserver(function() {
+        if (!document.body.classList.contains('theme-dark') && !document.body.classList.contains('theme-light')) return;
+        var containers = document.querySelectorAll('[id^="cif-radar-"]');
+        containers.forEach(function(container) {
+            var prevChart = container.__cifRadarChart;
+            if (prevChart) {
+                prevChart.destroy();
+                container.__cifRadarChart = null;
+            }
+            var students = container.__radarStudents;
+            var options = container.__radarOptions || {};
+            if (students && students.length && container.id) {
+                renderFn(students, container.id, options);
+            }
+        });
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 }
 
 function bindGlobalActions() {
