@@ -768,10 +768,10 @@ var CIF_RADAR_COLORS = [
 function getRadarThemeColors() {
     var isDark = document.body.classList.contains('theme-dark');
     return {
-        textColor: isDark ? '#e8eaed' : '#202124',
-        gridColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)',
-        angleColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.14)',
-        tickColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
+        textColor: isDark ? '#e8eaed' : '#0d0d0d',
+        gridColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.25)',
+        angleColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.18)',
+        tickColor: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'
     };
 }
 
