@@ -361,16 +361,14 @@ function renderConditionDetail() {
         return;
     }
 
-    var radarContainers = [];
-    var profilesHtml = students.map(function(student, sIdx) {
-        var radarId = 'cif-radar-detail-' + sIdx;
-        var studentChartHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>';
-        radarContainers.push({ id: radarId, student: student });
+    var radarId = 'cif-radar-detail';
+    var profilesHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' +
+    students.map(function(student) {
         var group = {
             conditions: student.conditions,
             students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
         };
-        try { return studentChartHtml + renderProfileGroup(group); } catch (e) { return ''; }
+        try { return renderProfileGroup(group); } catch (e) { return ''; }
     }).join('');
 
     var conditionNames = componentKeys.map(function(k) {
@@ -387,9 +385,7 @@ function renderConditionDetail() {
         '</div>' +
         profilesHtml;
 
-    radarContainers.forEach(function(rc) {
-        renderCIFRadarChart([rc.student], rc.id, { height: '380px' });
-    });
+    renderCIFRadarChart(students, radarId, { height: '380px' });
 }
 
 function getStudentMatrixProfile(studentIndex) {
@@ -461,32 +457,32 @@ function renderSelectedSupportRecommendations() {
         ? 'Estas orientaciones combinan condiciones seleccionadas y evitan duplicar apoyos. Úsalas como referencia inicial mientras identificas barreras concretas.'
         : 'Estas orientaciones sirven como referencia cuando no hay ficha disponible. La decisión final debe ajustarse a la barrera observada y al diálogo con el estudiante.';
 
-    var radarContainers = [];
+    var radarId = 'cif-radar-results';
+    var showRadar = false;
     var profilesHtml = '';
     try {
-        profilesHtml = students.map(function(student, sIdx) {
-            var radarId = 'cif-radar-results-' + sIdx;
+        profilesHtml = students.map(function(student) {
             var studentChartHtml = '';
             try {
                 var card = document.querySelector('#support-students-medical .support-student-card[data-student-index="' + student.cardIndex + '"]');
                 var showChart = card ? (card.querySelector('.show-in-chart')?.checked ?? false) : true;
-                if (showChart) {
-                    studentChartHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>';
-                    radarContainers.push({ id: radarId, student: student });
-                }
+                if (showChart) showRadar = true;
             } catch (e) {
                 console.error('Error preparando radar:', e.message);
-                studentChartHtml = '<p style="color:red">Error en gráfico: ' + e.message + '</p>';
             }
             var group = {
                 conditions: student.conditions,
                 students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
             };
-            try { return studentChartHtml + renderProfileGroup(group); } catch (e) { return '<p style="color:red">Error en recomendaciones: ' + e.message + '</p>'; }
+            try { return (showRadar && !studentChartHtml ? '' : studentChartHtml) + renderProfileGroup(group); } catch (e) { return '<p style="color:red">Error en recomendaciones: ' + e.message + '</p>'; }
         }).join('');
     } catch (e) {
         console.error('Error general en profiles:', e.message);
         profilesHtml = '<p style="color:red">Error en recomendaciones: ' + e.message + '</p>';
+    }
+
+    if (showRadar) {
+        profilesHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + profilesHtml;
     }
 
     results.innerHTML =
@@ -498,9 +494,9 @@ function renderSelectedSupportRecommendations() {
             '</div>' +
         '</div>' +
         profilesHtml;
-    radarContainers.forEach(function(rc) {
-        renderCIFRadarChart([rc.student], rc.id, { height: '380px' });
-    });
+    if (showRadar) {
+        renderCIFRadarChart(students, radarId, { height: '380px' });
+    }
     bindRecommendationEditing();
     bindManualRecommendationEditing();
     bindAdvisorCommentFields();
@@ -539,14 +535,12 @@ function renderSocialResults() {
 
     results.classList.remove('hidden');
 
-    var radarContainers = [];
+    var matrixStudents = [];
     var recsHtml = students.map(function(student, sIdx) {
         var label = student.name || ('Estudiante ' + student.cardIndex);
 
         if (student.hasMatrix) {
-            var radarId = 'cif-radar-social-' + sIdx;
-            var studentChartHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>';
-            radarContainers.push({ id: radarId, student: student });
+            matrixStudents.push(student);
             var barrierRecs = getBarrierBasedRecommendations(student.matrixScores, student.conditionKeys || []);
 
             if (!barrierRecs.length) {
@@ -591,7 +585,6 @@ function renderSocialResults() {
                 '<h3>' + label + '</h3>' +
                 '<p><strong>Filtro de pertinencia:</strong> ' + conditionText + '. Las recomendaciones se agrupan en las mismas dimensiones del mapa de barreras.</p>' +
                 '</div></div>' +
-                studentChartHtml +
                 '<div class="support-grid">' + itemsHtml + '</div>' +
                 '</article>';
         }
@@ -615,6 +608,11 @@ function renderSocialResults() {
         }
     }).join('');
 
+    if (matrixStudents.length) {
+        var radarId = 'cif-radar-social';
+        recsHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + recsHtml;
+    }
+
     var headerPill = hasMatrixData ? 'Resultados de la matriz' : 'Consultor por condici\u00f3n';
     var headerTitle = hasMatrixData
         ? 'Recomendaciones por actividad y dimensi\u00f3n'
@@ -632,9 +630,9 @@ function renderSocialResults() {
             '</div>' +
         '</div>' +
         recsHtml;
-    radarContainers.forEach(function(rc) {
-        renderCIFRadarChart([rc.student], rc.id, { height: '380px' });
-    });
+    if (matrixStudents.length) {
+        renderCIFRadarChart(matrixStudents, 'cif-radar-social', { height: '380px' });
+    }
     bindBarrierMapToggles();
     bindRecommendationEditing();
     bindManualRecommendationEditing();
