@@ -769,9 +769,9 @@ function getRadarThemeColors() {
     var isDark = document.body.classList.contains('theme-dark');
     return {
         textColor: isDark ? '#e8eaed' : '#202124',
-        gridColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)',
-        angleColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
-        tickColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'
+        gridColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)',
+        angleColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.14)',
+        tickColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
     };
 }
 
@@ -791,7 +791,7 @@ function getCIFRadarDataset(student, index) {
     if (hasMatrix) {
         data = window.UiePlannerData.accessMatrixActivities.map(function(act) {
             var score = Number(matrixScores[act.id] || 0);
-            return score;
+            return score > 0 ? 4 - score : 0;
         });
     } else {
         var condKeys = student.conditions.map(function(c) { return c.key; });
@@ -815,7 +815,7 @@ function getCIFRadarDataset(student, index) {
         backgroundColor: 'transparent',
         borderWidth: 3,
         pointBackgroundColor: color.border,
-        pointBorderColor: '#fff',
+        pointBorderColor: color.border,
         pointBorderWidth: 1.5,
         pointRadius: 3.5,
         pointHoverRadius: 6,
@@ -882,12 +882,16 @@ function renderCIFRadarChart(students, containerId, options) {
                 scales: {
                     r: {
                         min: 0,
-                        max: 4,
+                        max: 3,
                         ticks: {
                             stepSize: 1,
                             font: { size: 10 },
                             color: theme.tickColor,
-                            backdropColor: 'transparent'
+                            backdropColor: 'transparent',
+                            callback: function(value) {
+                                var labels = { 0: 'Sin ajuste', 1: 'Menor', 2: 'Moderado', 3: 'Prioritario' };
+                                return labels[value] || value;
+                            }
                         },
                         pointLabels: {
                             font: { size: 11, weight: '600' },
@@ -917,8 +921,9 @@ function renderCIFRadarChart(students, containerId, options) {
                             label: function(context) {
                                 var label = context.dataset.label || '';
                                 var val = context.raw;
-                                var scoreLabel = val === 4 ? 'Perfecta' : val === 3 ? 'Buena' : val === 2 ? 'Parcial' : val === 1 ? 'Incompatible' : 'Sin dato';
-                                return label + ': ' + val + ' (' + scoreLabel + ')';
+                                var adjLabel = val === 3 ? 'Ajuste prioritario' : val === 2 ? 'Ajuste moderado' : val === 1 ? 'Ajuste menor' : 'Sin ajuste necesario';
+                                var cifOriginal = val === 3 ? 'CIF: Incompatible' : val === 2 ? 'CIF: Parcial' : val === 1 ? 'CIF: Buena' : 'CIF: Perfecta / Sin dato';
+                                return label + ': ' + adjLabel + ' (' + cifOriginal + ')';
                             }
                         }
                     }
