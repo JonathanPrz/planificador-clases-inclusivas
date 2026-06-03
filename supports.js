@@ -452,7 +452,7 @@ function renderSelectedSupportRecommendations() {
         return !!getStudentMatrixProfile(student.cardIndex);
     });
     var descriptionText = hasMatrixApplied
-        ? 'Revisa los apoyos por dimension institucional. El semaforo indica prioridad por recomendacion y las consultas rapidas documentan informacion pendiente.'
+        ? 'El radar compara el nivel de ajuste necesario por actividad CIF entre todos los estudiantes. Cada anillo concéntrico representa un nivel: 0 = Sin ajuste, 1 = Menor, 2 = Moderado, 3 = Prioritario. Haz clic en la leyenda para ocultar/mostrar a cada estudiante.'
         : hasMultiple
         ? 'Estas orientaciones combinan condiciones seleccionadas y evitan duplicar apoyos. Úsalas como referencia inicial mientras identificas barreras concretas.'
         : 'Estas orientaciones sirven como referencia cuando no hay ficha disponible. La decisión final debe ajustarse a la barrera observada y al diálogo con el estudiante.';
@@ -488,8 +488,8 @@ function renderSelectedSupportRecommendations() {
     results.innerHTML =
         '<div class="results-title-header">' +
             '<div>' +
-                '<span class="source-pill">' + (hasMatrixApplied ? 'Matriz CIF aplicada' : 'Consultor por condición') + '</span>' +
-                '<h3>' + (hasMatrixApplied ? 'Apoyos sugeridos por dimension' : 'Orientaciones iniciales para observar barreras') + '</h3>' +
+                '<span class="source-pill">' + (hasMatrixApplied ? 'Perfil CIF / Radar de apoyos' : 'Consultor por condición') + '</span>' +
+                '<h3>' + (hasMatrixApplied ? 'Resumen de requerimientos CIF' : 'Orientaciones iniciales para observar barreras') + '</h3>' +
                 '<p>' + descriptionText + '</p>' +
             '</div>' +
         '</div>' +
@@ -613,12 +613,12 @@ function renderSocialResults() {
         recsHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + recsHtml;
     }
 
-    var headerPill = hasMatrixData ? 'Resultados de la matriz' : 'Consultor por condici\u00f3n';
+    var headerPill = hasMatrixData ? 'Perfil CIF / Radar de apoyos' : 'Consultor por condici\u00f3n';
     var headerTitle = hasMatrixData
-        ? 'Recomendaciones por actividad y dimensi\u00f3n'
+        ? 'Resumen de requerimientos CIF'
         : 'Orientaciones iniciales para observar barreras';
     var headerDesc = hasMatrixData
-        ? 'La matriz define el requerimiento; la condici\u00f3n solo filtra pertinencia.'
+        ? 'El radar compara el nivel de ajuste necesario por actividad CIF. Cada anillo concéntrico representa un nivel: 0 = Sin ajuste, 1 = Menor, 2 = Moderado, 3 = Prioritario.'
         : 'Revisa cada categor\u00eda como referencia inicial mientras identificas barreras concretas.';
 
     results.innerHTML =
