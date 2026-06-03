@@ -452,7 +452,7 @@ function renderSelectedSupportRecommendations() {
         return !!getStudentMatrixProfile(student.cardIndex);
     });
     var descriptionText = hasMatrixApplied
-        ? 'El radar compara el nivel de ajuste necesario por actividad CIF entre todos los estudiantes. Cada anillo concéntrico representa un nivel: 0 = Sin ajuste, 1 = Menor, 2 = Moderado, 3 = Prioritario. Haz clic en la leyenda para ocultar/mostrar a cada estudiante.'
+        ? 'Perfil comparado de requerimientos CIF entre los estudiantes. Las recomendaciones específicas están más abajo, agrupadas por estudiante.'
         : hasMultiple
         ? 'Estas orientaciones combinan condiciones seleccionadas y evitan duplicar apoyos. Úsalas como referencia inicial mientras identificas barreras concretas.'
         : 'Estas orientaciones sirven como referencia cuando no hay ficha disponible. La decisión final debe ajustarse a la barrera observada y al diálogo con el estudiante.';
@@ -485,15 +485,11 @@ function renderSelectedSupportRecommendations() {
         profilesHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + profilesHtml;
     }
 
-    results.innerHTML =
-        '<div class="results-title-header">' +
-            '<div>' +
-                '<span class="source-pill">' + (hasMatrixApplied ? 'Perfil CIF / Radar de apoyos' : 'Consultor por condición') + '</span>' +
-                '<h3>' + (hasMatrixApplied ? 'Resumen de requerimientos CIF' : 'Orientaciones iniciales para observar barreras') + '</h3>' +
-                '<p>' + descriptionText + '</p>' +
-            '</div>' +
-        '</div>' +
-        profilesHtml;
+    var headerHtml = hasMatrixApplied
+        ? '<div class="results-title-header"><div><span class="source-pill">Perfil CIF</span><p>' + descriptionText + '</p></div></div>'
+        : '<div class="results-title-header"><div><span class="source-pill">Consultor por condici\u00f3n</span><h3>Orientaciones iniciales para observar barreras</h3><p>' + descriptionText + '</p></div></div>';
+
+    results.innerHTML = headerHtml + profilesHtml;
     if (showRadar) {
         renderCIFRadarChart(students, radarId, { height: '380px' });
     }
@@ -613,23 +609,11 @@ function renderSocialResults() {
         recsHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + recsHtml;
     }
 
-    var headerPill = hasMatrixData ? 'Perfil CIF / Radar de apoyos' : 'Consultor por condici\u00f3n';
-    var headerTitle = hasMatrixData
-        ? 'Resumen de requerimientos CIF'
-        : 'Orientaciones iniciales para observar barreras';
-    var headerDesc = hasMatrixData
-        ? 'El radar compara el nivel de ajuste necesario por actividad CIF. Cada anillo concéntrico representa un nivel: 0 = Sin ajuste, 1 = Menor, 2 = Moderado, 3 = Prioritario.'
-        : 'Revisa cada categor\u00eda como referencia inicial mientras identificas barreras concretas.';
+    var headerHtml = hasMatrixData
+        ? '<div class="results-title-header results-toolbar"><div><span class="source-pill">Perfil CIF</span><p>Perfil comparado de requerimientos CIF entre los estudiantes. Las recomendaciones específicas están más abajo, agrupadas por estudiante.</p></div></div>'
+        : '<div class="results-title-header results-toolbar"><div><span class="source-pill">Consultor por condici\u00f3n</span><h3>Orientaciones iniciales para observar barreras</h3><p>Revisa cada categor\u00eda como referencia inicial mientras identificas barreras concretas.</p></div></div>';
 
-    results.innerHTML =
-        '<div class="results-title-header results-toolbar">' +
-            '<div>' +
-                '<span class="source-pill">' + headerPill + '</span>' +
-                '<h3>' + headerTitle + '</h3>' +
-                '<p>' + headerDesc + '</p>' +
-            '</div>' +
-        '</div>' +
-        recsHtml;
+    results.innerHTML = headerHtml + recsHtml;
     if (matrixStudents.length) {
         renderCIFRadarChart(matrixStudents, 'cif-radar-social', { height: '380px' });
     }
