@@ -62,12 +62,6 @@ function getSemaforo(activities, studentScores) {
     return minScore < 4 ? minScore : null;
 }
 
-function getSemaforoBadge(level, cat) {
-    if (!level || !prioridadLabels[level]) return '';
-    var p = prioridadLabels[level];
-    return ' <span class="semaforo-badge semaforo-' + level + '">' + p.icon + ' ' + p.label + '</span>';
-}
-
 // MERGE GUIDE: When adding new recommendations in data.js, check if they overlap
 // with existing merge groups below. If they do, add the text to the relevant group's
 // `texts` array and adjust `mergedText` to reflect the broader reason.
@@ -166,7 +160,7 @@ function setEditingMode(enabled) {
     renderSelectedSupportRecommendations();
 }
 
-function switchMode(mode) {
+function _unused_switchMode(mode) {
     currentMode = mode;
     var selector = document.getElementById('mode-selector');
     var panelMedical = document.getElementById('panel-medical');
@@ -191,43 +185,18 @@ function switchMode(mode) {
         renderMedicalStudents(renderSelectedSupportRecommendations);
         initConditionPillsMedical();
     } else if (mode === 'social') {
-        renderSocialStudents(renderSelectedSupportRecommendations);
+        _unused_renderSocialStudents(renderSelectedSupportRecommendations);
     }
 }
 
 function initModeSelector() {
-    var btnMedical = document.getElementById('btn-mode-medical');
-    var btnSocial = document.getElementById('btn-mode-social');
-    var btnSwitchSocial = document.getElementById('btn-switch-social');
-    var btnSwitchMedical = document.getElementById('btn-switch-medical');
     var genMedical = document.getElementById('btn-generate-plan-medical');
-    var genSocial = document.getElementById('btn-generate-plan-social');
     var editToggle = document.getElementById('btn-toggle-editing-mode');
 
-    if (btnMedical && btnMedical.dataset.boundMode !== 'true') {
-        btnMedical.addEventListener('click', function() { switchMode('medical'); });
-        btnMedical.setAttribute('data-bound-mode', 'true');
-    }
-    if (btnSocial && btnSocial.dataset.boundMode !== 'true') {
-        btnSocial.addEventListener('click', function() { switchMode('social'); });
-        btnSocial.setAttribute('data-bound-mode', 'true');
-    }
-    if (btnSwitchSocial && btnSwitchSocial.dataset.boundMode !== 'true') {
-        btnSwitchSocial.addEventListener('click', function() { switchMode('social'); });
-        btnSwitchSocial.setAttribute('data-bound-mode', 'true');
-    }
-    if (btnSwitchMedical && btnSwitchMedical.dataset.boundMode !== 'true') {
-        btnSwitchMedical.addEventListener('click', function() { switchMode('medical'); });
-        btnSwitchMedical.setAttribute('data-bound-mode', 'true');
-    }
     if (genMedical && genMedical.dataset.boundGen !== 'true') {
         genMedical.addEventListener('click', function() { openPlanModal(); });
         genMedical.setAttribute('data-bound-gen', 'true');
         genMedical.style.display = '';
-    }
-    if (genSocial && genSocial.dataset.boundGen !== 'true') {
-        genSocial.addEventListener('click', function() { openPlanModal(); });
-        genSocial.setAttribute('data-bound-gen', 'true');
     }
     if (editToggle && editToggle.dataset.boundEdit !== 'true') {
         editToggle.addEventListener('click', function() { setEditingMode(!editingMode); });
@@ -237,19 +206,6 @@ function initModeSelector() {
 }
 
 const conditionGridOrder = ['autismo', 'intelectual', 'sordoceguera', 'fisica', 'visual', 'auditiva', 'visceral', 'psiquica', 'vestibular', 'tactil', 'multiple'];
-
-function getConditionImpact(key) {
-    var profile = barrierProfiles[key];
-    if (!profile) return 0;
-    return profile.context + profile.materials + profile.methods + profile.interaction + profile.evaluacion + profile.tech;
-}
-
-function countConditionRecommendations(key) {
-    var data = accommodationsData[key];
-    if (!data) return 0;
-    return (data.context || []).length + (data.materials || []).length + (data.methods || []).length +
-           (data.interaction || []).length + (data.evaluacion || []).length + (data.tech || []).length;
-}
 
 function getSelectedConditionKeys() {
     return selectedConditionKeys.slice();
@@ -403,17 +359,6 @@ function getStudentMatrixScores(studentIndex) {
     return entry ? entry.scores || {} : {};
 }
 
-function getEmptyMatrixMessage(scores) {
-    var values = Object.values(scores || {}).map(function(value) { return Number(value || 0); }).filter(function(value) { return value > 0; });
-    if (!values.length) {
-        return 'Aun no hay puntajes de matriz para generar apoyos automaticos.';
-    }
-    if (values.every(function(value) { return value === 4; })) {
-        return 'No hay apoyos automaticos para mostrar: todos los puntajes registrados son 4, por lo que no se detectan barreras en la matriz.';
-    }
-    return 'No hay apoyos automaticos para mostrar. Revisa que la condicion seleccionada sea pertinente o usa "Precisar barrera" cuando falte informacion del caso.';
-}
-
 function hasEnteredMatrixScores(studentIndex) {
     return Object.values(readStudentMatrixScores(studentIndex)).some(function(value) {
         return Number(value || 0) > 0;
@@ -430,11 +375,6 @@ function renderSelectedSupportRecommendations() {
     var results = document.getElementById('support-results');
     if (!results) return;
     var layout = document.querySelector('.support-layout');
-
-    if (currentMode === 'social') {
-        renderSocialResults();
-        return;
-    }
 
     var students = getSelectedSupportStudentGroups();
 
@@ -487,7 +427,7 @@ function renderSelectedSupportRecommendations() {
     bindClarificationButtons();
 }
 
-function renderSocialResults() {
+function _unused_renderSocialResults() {
     var results = document.getElementById('support-results');
     if (!results) return;
 
@@ -506,8 +446,8 @@ function renderSocialResults() {
             label: name || ('Estudiante ' + idx),
             cardIndex: Number(idx),
             name: name,
-            conditionKeys: mData ? mData.conditionKeys || readSocialConditionKeys(idx) : readSocialConditionKeys(idx),
-            conditions: (mData ? mData.conditionKeys || readSocialConditionKeys(idx) : readSocialConditionKeys(idx)).map(function(key) {
+            conditionKeys: mData ? mData.conditionKeys || _unused_readSocialConditionKeys(idx) : _unused_readSocialConditionKeys(idx),
+            conditions: (mData ? mData.conditionKeys || _unused_readSocialConditionKeys(idx) : _unused_readSocialConditionKeys(idx)).map(function(key) {
                 var data = accommodationsData[key];
                 return data ? { key: key, name: data.name, source: data.source } : null;
             }).filter(Boolean),
@@ -709,7 +649,7 @@ function renderCIFBarChart(students, options) {
         '</div>';
 }
 
-function bindCIFBarToggles() {
+function _unused_bindCIFBarToggles() {
     document.querySelectorAll('.cif-bar-toggle:not([data-bound])').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var panel = btn.closest('.barrier-map-panel');
@@ -978,13 +918,6 @@ function mergeConditionProfiles(conditionKeys) {
     }, {});
 }
 
-function formatStudentConditionLabel(student) {
-    const names = student.conditions.map(condition => condition.name).filter(Boolean);
-    if (!names.length) return 'Sin condición seleccionada';
-    if (names.length === 1) return names[0];
-    return `Múltiples (${names.join(', ')})`;
-}
-
 function supportRecommendationGroup(grouped) {
     const data = grouped.condition;
     const studentNames = grouped.students.map(student => formatStudentLabel(student)).join(', ');
@@ -1166,7 +1099,7 @@ function renderMedicalStudents(onStudentChange) {
     });
 }
 
-function renderSocialStudents(onStudentChange) {
+function _unused_renderSocialStudents(onStudentChange) {
     var container = document.getElementById('support-students-social');
     var addBtn = document.getElementById('add-student-btn-social');
     if (!container) return;
@@ -1226,7 +1159,7 @@ function renderSocialStudents(onStudentChange) {
                     if (!wasActive) pill.classList.add('active');
                 }
 
-                updateSocialConditionSummary(studentIndex);
+                _unused_updateSocialConditionSummary(studentIndex);
                 if (matrixData[studentIndex] && matrixData[studentIndex].applied) {
                     renderSelectedSupportRecommendations();
                 }
@@ -1236,7 +1169,7 @@ function renderSocialStudents(onStudentChange) {
         card.querySelectorAll('input[type="radio"][name^="social-matrix"]').forEach(function(radio) {
             radio.addEventListener('change', function() {
                 updateStudentMatrixBadge(studentIndex);
-                if (readSocialConditionKeys(studentIndex).length) {
+                if (_unused_readSocialConditionKeys(studentIndex).length) {
                     applyStudentMatrix(studentIndex);
                 }
             });
@@ -1249,31 +1182,27 @@ function renderSocialStudents(onStudentChange) {
 
         var removeBtn = card.querySelector('.btn-remove-student');
         if (removeBtn) {
-            removeBtn.addEventListener('click', function() { removeLastSocialStudent(onStudentChange); });
+            removeBtn.addEventListener('click', function() { _unused_removeLastSocialStudent(onStudentChange); });
         }
 
         card.setAttribute('data-events-bound', '');
     });
 
     if (addBtn && addBtn.dataset.boundSocial !== 'true') {
-        addBtn.addEventListener('click', function() { addSocialStudentCard(onStudentChange); });
+        addBtn.addEventListener('click', function() { _unused_addSocialStudentCard(onStudentChange); });
         addBtn.setAttribute('data-bound-social', 'true');
     }
 
-    updateSocialRemoveButtons();
-    updateSocialAddButton();
-    updateSocialMatrixSummaries();
+    _unused_updateSocialRemoveButtons();
+    _unused_updateSocialAddButton();
+    _unused_updateSocialMatrixSummaries();
     container.querySelectorAll('.support-student-card').forEach(function(card) {
-        updateSocialConditionSummary(card.getAttribute('data-student-index'));
+        _unused_updateSocialConditionSummary(card.getAttribute('data-student-index'));
     });
 }
 
 function renderSupportStudents(onStudentChange) {
-    if (currentMode === 'medical') {
-        renderMedicalStudents(onStudentChange || renderSelectedSupportRecommendations);
-    } else if (currentMode === 'social') {
-        renderSocialStudents(onStudentChange || renderSelectedSupportRecommendations);
-    }
+    renderMedicalStudents(onStudentChange || renderSelectedSupportRecommendations);
 }
 
 function getConditionFilterButtons(className) {
@@ -1289,7 +1218,7 @@ function getConditionFilterButtons(className) {
     }).join('');
 }
 
-function readSocialConditionKeys(studentIndex) {
+function _unused_readSocialConditionKeys(studentIndex) {
     var card = document.querySelector('#support-students-social .support-student-card[data-student-index="' + studentIndex + '"]');
     if (!card) return [];
     return Array.from(card.querySelectorAll('.social-condition-pill.active')).map(function(pill) {
@@ -1297,11 +1226,11 @@ function readSocialConditionKeys(studentIndex) {
     }).filter(function(key) { return key && key !== 'multiple'; });
 }
 
-function updateSocialConditionSummary(studentIndex) {
+function _unused_updateSocialConditionSummary(studentIndex) {
     var card = document.querySelector('#support-students-social .support-student-card[data-student-index="' + studentIndex + '"]');
     if (!card) return;
     var note = card.querySelector('.social-condition-summary');
-    var keys = readSocialConditionKeys(studentIndex);
+    var keys = _unused_readSocialConditionKeys(studentIndex);
     if (note) {
         note.textContent = keys.length
             ? 'Filtro activo: ' + keys.map(function(key) { return shortConditionNames[key] || key; }).join(', ')
@@ -1421,7 +1350,7 @@ function createMedicalStudentCard(studentIndex) {
     return wrapper;
 }
 
-function createSocialStudentCard(studentIndex) {
+function _unused_createSocialStudentCard(studentIndex) {
     var wrapper = document.createElement('article');
     wrapper.className = 'support-student-card';
     wrapper.setAttribute('data-student-index', String(studentIndex));
@@ -1485,13 +1414,13 @@ function addMedicalStudentCard(onStudentChange) {
     renderMedicalStudents(onStudentChange);
 }
 
-function addSocialStudentCard(onStudentChange) {
+function _unused_addSocialStudentCard(onStudentChange) {
     var container = document.getElementById('support-students-social');
     if (!container) return;
     var count = Number(container.getAttribute('data-student-count')) || 1;
     if (count >= 8) return;
     container.setAttribute('data-student-count', String(count + 1));
-    renderSocialStudents(onStudentChange);
+    _unused_renderSocialStudents(onStudentChange);
 }
 
 function removeLastMedicalStudent(onStudentChange) {
@@ -1508,7 +1437,7 @@ function removeLastMedicalStudent(onStudentChange) {
     if (typeof onStudentChange === 'function') onStudentChange();
 }
 
-function removeLastSocialStudent(onStudentChange) {
+function _unused_removeLastSocialStudent(onStudentChange) {
     var container = document.getElementById('support-students-social');
     if (!container) return;
     var count = Number(container.getAttribute('data-student-count')) || 1;
@@ -1520,9 +1449,9 @@ function removeLastSocialStudent(onStudentChange) {
         cards[cards.length - 1].remove();
     }
     container.setAttribute('data-student-count', String(count - 1));
-    updateSocialRemoveButtons();
-    updateSocialAddButton();
-    updateSocialMatrixSummaries();
+    _unused_updateSocialRemoveButtons();
+    _unused_updateSocialAddButton();
+    _unused_updateSocialMatrixSummaries();
     if (typeof onStudentChange === 'function') onStudentChange();
 }
 
@@ -1539,7 +1468,7 @@ function updateMedicalAddButton() {
     addBtn.style.display = hasCondition ? '' : 'none';
 }
 
-function updateSocialAddButton() {
+function _unused_updateSocialAddButton() {
     var addBtn = document.getElementById('add-student-btn-social');
     var container = document.getElementById('support-students-social');
     if (!addBtn || !container) return;
@@ -1564,7 +1493,7 @@ function updateMedicalRemoveButtons() {
     });
 }
 
-function updateSocialRemoveButtons() {
+function _unused_updateSocialRemoveButtons() {
     var container = document.getElementById('support-students-social');
     if (!container) return;
     var cards = container.querySelectorAll('.support-student-card');
@@ -1602,7 +1531,7 @@ function updateMedicalConditionSummaries() {
     });
 }
 
-function updateSocialMatrixSummaries() {
+function _unused_updateSocialMatrixSummaries() {
     document.querySelectorAll('#support-students-social .support-student-card').forEach(function(card) {
         var idx = card.getAttribute('data-student-index');
         updateStudentMatrixBadge(idx);
@@ -1629,7 +1558,7 @@ function updateStudentStatusBadgeForContainer(containerId, idx, conditions) {
     }
 }
 
-function renderReferenceCatalog() {
+function _unused_renderReferenceCatalog() {
     var conditionKeys = Object.keys(accommodationsData);
 
     var items = conditionKeys.map(function(key) {
@@ -2612,7 +2541,7 @@ function computeProfileFromPrioritizedRecommendations(items) {
     }, {});
 }
 
-function computeWeightedMatrixProfile(scores, conditionKeys) {
+function _unused_computeWeightedMatrixProfile(scores, conditionKeys) {
     var activities = window.UiePlannerData.accessMatrixActivities;
     var filterKeys = (conditionKeys || []).filter(function(key) { return accommodationsData[key]; });
     var evidence = {};
@@ -2663,7 +2592,7 @@ function computeWeightedMatrixProfile(scores, conditionKeys) {
     }, {});
 }
 
-function computeRadarProfile(scores) {
+function _unused_computeRadarProfile(scores) {
     var activities = window.UiePlannerData.accessMatrixActivities;
     var dims = { context: [], materials: [], methods: [], interaction: [], evaluacion: [], tech: [] };
 
@@ -2688,7 +2617,6 @@ function applyStudentMatrix(studentIndex) {
     var scored = Object.values(scores).filter(function(v) { return v > 0; });
     if (!scored.length) return;
     var conditionKeys = readMedicalConditionKeys(studentIndex);
-    if (!conditionKeys.length) conditionKeys = readSocialConditionKeys(studentIndex);
     if (!conditionKeys.length) {
         alert('Selecciona la condición registrada en la ficha antes de identificar barreras. Esto evita sugerir apoyos que no corresponden.');
         return;
@@ -2710,11 +2638,7 @@ function applyStudentMatrix(studentIndex) {
     if (card) card.setAttribute('data-assessment-source', 'matrix');
 
     updateStudentMatrixBadge(studentIndex);
-    updateSocialConditionSummary(studentIndex);
     updateMedicalConditionSummaries();
-    updateStudentStatusBadgeForContainer('support-students-social', studentIndex, null);
-    updateSocialAddButton();
-    updateSocialRemoveButtons();
     updateMedicalAddButton();
     updateMedicalRemoveButtons();
     renderSelectedSupportRecommendations();
@@ -2880,7 +2804,7 @@ function collectMedicalStudents() {
     return students;
 }
 
-function collectSocialStudents() {
+function _unused_collectSocialStudents() {
     var students = [];
     var cards = document.querySelectorAll('#support-students-social .support-student-card');
 
@@ -2890,7 +2814,7 @@ function collectSocialStudents() {
 
         var hasMatrix = matrixData[studentIndex] && matrixData[studentIndex].applied;
         var matrixScores = hasMatrix ? matrixData[studentIndex].scores : {};
-        var conditionKeys = hasMatrix ? (matrixData[studentIndex].conditionKeys || readSocialConditionKeys(studentIndex)) : readSocialConditionKeys(studentIndex);
+        var conditionKeys = hasMatrix ? (matrixData[studentIndex].conditionKeys || _unused_readSocialConditionKeys(studentIndex)) : _unused_readSocialConditionKeys(studentIndex);
         var hasScores = hasMatrix && Object.values(matrixScores).filter(function(v) { return v > 0; }).length > 0;
 
         if (!hasScores) return;
@@ -3009,7 +2933,6 @@ function generatePlanPDF() {
         return;
     }
 
-    var includeDua = document.getElementById('plan-include-dua')?.checked || false;
     var includeCharts = document.getElementById('plan-include-charts')?.checked || false;
 
     if (includeCharts) {
@@ -3023,33 +2946,31 @@ function generatePlanPDF() {
         }
     }
 
-    imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
-        var docDef;
-        try {
-            docDef = buildPlanPDFDocument(students, includeDua, includeCharts);
-            var headerContent = buildPdfHeader(logoBase64);
-            docDef.content = headerContent.concat(docDef.content);
-        } catch (e) {
-            console.error('Error construyendo documento PDF:', e);
-            alert('Error al construir el documento: ' + e.message);
-            return;
-        }
+    var docDef;
+    try {
+        docDef = buildPlanPDFDocument(students, false, includeCharts);
+        var headerContent = buildPdfHeader();
+        docDef.content = headerContent.concat(docDef.content);
+    } catch (e) {
+        console.error('Error construyendo documento PDF:', e);
+        alert('Error al construir el documento: ' + e.message);
+        return;
+    }
 
-        if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
-            alert('Librería PDF no disponible. Recarga la página.');
-            return;
-        }
-        try {
-            var filename = 'plan-de-apoyo-por-condicion.pdf';
-            window.pdfMake.createPdf(docDef).download(filename);
-        } catch (e) {
-            console.error('Error generando PDF:', e);
-            alert('Error al generar el PDF: ' + e.message);
-        }
-    });
+    if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
+        alert('Librería PDF no disponible. Recarga la página.');
+        return;
+    }
+    var filename = 'plan-de-apoyo-por-condicion.pdf';
+    try {
+        window.pdfMake.createPdf(docDef).download(filename);
+    } catch(e) {
+        console.error('Error generando PDF:', e);
+        alert('Error al generar el PDF: ' + e.message);
+    }
 }
 
-function renderStudentBarChartCanvas(student, label) {
+function _unused_renderStudentBarChartCanvas(student, label) {
     var activities = window.UiePlannerData.accessMatrixActivities;
     var studentIndex = student.cardIndex || student.index || 1;
     var matrixScores = getStudentMatrixScores(studentIndex);
@@ -3171,11 +3092,11 @@ function renderPdfCIFRadarChartCanvas(students) {
     var activities = window.UiePlannerData.accessMatrixActivities;
     if (!activities || !students || !students.length || activities.length < 3) return '';
 
-    var W = 340, H = 350, CX = 170, CY = 140, MAX_R = 110;
+    var W = 320, H = 315, CX = 160, CY = 122, MAX_R = 94;
     var n = activities.length;
     var maxStudents = Math.min(students.length, 4);
 
-    var scale = 2;
+    var scale = 3;
     var canvas = document.createElement('canvas');
     canvas.width = W * scale;
     canvas.height = H * scale;
@@ -3293,7 +3214,7 @@ function renderPdfCIFRadarChartCanvas(students) {
     }
 
     // Bottom legend
-    var ly = 302;
+    var ly = 258;
     ctx.font = '10px Arial';
     ctx.textBaseline = 'top';
     ctx.textAlign = 'center';
@@ -3310,7 +3231,7 @@ function renderPdfCIFRadarChartCanvas(students) {
     }
 
     // Severity level legend
-    var ly2 = ly + 24;
+    var ly2 = ly + 22;
     ctx.font = '9px Arial';
     ctx.textBaseline = 'top';
     var levelColors = ['#9aa0a6', '#34a853', '#fbbc04', '#ea4335'];
@@ -3355,11 +3276,11 @@ function renderPdfCIFChart(students) {
     if (!radarResult) return [];
     var radarDataUrl = radarResult.dataUrl;
     var cw = radarResult.width;
-    var pdfWidth = Math.min(cw, 360);
+    var pdfWidth = Math.min(cw, 285);
 
     return [
-        { text: 'Perfil CIF — Radar de ajustes', style: 'subSectionTitle' },
-        { image: radarDataUrl, width: pdfWidth, alignment: 'center', margin: [0, 2, 0, 6] },
+        { text: 'Mapa de énfasis de apoyo', style: 'subSectionTitle' },
+        { image: radarDataUrl, width: pdfWidth, alignment: 'center', margin: [0, 2, 0, 4] },
         { text: '' }
     ];
 }
@@ -3380,42 +3301,68 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
         paddingBottom: function() { return 1.5; }
     };
     var isSocial = students.length > 0 && students[0].mode === 'social';
-    var modeTitle = isSocial ? 'Plan de apoyo docente — Ficha o matriz de acceso' : 'Plan de apoyo docente — Consultor por condición';
+    var modeTitle = 'Ficha docente de apoyos y adecuaciones de acceso';
+    var conditionNames = [];
+    var matrixCount = 0;
+
+    students.forEach(function(student) {
+        if (student.conditions && student.conditions.length) {
+            student.conditions.forEach(function(condition) {
+                if (conditionNames.indexOf(condition.name) === -1) conditionNames.push(condition.name);
+            });
+        }
+        var scores = student.matrixScores || getStudentMatrixScores(student.cardIndex || student.index || 1);
+        if (scores && Object.values(scores).some(function(value) { return Number(value || 0) > 0; })) {
+            matrixCount++;
+        }
+    });
 
     content.push({ text: modeTitle, style: 'mainTitle' });
     content.push({ text: 'Documento orientativo para acordar una base DUA de clase y adecuaciones curriculares de acceso.', style: 'introText' });
 
-    if (isSocial) {
-        content.push({ text: 'Este plan se generó desde el modelo social CIF/OMS, alineado con la Guía de Adecuaciones Curriculares de Acceso de Duoc UC. La discapacidad no está en la persona, sino en las barreras del entorno. Los datos de la matriz deben ser extraídos de la ficha del estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 4, 0, 10] });
+    content.push({ text: '1. Base DUA para la clase', style: 'sectionTitle' });
+    content.push({ text: 'Antes de aplicar adecuaciones individuales, asegura una base común de accesibilidad pedagógica para todo el curso. Estas acciones reducen barreras sin modificar los resultados de aprendizaje.', style: 'bodyText', italics: true, color: '#4b5563' });
+    [
+        'Entregar la programación completa desde el inicio: fechas, evaluaciones, condiciones y cambios relevantes.',
+        'Publicar instrucciones, criterios de logro y ejemplos en formato visible, oral y escrito.',
+        'Modelar tareas complejas antes del trabajo autónomo y dividirlas en pasos verificables.',
+        'Organizar participación y trabajo grupal con roles claros, turnos y apoyos entre pares.',
+        'Ofrecer canales claros para pedir ayuda y comunicar apoyos institucionales disponibles.',
+        'Verificar comprensión sin exponer públicamente al estudiante.'
+    ].forEach(function(item) {
+        content.push({ text: '• ' + item, style: 'bodyText', margin: [10, 1, 0, 1] });
+    });
+
+    content.push({ text: '2. Buenas prácticas para adecuaciones individuales', style: 'sectionTitle' });
+    goodPracticesData.slice(0, 4).forEach(function(item) {
+        content.push({ text: [{ text: '• ' + item.title + ': ', bold: true }, item.text], style: 'bodyText', margin: [10, 1, 0, 1] });
+    });
+    content.push({ text: '3. Resumen para la gestión docente', style: 'sectionTitle' });
+    content.push({
+        table: {
+            widths: ['25%', '45%', '30%'],
+            body: [
+                [
+                    { text: 'Estudiantes', style: 'tableHeader' },
+                    { text: 'Condiciones registradas', style: 'tableHeader' },
+                    { text: 'Fuente de priorización', style: 'tableHeader' }
+                ],
+                [
+                    { text: String(students.length), style: 'bodyText' },
+                    { text: conditionNames.length ? conditionNames.join(', ') : 'Sin registro', style: 'bodyText' },
+                    { text: matrixCount ? matrixCount + ' con matriz CIF aplicada' : 'Orientación por condición', style: 'bodyText' }
+                ]
+            ]
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 4, 0, 8]
+    });
+    content.push({ text: 'La ficha organiza apoyos por estudiante y por categoría Duoc para facilitar decisiones de clase, evaluación y seguimiento.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 2, 0, 8] });
+
+    if (includeCharts) {
+        var allChartContent = renderPdfCIFChart(students);
+        allChartContent.forEach(function(item) { content.push(item); });
     }
-
-    content.push({ text: '' });
-
-    if (includeDua) {
-        content.push({ text: '1. Base DUA para toda la clase', style: 'sectionTitle' });
-        content.push({ text: 'El Diseño Universal para el Aprendizaje (DUA) es un marco que propone anticipar barreras y diversificar la enseñanza, ofreciendo múltiples formas de motivación, representación, y acción y expresión para que todos los estudiantes participen y aprendan.', style: 'bodyText' });
-        content.push({ text: '' });
-
-        var duaStages = window.UiePlannerData.duaStagesData || [];
-        if (duaStages.length) {
-            duaStages.forEach(function(stage) {
-                content.push({ text: stage.label + ' — ' + stage.badge, style: 'subSectionTitle' });
-                var items = stage.checklist || [];
-                items.forEach(function(item) {
-                    content.push(checkboxItem(item, false));
-                });
-                content.push({ text: '' });
-            });
-        } else {
-            content.push({ text: 'No se encontraron principios DUA definidos.', style: 'bodyText' });
-        }
-    }
-
-    var gpNum = includeDua ? 2 : 1;
-    var bpPageBreak = includeDua ? 'before' : undefined;
-    content.push({ text: gpNum + '. Buenas prácticas generales para adecuaciones', style: 'sectionTitle', pageBreak: bpPageBreak });
-    content.push({ ul: goodPracticesData.map(function(item) { return { text: [{ text: item.title + ': ', bold: true }, item.text] }; }) });
-    content.push({ text: '' });
 
     content.push({ text: 'Las adecuaciones curriculares de acceso son ajustes que eliminan barreras sin modificar los objetivos de aprendizaje. A continuación el detalle por estudiante.', style: 'bodyText', italics: true, margin: [0, 6, 0, 8] });
 
@@ -3430,15 +3377,9 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
         content.push({ columns: legCols, margin: [0, 0, 0, 6] });
     }
 
-    // Single radar chart for all students
-    if (includeCharts) {
-        var allChartContent = renderPdfCIFChart(students);
-        allChartContent.forEach(function(item) { content.push(item); });
-    }
-
     students.forEach(function(student, sIdx) {
         var nameLabel = student.name || ('Estudiante ' + student.index);
-        content.push({ text: nameLabel, style: 'sectionTitle', pageBreak: 'before' });
+        content.push({ text: nameLabel, style: 'sectionTitle' });
 
         if (student.conditions && student.conditions.length) {
             content.push({ text: 'Condición registrada en ficha: ' + student.conditions.map(function(c) { return c.name; }).join(', '), style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
@@ -3565,17 +3506,17 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
     return {
         content: content,
         styles: {
-            headerOrg: { fontSize: 13, bold: true, color: '#b42318' },
+            headerOrg: { fontSize: 12, bold: true, color: '#b42318' },
             headerMeta: { fontSize: 8.5, color: '#6b7280' },
-            mainTitle: { fontSize: 20, bold: true, color: '#111827', margin: [0, 0, 0, 8] },
-            sectionTitle: { fontSize: 14, bold: true, color: '#111827', margin: [0, 10, 0, 6] },
-            subSectionTitle: { fontSize: 11, bold: true, color: '#b42318', margin: [0, 6, 0, 3] },
-            introText: { fontSize: 9.5, color: '#4b5563', margin: [0, 0, 0, 12], italics: true },
+            mainTitle: { fontSize: 18, bold: true, color: '#111827', margin: [0, 0, 0, 7] },
+            sectionTitle: { fontSize: 13, bold: true, color: '#111827', margin: [0, 9, 0, 5] },
+            subSectionTitle: { fontSize: 10.5, bold: true, color: '#b42318', margin: [0, 6, 0, 3] },
+            introText: { fontSize: 9.5, color: '#4b5563', margin: [0, 0, 0, 10], italics: true },
             bodyText: { fontSize: 9.5, color: '#111827', margin: [0, 2, 0, 2] },
-            tableHeader: { fontSize: 10, bold: true, color: '#111827', fillColor: '#f3f4f6' },
+            tableHeader: { fontSize: 9.5, bold: true, color: '#111827', fillColor: '#f3f4f6' },
             footerText: { fontSize: 8.5, color: '#9ca3af', margin: [0, 6, 0, 0], italics: true }
         },
-        defaultStyle: { fontSize: 10.5, color: '#111827' },
+        defaultStyle: { fontSize: 9.5, color: '#111827' },
         pageMargins: [40, 40, 40, 40]
     };
 }
@@ -3629,7 +3570,8 @@ function showToast(msg) {
     }, 3500);
 }
 
-function buildPdfHeader(logoBase64) {
+function buildPdfHeader() {
+    var logoBase64 = window.LOGO_UIE_BASE64 || '';
     var columns = [];
     if (logoBase64) {
         columns.push({ image: logoBase64, width: 110, margin: [0, 0, 14, 0] });
@@ -3655,53 +3597,54 @@ function downloadDuaChecklist() {
         return;
     }
     var checkedDua = window.UiePlannerDua.getCheckedDuaItems() || [];
+    if (!checkedDua.length) {
+        alert('Selecciona al menos un elemento DUA antes de descargar.');
+        return;
+    }
+    var content = buildPdfHeader();
     
-    imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
-        var content = buildPdfHeader(logoBase64);
-        
-        content.push({ text: 'Checklist DUA para la clase', style: 'mainTitle' });
-        content.push({ text: '' });
+    content.push({ text: 'Checklist DUA para la clase', style: 'mainTitle' });
+    content.push({ text: '' });
 
-        var checkedTexts = {};
-        checkedDua.forEach(function(item) { checkedTexts[item.text] = true; });
-        var stages = window.UiePlannerData.duaStagesData || [];
-        stages.forEach(function(stage) {
-            content.push({ text: stage.label + ' — ' + stage.badge, style: 'subSectionTitle' });
-            stage.checklist.forEach(function(item) {
-                content.push(checkboxItem(item, !!checkedTexts[item]));
-            });
-            content.push({ text: '' });
+    var checkedTexts = {};
+    checkedDua.forEach(function(item) { checkedTexts[item.text] = true; });
+    var stages = window.UiePlannerData.duaStagesData || [];
+    stages.forEach(function(stage) {
+        content.push({ text: stage.label + ' — ' + stage.badge, style: 'subSectionTitle' });
+        stage.checklist.forEach(function(item) {
+            content.push(checkboxItem(item, !!checkedTexts[item]));
         });
-
-        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
         content.push({ text: '' });
-        content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
-
-        var docDef = {
-            content: content,
-            styles: {
-                headerOrg: { fontSize: 13, bold: true, color: '#b42318' },
-                headerMeta: { fontSize: 8.5, color: '#6b7280' },
-                mainTitle: { fontSize: 20, bold: true, color: '#111827', margin: [0, 0, 0, 8] },
-                subSectionTitle: { fontSize: 11, bold: true, color: '#b42318', margin: [0, 10, 0, 4] },
-                bodyText: { fontSize: 10.5, color: '#111827', margin: [0, 3, 0, 3] },
-                footerText: { fontSize: 8.5, color: '#9ca3af', margin: [0, 6, 0, 0], italics: true }
-            },
-            defaultStyle: { fontSize: 10.5, color: '#111827' },
-            pageMargins: [40, 40, 40, 40]
-        };
-
-        if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
-            alert('Librería PDF no disponible. Recarga la página.');
-            return;
-        }
-        try {
-            window.pdfMake.createPdf(docDef).download('checklist-dua.pdf');
-        } catch (e) {
-            console.error('Error generando PDF DUA:', e);
-            alert('Error al generar el PDF: ' + e.message);
-        }
     });
+
+    content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
+    content.push({ text: '' });
+    content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
+
+    var docDef = {
+        content: content,
+        styles: {
+            headerOrg: { fontSize: 13, bold: true, color: '#b42318' },
+            headerMeta: { fontSize: 8.5, color: '#6b7280' },
+            mainTitle: { fontSize: 20, bold: true, color: '#111827', margin: [0, 0, 0, 8] },
+            subSectionTitle: { fontSize: 11, bold: true, color: '#b42318', margin: [0, 10, 0, 4] },
+            bodyText: { fontSize: 10.5, color: '#111827', margin: [0, 3, 0, 3] },
+            footerText: { fontSize: 8.5, color: '#9ca3af', margin: [0, 6, 0, 0], italics: true }
+        },
+        defaultStyle: { fontSize: 10.5, color: '#111827' },
+        pageMargins: [40, 40, 40, 40]
+    };
+
+    if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
+        alert('Librería PDF no disponible. Recarga la página.');
+        return;
+    }
+    try {
+        window.pdfMake.createPdf(docDef).download('checklist-dua.pdf');
+    } catch(e) {
+        console.error('Error generando PDF DUA:', e);
+        alert('Error al generar el PDF: ' + e.message);
+    }
 }
 
 function checkboxItem(text, checked) {
@@ -3726,7 +3669,7 @@ function generatePlanEmail() {
         return;
     }
 
-    var includeDua = document.getElementById('plan-include-dua')?.checked || false;
+    var includeDua = false;
     var today = new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
 
     var isSocial = students[0].mode === 'social';
@@ -3847,7 +3790,6 @@ window.UiePlannerSupports = {
     groupStudentsByProfile,
     getMergedRecommendations,
     renderProfileGroup,
-    renderReferenceCatalog,
     initConditionPills,
     renderConditionPills,
     renderConditionDetail,

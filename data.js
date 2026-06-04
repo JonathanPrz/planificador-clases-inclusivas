@@ -1,59 +1,23 @@
 (function () {
 const referencesData = [
-    { code: 'DUA 3.0', title: 'Diseño Universal para el Aprendizaje, versión 3.0', source: 'CAST', url: 'https://udlguidelines.cast.org/' },
-    { code: 'ORG', title: 'Organizador gráfico DUA 3.0 (español)', source: 'CAST', url: 'docs/investigacion/udlg3-graphicorganizer-digital-numbers-a11y-spanish-latin-america.pdf' },
-    { code: 'DUA Duoc', title: 'Experiencia DUA en Duoc UC', source: 'Duoc UC', url: 'docs/investigacion/Experiencia%20DUA.pdf' },
-    { code: 'ADE', title: 'Guía de Adecuaciones Curriculares de Acceso', source: 'Duoc UC', url: 'docs/guias/Gu%C3%ADa%20Adecuaciones%20Curriculares%20de%20Acceso.pdf' },
-    { code: 'ACC', title: 'Guía de Introducción a la Accesibilidad Digital', source: 'Duoc UC', url: 'docs/guias/Gu%C3%ADa%20de%20Introducci%C3%B3n%20a%20la%20Accesibilidad%20Digital.pdf' },
-    { code: 'AUT', title: 'Orientaciones docentes para estudiantes del espectro autista', source: 'Duoc UC', url: 'docs/guias/Guia%20Orientaciones%20Autismo%20v2024.pdf' },
-    { code: 'VOC', title: 'Orientaciones para un vocabulario inclusivo', source: 'Duoc UC', url: 'docs/guias/Orientaciones%20Vocabulario%20Inclusivo.pdf' },
-    { code: 'PRÁCTICA', title: 'De la formación a la práctica — Cuadernillo de apoyo', source: 'Duoc UC', url: 'docs/guias/Cuadernillo%20de%20la%20Formaci%C3%B3n%20a%20la%20Pr%C3%A1ctica.pdf' },
-    { code: 'CAST', title: 'Universal Design for Learning', source: 'CAST', url: 'https://www.cast.org/' },
-    { code: 'WCAG', title: 'Web Content Accessibility Guidelines 2.2', source: 'W3C WAI', url: 'https://www.w3.org/WAI/standards-guidelines/wcag/' },
-    { code: 'UNE LF', title: 'UNE 153101:2018 EX Lectura Fácil: pautas y recomendaciones para elaborar documentos', source: 'AENOR' },
-    { code: 'VALIDACIÓN LF', title: 'UNE 153102:2018 EX: guía en Lectura Fácil para validadores de documentos', source: 'AENOR' },
-    { code: 'LEY 20.422', title: 'Ley 20.422: igualdad de oportunidades e inclusión social de personas con discapacidad', source: 'Chile' },
-    { code: 'LEY TEA', title: 'Ley 21.545: inclusión, atención integral y derechos de personas autistas', source: 'Chile' },
-    { code: 'LEY 21.015', title: 'Ley 21.015: inclusión laboral de personas con discapacidad', source: 'Chile' },
-    { code: 'LEY 21.690', title: 'Ley 21.690: actualiza normas de inclusión laboral de personas con discapacidad', source: 'Chile' },
-    { code: 'SENADIS', title: 'Inclusión laboral, trabajo como derecho y entornos accesibles', source: 'SENADIS' },
-    { code: 'SENADIS 21.015', title: 'Orientaciones y preguntas frecuentes sobre Ley de Inclusión Laboral', source: 'SENADIS' },
-    { code: 'OIT FP', title: 'Inclusión de personas con discapacidad en la formación profesional', source: 'OIT' },
-    { code: 'OIT TVET', title: 'Sistemas técnico-profesionales inclusivos para personas con discapacidad', source: 'OIT' },
-    { code: 'CAR CURSO', title: 'Plantilla editable: Caracterización inicial del curso', source: 'Duoc UC' },
-    { code: 'COLAB', title: 'Checklist de prácticas colaborativas inclusivas', source: 'Duoc UC' },
-    { code: 'RETRO', title: 'Infografía: Yo retroalimento para todos', source: 'Duoc UC' },
-    { code: 'LENG', title: 'Infografía: Mis palabras crean una comunidad inclusiva', source: 'Duoc UC' },
-    { code: 'CRISIS', title: 'Infografía: Cómo apoyar a un estudiante que se descompensa en mi aula', source: 'Duoc UC' },
-    { code: 'CIERRE', title: 'Plantilla de reflexión de cierre de semestre', source: 'Duoc UC' },
-    { code: 'ART DUA 3.0', title: 'Artículo: DUA 3.0 — hacia un modelo educativo más inclusivo', source: 'Morilla & Álvarez', url: 'docs/investigacion/articulo-dua-3.0-morilla-y-alvarez.pdf' },
-    { code: 'CIF MANUAL', title: 'Manual Práctico CIF (Clasificación Internacional del Funcionamiento)', source: 'OMS / OPS', url: 'docs/investigacion/Documentos%20ICF/Manual%20Pr%C3%A1ctico%20ICF.pdf' },
-    { code: 'CIF BAS', title: 'Guía para principiantes de la CIF (Clasificación Internacional del Funcionamiento)', source: 'OMS / OPS', url: 'docs/investigacion/Documentos%20ICF/Gu%C3%ADa%20para%20principiantes%20de%20la%20ICF.pdf' },
-    { code: 'CIF INTRO', title: 'Clasificación Internacional del Funcionamiento — introducción (inglés)', source: 'WHO', url: 'docs/investigacion/Documentos%20ICF/International%20classification%20of%20functioning%20ICF.pdf' },
-    { code: 'ADEC CIF', title: 'Guía de Adecuaciones Curriculares con enfoque CIF', source: 'Duoc UC', url: 'docs/guias/adecuaciones-curriculares-cif.md' },
-    { code: 'GEM LF', title: 'Gem — Adaptador técnico a Lectura Fácil (instrucciones)', source: 'Duoc UC', url: 'docs/lectura-facil/gem_adaptador_tecnico_lectura_facil.md' },
-    { code: 'GEM EJ', title: 'Gem — Ejemplo de adaptación a Lectura Fácil (matemática)', source: 'Duoc UC', url: 'docs/lectura-facil/ejemplo_gem_lectura_facil_matematica.md' }
-];
-
-const principleCards = [
-    {
-        icon: '01',
-        title: 'Modelo social',
-        text: 'La discapacidad aparece en la interacción con barreras del entorno. La tarea docente es anticiparlas, reducirlas y abrir participación.',
-        source: 'Vocabulario Inclusivo'
-    },
-    {
-        icon: '02',
-        title: 'Agencia del aprendiz',
-        text: 'El Marco DUA 3.0 orienta el diseño hacia estudiantes con propósito, reflexión, autenticidad, estrategia y acción.',
-        source: 'Marco DUA 3.0'
-    },
-    {
-        icon: '03',
-        title: 'Ajustes cuando persisten barreras',
-        text: 'Las adecuaciones de acceso entregan recursos, tiempos, apoyos o formatos sin modificar los resultados de aprendizaje.',
-        source: 'Adecuaciones de Acceso'
-    }
+    { code: 'AUT', title: 'Orientaciones docentes para estudiantes del espectro autista', source: 'Duoc UC', url: 'docs/guias/Guia%20Orientaciones%20Autismo%20v2024.pdf', year: 2024, type: 'guide', authors: 'Duoc UC' },
+    { code: 'DUA 3.0', title: 'Universal Design for Learning Guidelines version 3.0', source: 'CAST', url: 'https://udlguidelines.cast.org/', year: 2024, type: 'web', authors: 'CAST' },
+    { code: 'ORG', title: 'Universal Design for Learning Guidelines version 3.0 [graphic organizer]', source: 'CAST', url: 'docs/investigacion/udlg3-graphicorganizer-digital-numbers-a11y-spanish-latin-america.pdf', year: 2024, type: 'pdf', authors: 'CAST' },
+    { code: 'LEY 21.690', title: 'Ley 21.690: introduce modificaciones al Código del Trabajo y otros cuerpos legales en materia de inclusión laboral de personas con discapacidad y asignatarias de pensión de invalidez', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=1206100', year: 2024, type: 'law', authors: 'Ministerio de Desarrollo Social y Familia, Chile' },
+    { code: 'DUA Duoc', title: 'Experiencia DUA en Duoc UC', source: 'Duoc UC', url: 'docs/investigacion/Experiencia%20DUA.pdf', year: 2025, type: 'report', authors: 'Duoc UC' },
+    { code: 'ADE', title: 'Guía de Adecuaciones Curriculares de Acceso', source: 'Duoc UC', url: 'docs/guias/Gu%C3%ADa%20Adecuaciones%20Curriculares%20de%20Acceso.pdf', year: 2025, type: 'guide', authors: 'Duoc UC' },
+    { code: 'ACC', title: 'Guía de Introducción a la Accesibilidad Digital', source: 'Duoc UC', url: 'docs/guias/Gu%C3%ADa%20de%20Introducci%C3%B3n%20a%20la%20Accesibilidad%20Digital.pdf', year: 2025, type: 'guide', authors: 'Duoc UC' },
+    { code: 'VOC', title: 'Orientaciones para un vocabulario inclusivo', source: 'Duoc UC', url: 'docs/guias/Orientaciones%20Vocabulario%20Inclusivo.pdf', year: 2025, type: 'guide', authors: 'Duoc UC' },
+    { code: 'PRÁCTICA', title: 'De la formación a la práctica: cuadernillo de apoyo', source: 'Duoc UC', url: 'docs/guias/Cuadernillo%20de%20la%20Formaci%C3%B3n%20a%20la%20Pr%C3%A1ctica.pdf', year: 2025, type: 'guide', authors: 'Duoc UC' },
+    { code: 'WCAG', title: 'Web Content Accessibility Guidelines (WCAG) 2.2', source: 'W3C', url: 'https://www.w3.org/TR/WCAG22/', year: 2023, type: 'web', authors: 'W3C' },
+    { code: 'LEY TEA', title: 'Ley 21.545: establece la promoción de la inclusión, la atención integral y la protección de los derechos de las personas con trastorno del espectro autista en el ámbito social, de salud y educación', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=1190123', year: 2023, type: 'law', authors: 'Ministerio de Desarrollo Social y Familia, Chile' },
+    { code: 'UNE LF', title: 'UNE 153101:2018 EX. Lectura Fácil. Pautas y recomendaciones para la elaboración de documentos', source: 'AENOR', url: 'https://tienda.aenor.com/p/norma-une-153101-2018-ex-n0060036', year: 2018, type: 'standard', authors: 'AENOR' },
+    { code: 'VALIDACIÓN LF', title: 'UNE 153102:2018 EX. Guía en Lectura Fácil para validadores de documentos', source: 'AENOR', url: 'https://tienda.aenor.com/p/norma-une-153102-2018-ex-n0061282', year: 2018, type: 'standard', authors: 'AENOR' },
+    { code: 'LEY 21.015', title: 'Ley 21.015: incentiva la inclusión de personas con discapacidad al mundo laboral', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=1103997', year: 2017, type: 'law', authors: 'Ministerio de Desarrollo Social, Chile' },
+    { code: 'CIF MANUAL', title: 'Manual práctico de la CIF', source: 'OMS / OPS', url: 'docs/investigacion/Documentos%20ICF/Manual%20Pr%C3%A1ctico%20ICF.pdf', year: 2015, type: 'manual', authors: 'OMS / OPS' },
+    { code: 'CIF BAS', title: 'Guía para principiantes de la CIF', source: 'OMS / OPS', url: 'docs/investigacion/Documentos%20ICF/Gu%C3%ADa%20para%20principiantes%20de%20la%20ICF.pdf', year: 2015, type: 'guide', authors: 'OMS / OPS' },
+    { code: 'LEY 20.422', title: 'Ley 20.422: establece normas sobre igualdad de oportunidades e inclusión social de personas con discapacidad', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=1010903', year: 2010, type: 'law', authors: 'Ministerio de Planificación, Chile' },
+    { code: 'CIF OMS', title: 'International Classification of Functioning, Disability and Health (ICF)', source: 'WHO', url: 'https://www.who.int/classifications/international-classification-of-functioning-disability-and-health', year: 2001, type: 'web', authors: 'World Health Organization' }
 ];
 
 const duaStagesData = [
@@ -127,12 +91,6 @@ const duaStagesData = [
         ],
         example: 'Si muchos estudiantes pidieron instrucciones nuevamente, convierte la pauta en una lista visible con ejemplo de entrega esperada.'
     }
-];
-
-const resourcesData = [
-    { title: 'Ideas y variantes', text: 'Puedes usar herramientas digitales para generar alternativas de actividad, rúbrica o ejemplo, revisando siempre pertinencia y accesibilidad.', source: 'Experiencia DUA Duoc UC' },
-    { title: 'Participación sin exposición', text: 'Foros, encuestas o tableros colaborativos pueden levantar dudas e intereses sin exigir participación oral inmediata.', source: 'Experiencia DUA Duoc UC' },
-    { title: 'Material visual accesible', text: 'Todo recurso visual debe cuidar contraste, lectura lineal, subtítulos y texto alternativo cuando corresponda.', source: 'Accesibilidad Digital' }
 ];
 
 const accommodationsData = {
@@ -500,58 +458,6 @@ const goodPracticesData = [
     }
 ];
 
-const digitalAccessibilityData = [
-    {
-        id: 'materiales',
-        label: 'Materiales',
-        source: 'Accesibilidad Digital',
-        intro: 'Un documento accesible permite ajustar lectura, navegar estructura y comprender información sin depender solo de lo visual.',
-        items: [
-            'Usa fuentes sin serifas y tamaño mínimo de 11 puntos; consulta preferencias si hay baja visión.',
-            'Organiza con encabezados jerárquicos, listas reales y párrafos no justificados.',
-            'Mantén contraste suficiente y no uses color como única señal.',
-            'Describe imágenes, gráficos y mapas conceptuales con texto alternativo breve y útil.'
-        ]
-    },
-    {
-        id: 'audiovisual',
-        label: 'Audiovisual',
-        source: 'Accesibilidad Digital',
-        intro: 'Los videos y audios necesitan alternativas para estudiantes sordos, con baja visión, dificultades de procesamiento o entornos sin sonido.',
-        items: [
-            'Incluye subtítulos o transcripciones para videos y podcasts.',
-            'Agrega audiodescripción o explicación textual cuando la imagen aporte información clave.',
-            'Evita efectos visuales o sonoros que puedan generar molestias o sobrecarga.',
-            'Permite controlar reproducción, pausa y revisión del contenido.'
-        ]
-    },
-    {
-        id: 'ava',
-        label: 'AVA / Blackboard',
-        source: 'Accesibilidad Digital',
-        intro: 'La navegación digital debe ser clara, predecible y compatible con tecnologías asistivas.',
-        items: [
-            'Publica recursos con nombres descriptivos y orden lógico.',
-            'Evita documentos escaneados como imagen cuando se requiere lectura de texto.',
-            'Entrega instrucciones, plazos y criterios en un lugar visible.',
-                'Revisa accesibilidad con Blackboard Ally, validadores WCAG u otra herramienta disponible.'
-        ]
-    },
-    {
-        id: 'checklist',
-        label: 'Checklist rápida',
-        source: 'Accesibilidad Digital',
-        intro: 'Antes de publicar un recurso, verifica lo esencial.',
-        items: [
-            '¿El objetivo y la forma de uso están claros?',
-            '¿El texto tiene estructura, contraste y tamaño adecuados?',
-            '¿Las imágenes tienen descripción o son marcadas como decorativas?',
-            '¿Videos y audios tienen subtítulos, transcripción o alternativa?',
-            '¿La actividad puede completarse con teclado o tecnología de apoyo?'
-        ]
-    }
-];
-
 const vocabularyData = [
     { bad: 'Minusválido/a', good: 'Persona con discapacidad o persona usuaria de silla de ruedas', why: 'Evita asociar discapacidad con menor valor personal.' },
     { bad: 'Persona con capacidades diferentes', good: 'Persona con discapacidad', why: 'Evita eufemismos que ocultan las barreras del entorno.' },
@@ -754,12 +660,9 @@ const recommendationsData = buildRecommendationsData();
 
 window.UiePlannerData = {
     referencesData,
-    principleCards,
     duaStagesData,
-    resourcesData,
     accommodationsData,
     goodPracticesData,
-    digitalAccessibilityData,
     vocabularyData,
     autismMyths,
     glossaryData,

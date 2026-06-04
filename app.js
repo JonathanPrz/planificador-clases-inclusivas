@@ -19,7 +19,6 @@ function initApp() {
     bindGlobalActions();
     bindSectionNavigation();
     initConditionPills();
-    window.UiePlannerSupports.initJustificationModal();
 }
 
 function bindGlobalActions() {
@@ -65,7 +64,9 @@ try {
     console.error('No se pudo inicializar el planificador inclusivo.', error);
 }
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
+    navigator.serviceWorker.register('sw.js').catch(function(error) {
+        console.warn('No se pudo registrar el Service Worker.', error);
+    });
 }
 })();
