@@ -24,11 +24,15 @@ function setTheme(themeName) {
     body.classList.remove('theme-light', 'theme-dark');
     body.classList.add(themeName);
     localStorage.setItem('user-theme', themeName);
-    if (!themeToggle) return;
-    const isDark = themeName === 'theme-dark';
-    themeToggle.classList.toggle('active', isDark);
-    themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-    themeToggle.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    if (themeToggle) {
+        var isDark = themeName === 'theme-dark';
+        themeToggle.classList.toggle('active', isDark);
+        themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        themeToggle.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    }
+    if (window.UiePlannerSupports && window.UiePlannerSupports.rethemeAllRadarCharts) {
+        window.UiePlannerSupports.rethemeAllRadarCharts();
+    }
 }
 
 window.UiePlannerTheme = { initTheme };
