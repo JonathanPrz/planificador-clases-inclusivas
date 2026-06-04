@@ -241,7 +241,12 @@ function goToReportSource(sectionId) {
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
     }
-    window.location.hash = sectionId;
+    try {
+        history.pushState(null, '', '#' + sectionId);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (error) {
+        window.location.replace('#' + sectionId);
+    }
 }
 
 function clearPrintableRecommendations() {
@@ -518,7 +523,7 @@ function updatePrintableRecommendations() {
     var goodPracticesNumber = checkedDua.length ? 2 : 1;
     var firstSupportNumber = goodPracticesNumber + 1;
 
-    sheet.innerHTML = '<header class="print-report-header"><div class="print-brand"><img class="print-logo" src="' + LOGO_UIE_BASE64 + '" alt="Unidad de Inclusión Educativa"></div><div class="print-report-meta"><span>Plan de apoyo docente</span><span>Equipo de Inclusión Académica · Duoc UC Campus Arauco</span><span>' + formatReportDate() + '</span></div></header><h1>' + REPORT_TITLE + '</h1><p class="print-intro">Documento orientativo para acordar una base DUA de clase y, cuando corresponda, adecuaciones curriculares de acceso para estudiantes registrados.</p>' + (checkedDua.length ? '<section class="print-report-section"><h2>1. Base DUA para toda la clase</h2><p>Estas decisiones describen la base común de clase: apoyos pedagógicos generales para anticipar barreras, diversificar la participación y sostener el resultado de aprendizaje.</p>' + (function() { var ck = {}; checkedDua.forEach(function(i) { ck[i.text] = true; }); return window.UiePlannerData.duaStagesData.map(function(stage) { return '<div class="print-subsection"><h3>' + stage.label + '</h3><ul>' + stage.checklist.map(function(text) { return '<li><span class="print-checkbox' + (ck[text] ? ' checked' : '') + '"></span> ' + text + '</li>'; }).join('') + '</ul></div>'; }).join(''); })() + '</section>' : '') + '<section class="print-report-section"><h2>' + goodPracticesNumber + '. Buenas prácticas generales para adecuaciones</h2><ul>' + goodPracticesData.map(function(item) { return '<li><strong>' + item.title + ':</strong> ' + item.text + '</li>'; }).join('') + '</ul></section>' + (function() { try { return renderCIFBarChart(students, { hideToggle: true }); } catch(e) { return ''; } })() + profiles.map(function(grouped, index) { return renderProfileSection(grouped, index, firstSupportNumber); }).join('') + '<section class="print-report-section"><h2>Seguimiento y mejora</h2><ul><li>¿Qué barrera apareció o persistió durante la clase?</li><li>¿Qué apoyo favoreció comprensión, participación, autonomía o bienestar?</li><li>¿La retroalimentación fue clara, oportuna y centrada en el proceso?</li><li>¿Las instrucciones y recursos estuvieron disponibles en formatos accesibles?</li><li>¿Qué ajuste concreto conviene mantener, retirar o probar en la próxima clase?</li></ul></section><footer class="print-report-footer">Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.</footer>';
+    sheet.innerHTML = '<header class="print-report-header"><div class="print-brand"><img class="print-logo" src="' + window.LOGO_UIE_BASE64 + '" alt="Unidad de Inclusión Educativa"></div><div class="print-report-meta"><span>Plan de apoyo docente</span><span>Equipo de Inclusión Académica · Duoc UC Campus Arauco</span><span>' + formatReportDate() + '</span></div></header><h1>' + REPORT_TITLE + '</h1><p class="print-intro">Documento orientativo para acordar una base DUA de clase y, cuando corresponda, adecuaciones curriculares de acceso para estudiantes registrados.</p>' + (checkedDua.length ? '<section class="print-report-section"><h2>1. Base DUA para toda la clase</h2><p>Estas decisiones describen la base común de clase: apoyos pedagógicos generales para anticipar barreras, diversificar la participación y sostener el resultado de aprendizaje.</p>' + (function() { var ck = {}; checkedDua.forEach(function(i) { ck[i.text] = true; }); return window.UiePlannerData.duaStagesData.map(function(stage) { return '<div class="print-subsection"><h3>' + stage.label + '</h3><ul>' + stage.checklist.map(function(text) { return '<li><span class="print-checkbox' + (ck[text] ? ' checked' : '') + '"></span> ' + text + '</li>'; }).join('') + '</ul></div>'; }).join(''); })() + '</section>' : '') + '<section class="print-report-section"><h2>' + goodPracticesNumber + '. Buenas prácticas generales para adecuaciones</h2><ul>' + goodPracticesData.map(function(item) { return '<li><strong>' + item.title + ':</strong> ' + item.text + '</li>'; }).join('') + '</ul></section>' + (function() { try { return renderCIFBarChart(students, { hideToggle: true }); } catch(e) { return ''; } })() + profiles.map(function(grouped, index) { return renderProfileSection(grouped, index, firstSupportNumber); }).join('') + '<section class="print-report-section"><h2>Seguimiento y mejora</h2><ul><li>¿Qué barrera apareció o persistió durante la clase?</li><li>¿Qué apoyo favoreció comprensión, participación, autonomía o bienestar?</li><li>¿La retroalimentación fue clara, oportuna y centrada en el proceso?</li><li>¿Las instrucciones y recursos estuvieron disponibles en formatos accesibles?</li><li>¿Qué ajuste concreto conviene mantener, retirar o probar en la próxima clase?</li></ul></section><footer class="print-report-footer">Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.</footer>';
 }
 
 function imageToBase64(url, callback) {
@@ -571,7 +576,8 @@ function ensurePdfMake(callback, onError) {
     document.head.appendChild(fonts);
 }
 
-function buildPdfHeader(logoBase64) {
+function buildPdfHeader() {
+    var logoBase64 = window.LOGO_UIE_BASE64 || '';
     var columns = [];
     if (logoBase64) {
         columns.push({ image: logoBase64, width: 110, margin: [0, 0, 14, 0] });
@@ -612,12 +618,11 @@ function generatePdfMake(callback) {
     var profiles = data.profiles;
     var duaSummary = data.duaSummary;
 
-    imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
-        var content = buildPdfHeader(logoBase64);
-        var goodPracticesNumber = checkedDua.length ? 2 : 1;
+    var content = buildPdfHeader();
+    var goodPracticesNumber = checkedDua.length ? 2 : 1;
 
-        content.push({ text: REPORT_TITLE, style: 'mainTitle' });
-        content.push({ text: 'Documento orientativo para acordar una base DUA de clase y, cuando corresponda, adecuaciones curriculares de acceso para estudiantes registrados.', style: 'introText' });
+    content.push({ text: REPORT_TITLE, style: 'mainTitle' });
+    content.push({ text: 'Documento orientativo para acordar una base DUA de clase y, cuando corresponda, adecuaciones curriculares de acceso para estudiantes registrados.', style: 'introText' });
         content.push({ text: '' });
 
         if (checkedDua.length) {
@@ -690,7 +695,6 @@ function generatePdfMake(callback) {
             alert('No se pudo generar el PDF. Intenta recargar la página e intentar de nuevo.');
         }
         if (callback) callback();
-    });
 }
 
 function generateDuaPdf(callback) {
@@ -701,10 +705,9 @@ function generateDuaPdf(callback) {
         return;
     }
 
-    imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
-        var content = buildPdfHeader(logoBase64);
+    var content = buildPdfHeader();
 
-        content.push({ text: 'Base DUA para la clase', style: 'mainTitle' });
+    content.push({ text: 'Base DUA para la clase', style: 'mainTitle' });
         content.push({ text: '' });
 
         var checkedTexts = {};
@@ -742,7 +745,6 @@ function generateDuaPdf(callback) {
             alert('No se pudo generar el PDF. Intenta recargar la página e intentar de nuevo.');
         }
         if (callback) callback();
-    });
 }
 
 function generateAccPdf(callback) {
@@ -755,10 +757,9 @@ function generateAccPdf(callback) {
 
     var conditionCount = profiles.reduce(function(count, p) { return count + p.conditions.length; }, 0);
 
-    imageToBase64(LOGO_UIE_BASE64, function(logoBase64) {
-        var content = buildPdfHeader(logoBase64);
+    var content = buildPdfHeader();
 
-        content.push({ text: 'Adecuaciones curriculares de acceso', style: 'mainTitle' });
+    content.push({ text: 'Adecuaciones curriculares de acceso', style: 'mainTitle' });
         content.push({ text: [{ text: 'Estudiantes: ', bold: true }, students.length + ' estudiante(s), ' + conditionCount + ' condición(es)'], style: 'bodyText' });
         content.push({ text: [{ text: 'Perfiles: ', bold: true }, profiles.map(function(p) { return p.conditions.map(function(c) { return c.name; }).join(' · '); }).join('; ') + '.'], style: 'bodyText' });
         content.push({ text: '' });
@@ -815,7 +816,6 @@ function generateAccPdf(callback) {
             alert('No se pudo generar el PDF. Intenta recargar la página e intentar de nuevo.');
         }
         if (callback) callback();
-    });
 }
 
 window.UiePlannerReport = {

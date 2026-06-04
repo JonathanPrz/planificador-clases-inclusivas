@@ -52,7 +52,11 @@ function bindSectionNavigation() {
         setActiveState(view, primaryTarget);
 
         if (window.location.hash !== '#' + primaryTarget) {
-            history.pushState(null, '', '#' + primaryTarget);
+            try {
+                history.pushState(null, '', '#' + primaryTarget);
+            } catch (error) {
+                window.location.replace('#' + primaryTarget);
+            }
         }
 
         if (shouldScroll) {
@@ -70,8 +74,9 @@ function bindSectionNavigation() {
     });
 
     document.addEventListener('click', function(event) {
+        if (event.defaultPrevented) return;
         const link = event.target.closest('a[href^="#"]');
-        if (!link || link.closest('.nav-links')) return;
+        if (!link) return;
         if (!sectionById(link.getAttribute('href').slice(1))) return;
         event.preventDefault();
         activate(link.getAttribute('href').slice(1));
