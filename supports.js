@@ -1126,7 +1126,7 @@ function _unused_renderSocialStudents(onStudentChange) {
     container.querySelectorAll('.support-student-card:not([data-events-bound])').forEach(function(card) {
         var studentIndex = card.getAttribute('data-student-index');
 
-        card.querySelectorAll('.student-name').forEach(function(input) {
+        card.querySelectorAll('.student-profile-field').forEach(function(input) {
             input.addEventListener('input', onStudentChange);
             input.addEventListener('change', onStudentChange);
         });
@@ -1276,8 +1276,12 @@ function createMedicalStudentCard(studentIndex) {
 
     wrapper.innerHTML =
         '<h4>Estudiante ' + studentIndex + '</h4>' +
-        '<label for="student-name-medical-' + studentIndex + '">Nombre del estudiante (opcional)</label>' +
-        '<input id="student-name-medical-' + studentIndex + '" class="text-control student-name" type="text" placeholder="Si queda vacío se usará Estudiante ' + studentIndex + '">' +
+        '<div class="student-management-fields">' +
+            '<label><span>Nombre (opcional)</span><input id="student-name-medical-' + studentIndex + '" class="text-control student-name student-profile-field" type="text" placeholder="Estudiante ' + studentIndex + '"></label>' +
+            '<label><span>RUT (opcional)</span><input class="text-control student-rut student-profile-field" type="text" placeholder="Sin informar"></label>' +
+            '<label><span>Carrera (opcional)</span><input class="text-control student-career student-profile-field" type="text" placeholder="Sin informar"></label>' +
+            '<label><span>Código asignatura (opcional)</span><input class="text-control student-section student-profile-field" type="text" placeholder="Sin informar"></label>' +
+        '</div>' +
         '<div class="student-card-status" id="student-status-medical-' + studentIndex + '">Sin condición de referencia seleccionada</div>' +
         '<p class="condition-consultor-note">Selecciona una condición solo para orientar la observación. Luego formula el ajuste desde la barrera concreta, no desde la etiqueta.</p>' +
         '<div class="condition-pills-inline" id="condition-pills-card-' + studentIndex + '">' +
@@ -2771,6 +2775,10 @@ function readAdvisorComments(card) {
     return (advisorCommentsByStudent[idx] || '').trim();
 }
 
+function readStudentProfileField(card, selector) {
+    return (card.querySelector(selector)?.value?.trim() || '');
+}
+
 function collectMedicalStudents() {
     var students = [];
     var cards = document.querySelectorAll('#support-students-medical .support-student-card');
@@ -2778,6 +2786,9 @@ function collectMedicalStudents() {
     cards.forEach(function(card) {
         var studentIndex = Number(card.getAttribute('data-student-index'));
         var name = (card.querySelector('.student-name')?.value?.trim() || '');
+        var rut = readStudentProfileField(card, '.student-rut');
+        var career = readStudentProfileField(card, '.student-career');
+        var section = readStudentProfileField(card, '.student-section');
 
         var activePills = card.querySelectorAll('.condition-pill.active');
         var conditions = Array.from(activePills).map(function(pill) {
@@ -2791,6 +2802,9 @@ function collectMedicalStudents() {
         students.push({
             index: studentIndex,
             name: name,
+            rut: rut,
+            career: career,
+            section: section,
             conditions: conditions,
             conditionKeys: conditions.map(function(c) { return c.key; }),
             assessmentSource: getStudentAssessmentSource(studentIndex),
@@ -3279,7 +3293,6 @@ function renderPdfCIFChart(students) {
     var pdfWidth = Math.min(cw, 285);
 
     return [
-        { text: 'Mapa de énfasis de apoyo', style: 'subSectionTitle' },
         { image: radarDataUrl, width: pdfWidth, alignment: 'center', margin: [0, 2, 0, 4] },
         { text: '' }
     ];
@@ -3302,20 +3315,17 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
     };
     var isSocial = students.length > 0 && students[0].mode === 'social';
     var modeTitle = 'Ficha docente de apoyos y adecuaciones de acceso';
-    var conditionNames = [];
-    var matrixCount = 0;
+    var missingText = 'Sin informar';
 
-    students.forEach(function(student) {
-        if (student.conditions && student.conditions.length) {
-            student.conditions.forEach(function(condition) {
-                if (conditionNames.indexOf(condition.name) === -1) conditionNames.push(condition.name);
-            });
-        }
+    function studentInfo(value, fallback) {
+        return value && String(value).trim() ? String(value).trim() : (fallback || missingText);
+    }
+
+    function studentMatrixLabel(student) {
         var scores = student.matrixScores || getStudentMatrixScores(student.cardIndex || student.index || 1);
-        if (scores && Object.values(scores).some(function(value) { return Number(value || 0) > 0; })) {
-            matrixCount++;
-        }
-    });
+        var hasMatrix = scores && Object.values(scores).some(function(value) { return Number(value || 0) > 0; });
+        return hasMatrix ? 'Sí' : 'No';
+    }
 
     content.push({ text: modeTitle, style: 'mainTitle' });
     content.push({ text: 'Documento orientativo para acordar una base DUA de clase y adecuaciones curriculares de acceso.', style: 'introText' });
@@ -3333,37 +3343,52 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
         content.push({ text: '• ' + item, style: 'bodyText', margin: [10, 1, 0, 1] });
     });
 
-    content.push({ text: '2. Buenas prácticas para adecuaciones individuales', style: 'sectionTitle' });
-    goodPracticesData.slice(0, 4).forEach(function(item) {
-        content.push({ text: [{ text: '• ' + item.title + ': ', bold: true }, item.text], style: 'bodyText', margin: [10, 1, 0, 1] });
-    });
-    content.push({ text: '3. Resumen para la gestión docente', style: 'sectionTitle' });
+    content.push({ text: '2. Resumen para la gestión docente', style: 'sectionTitle' });
+    content.push({ text: 'Este resumen permite identificar rápidamente a quién corresponde cada apoyo y si la priorización se basó en una matriz CIF o en orientación inicial por condición.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
     content.push({
         table: {
-            widths: ['25%', '45%', '30%'],
-            body: [
-                [
-                    { text: 'Estudiantes', style: 'tableHeader' },
-                    { text: 'Condiciones registradas', style: 'tableHeader' },
-                    { text: 'Fuente de priorización', style: 'tableHeader' }
-                ],
-                [
-                    { text: String(students.length), style: 'bodyText' },
-                    { text: conditionNames.length ? conditionNames.join(', ') : 'Sin registro', style: 'bodyText' },
-                    { text: matrixCount ? matrixCount + ' con matriz CIF aplicada' : 'Orientación por condición', style: 'bodyText' }
-                ]
-            ]
+            headerRows: 1,
+            widths: ['22%', '16%', '28%', '20%', '14%'],
+            body: [[
+                { text: 'Estudiante', style: 'tableHeader' },
+                { text: 'RUT', style: 'tableHeader' },
+                { text: 'Carrera', style: 'tableHeader' },
+                { text: 'Código asignatura', style: 'tableHeader' },
+                { text: 'Matriz CIF', style: 'tableHeader' }
+            ]].concat(students.map(function(student) {
+                return [
+                    { text: studentInfo(student.name, 'Estudiante ' + student.index), style: 'bodyText' },
+                    { text: studentInfo(student.rut), style: 'bodyText' },
+                    { text: studentInfo(student.career), style: 'bodyText' },
+                    { text: studentInfo(student.section), style: 'bodyText' },
+                    { text: studentMatrixLabel(student), style: 'bodyText' }
+                ];
+            }))
         },
         layout: 'lightHorizontalLines',
         margin: [0, 4, 0, 8]
     });
-    content.push({ text: 'La ficha organiza apoyos por estudiante y por categoría Duoc para facilitar decisiones de clase, evaluación y seguimiento.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 2, 0, 8] });
+    content.push({ text: 'La condición se utiliza como referencia de pertinencia para seleccionar apoyos; la decisión final debe responder a barreras observadas y acuerdos con el estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 2, 0, 8] });
+
+    var chartSectionNumber = includeCharts ? 3 : 0;
+    var criteriaSectionNumber = includeCharts ? 4 : 3;
+    var supportsSectionNumber = includeCharts ? 5 : 4;
+    var followUpSectionNumber = includeCharts ? 6 : 5;
 
     if (includeCharts) {
+        content.push({ text: chartSectionNumber + '. Mapa de énfasis de apoyo', style: 'sectionTitle' });
+        content.push({ text: 'El gráfico resume visualmente dónde conviene concentrar coordinación, observación o apoyos. Úsalo como lectura rápida antes de revisar las recomendaciones por estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
         var allChartContent = renderPdfCIFChart(students);
         allChartContent.forEach(function(item) { content.push(item); });
     }
 
+    content.push({ text: criteriaSectionNumber + '. Criterios para aplicar adecuaciones individuales', style: 'sectionTitle' });
+    content.push({ text: 'Usa estos criterios para decidir qué apoyos implementar, resguardando el resultado de aprendizaje, la privacidad y la participación del estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
+    goodPracticesData.slice(0, 4).forEach(function(item) {
+        content.push({ text: [{ text: '• ' + item.title + ': ', bold: true }, item.text], style: 'bodyText', margin: [10, 1, 0, 1] });
+    });
+
+    content.push({ text: supportsSectionNumber + '. Apoyos y adecuaciones por estudiante', style: 'sectionTitle' });
     content.push({ text: 'Las adecuaciones curriculares de acceso son ajustes que eliminan barreras sin modificar los objetivos de aprendizaje. A continuación el detalle por estudiante.', style: 'bodyText', italics: true, margin: [0, 6, 0, 8] });
 
     if (!includeCharts) {
@@ -3379,7 +3404,7 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
 
     students.forEach(function(student, sIdx) {
         var nameLabel = student.name || ('Estudiante ' + student.index);
-        content.push({ text: nameLabel, style: 'sectionTitle' });
+        content.push({ text: supportsSectionNumber + '.' + (sIdx + 1) + ' ' + nameLabel, style: 'studentSectionTitle' });
 
         if (student.conditions && student.conditions.length) {
             content.push({ text: 'Condición registrada en ficha: ' + student.conditions.map(function(c) { return c.name; }).join(', '), style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
@@ -3423,7 +3448,6 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
             }
 
             content.push({ text: 'Recomendaciones', style: 'subSectionTitle' });
-            content.push({ text: 'Revisa cada categoría y acuerda con el estudiante cuáles apoyos implementar. No es necesario aplicar todas: selecciona las que mejor respondan a las barreras identificadas.', style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
 
             if (matrixProfile) {
                 var groupedMatrixItems = groupMatrixItemsByDimension(getVisibleMatrixItems(student, { includeManual: true }));
@@ -3499,6 +3523,37 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
         content.push({ text: '' });
     });
 
+    content.push({ text: followUpSectionNumber + '. Seguimiento de apoyos aplicados', style: 'sectionTitle' });
+    content.push({ text: 'Registra una revisión breve por estudiante para decidir si el apoyo se mantiene, se ajusta o se retira.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
+    students.forEach(function(student, sIdx) {
+        var nameLabel = student.name || ('Estudiante ' + student.index);
+        content.push({ text: nameLabel, style: 'studentSectionTitle' });
+        content.push({
+            columns: [
+                { width: '*', stack: [
+                    checkboxItem('Apoyo aplicado según lo acordado.', false),
+                    checkboxItem('Favoreció acceso, participación o demostración de aprendizaje.', false)
+                ] },
+                { width: '*', stack: [
+                    checkboxItem('Persisten barreras o aparecieron nuevas.', false),
+                    checkboxItem('Requiere ajustar, retirar o agregar apoyo.', false)
+                ] }
+            ],
+            columnGap: 12,
+            margin: [0, 0, 0, 4]
+        });
+        content.push({
+            table: {
+                widths: ['100%'],
+                body: [[
+                    { text: 'Comentarios de seguimiento:\n\n\n', style: 'bodyText', color: '#6b7280' }
+                ]]
+            },
+            layout: matrixTableLayout,
+            margin: [0, 0, 0, 8]
+        });
+    });
+
     content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
     content.push({ text: '' });
     content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
@@ -3510,6 +3565,7 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
             headerMeta: { fontSize: 8.5, color: '#6b7280' },
             mainTitle: { fontSize: 18, bold: true, color: '#111827', margin: [0, 0, 0, 7] },
             sectionTitle: { fontSize: 13, bold: true, color: '#111827', margin: [0, 9, 0, 5] },
+            studentSectionTitle: { fontSize: 11.5, bold: true, color: '#111827', margin: [0, 7, 0, 3] },
             subSectionTitle: { fontSize: 10.5, bold: true, color: '#b42318', margin: [0, 6, 0, 3] },
             introText: { fontSize: 9.5, color: '#4b5563', margin: [0, 0, 0, 10], italics: true },
             bodyText: { fontSize: 9.5, color: '#111827', margin: [0, 2, 0, 2] },
