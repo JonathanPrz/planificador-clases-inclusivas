@@ -8,6 +8,13 @@
     <meta name="theme-color" content="#111113" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <script>
+        window.UIE_METRICS_CONFIG = {
+            clarityProjectId: 'x2en890zie',
+            supabaseUrl: 'https://TU-PROYECTO.supabase.co',
+            supabaseAnonKey: 'SUPABASE_ANON_KEY'
+        };
+    </script>
     <title>Planificador Inclusivo UIE - Apoyo docente Duoc UC</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +142,21 @@
                     <p>Después de usar el planificador, responde un formulario breve para aportar mejoras desde tu práctica docente.</p>
                     <p class="small-note">Tiempo estimado: 3 minutos.</p>
                 </div>
-                <a class="btn btn-primary" href="https://forms.cloud.microsoft/r/9RwvPGcZME" target="_blank" rel="noopener">Responder formulario</a>
+                <div class="pilot-actions">
+                    <div class="pilot-metrics" id="pilot-metrics" aria-label="Métricas anónimas de uso">
+                        <div class="pilot-metric-card">
+                            <span class="pilot-metric-value" id="metric-visits">—</span>
+                            <span class="pilot-metric-label">visitas</span>
+                        </div>
+                        <div class="pilot-metric-card">
+                            <span class="pilot-metric-value" id="metric-hearts">—</span>
+                            <span class="pilot-metric-label">corazones</span>
+                        </div>
+                        <button class="btn-like" id="btn-site-heart" type="button" aria-pressed="false">♡ Me gusta</button>
+                        <p class="pilot-metrics-note" id="metrics-note">Métricas anónimas del piloto.</p>
+                    </div>
+                    <a class="btn btn-primary" href="https://forms.cloud.microsoft/r/9RwvPGcZME" target="_blank" rel="noopener" data-metric-action="feedback_form_opened">Responder formulario</a>
+                </div>
             </div>
         </section>
 
@@ -710,6 +731,7 @@
     <script src="supports.js?v=20260529-support-scale"></script>
     <script src="report.js"></script>
     <script src="navigation.js"></script>
+    <script src="metrics.js"></script>
     <script src="app.js"></script>
     <script>
         (function() {

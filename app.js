@@ -5,6 +5,7 @@ const { renderGlossary, renderReferences, renderVocabulary, filterLanguageConten
 const { renderDua, resetDuaChecklist } = window.UiePlannerDua;
 const { renderGoodPractices, renderSupports, initConditionPills } = window.UiePlannerSupports;
 const { bindSectionNavigation } = window.UiePlannerNavigation;
+const metrics = window.UiePlannerMetrics || {};
 
 function initApp() {
     if (document.body.dataset.appReady === 'true') return;
@@ -17,6 +18,7 @@ function initApp() {
     renderGlossary(glossaryData);
     renderReferences();
     bindGlobalActions();
+    if (typeof metrics.initMetrics === 'function') metrics.initMetrics();
     bindSectionNavigation();
     initConditionPills();
 }

@@ -15,7 +15,11 @@ function initTheme() {
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
-            setTheme(body.classList.contains('theme-dark') ? 'theme-light' : 'theme-dark');
+            var nextTheme = body.classList.contains('theme-dark') ? 'theme-light' : 'theme-dark';
+            setTheme(nextTheme);
+            if (window.UiePlannerMetrics && typeof window.UiePlannerMetrics.trackMetric === 'function') {
+                window.UiePlannerMetrics.trackMetric('theme_changed', { theme: nextTheme });
+            }
         });
     }
 }
