@@ -230,7 +230,6 @@ img {
 
 .theme-dark .brand-logo-dark {
     display: block;
-    filter: brightness(0) invert(1);
     opacity: 0.96;
 }
 
@@ -1685,6 +1684,24 @@ body.theme-dark .theme-icon-dark {
     font-weight: 700;
 }
 
+.student-management-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.student-management-fields label {
+    display: grid;
+    gap: 4px;
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+    font-weight: 700;
+}
+
+.student-management-fields .text-control {
+    min-width: 0;
+}
+
 .advisor-comments-section {
     display: none;
     border: 1px solid color-mix(in oklch, var(--support) 22%, var(--border));
@@ -2763,6 +2780,10 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
 }
 
 @media (max-width: 640px) {
+    .student-management-fields {
+        grid-template-columns: 1fr;
+    }
+
     .nav-container,
     .main-content {
         padding-left: 16px;
