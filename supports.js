@@ -336,7 +336,7 @@ function renderConditionDetail() {
         '<div class="results-title-header">' +
             '<div>' +
                 '<h3>Recomendaciones por estudiante</h3>' +
-                '<p>Cada sección muestra los apoyos sugeridos según la condición registrada. Niveles: 1 🟢 Menor · 2 🟡 Moderado · 3 🔴 Prioritario. Ajusta según observación directa y conversación con el estudiante.</p>' +
+                '<p>El color orienta la prioridad de apoyo: observar, ajustar o intervenir. Revisa las recomendaciones como acuerdos editables según la barrera observada y la conversación con el estudiante.</p>' +
             '</div>' +
         '</div>' +
         profilesHtml;
@@ -392,7 +392,7 @@ function renderSelectedSupportRecommendations() {
         return !!getStudentMatrixProfile(student.cardIndex);
     });
     var descriptionText = hasMatrixApplied
-        ? 'Perfil comparado de requerimientos CIF entre los estudiantes. Niveles: 1 🟢 Menor · 2 🟡 Moderado · 3 🔴 Prioritario. Las recomendaciones específicas están más abajo, agrupadas por estudiante.'
+        ? 'Lee este gráfico como un mapa de énfasis: muestra dónde conviene concentrar observación, coordinación o apoyo. En las recomendaciones siguientes, el semáforo precisa la prioridad de cada ajuste.'
         : hasMultiple
         ? 'Estas orientaciones combinan condiciones seleccionadas y evitan duplicar apoyos. Úsalas como referencia inicial mientras identificas barreras concretas.'
         : 'Estas orientaciones sirven como referencia cuando no hay ficha disponible. La decisión final debe ajustarse a la barrera observada y al diálogo con el estudiante.';
@@ -537,7 +537,7 @@ function _unused_renderSocialResults() {
     }
 
     var headerHtml = hasMatrixData
-        ? '<div class="results-title-header results-toolbar"><div><span class="source-pill">Perfil CIF</span><p>Perfil comparado de requerimientos CIF entre los estudiantes. Las recomendaciones específicas están más abajo, agrupadas por estudiante.</p></div></div>'
+        ? '<div class="results-title-header results-toolbar"><div><span class="source-pill">Perfil CIF</span><p>Lee este gráfico como un mapa de énfasis: muestra dónde conviene concentrar observación, coordinación o apoyo. En las recomendaciones siguientes, el semáforo precisa la prioridad de cada ajuste.</p></div></div>'
         : '<div class="results-title-header results-toolbar"><div><span class="source-pill">Consultor por condici\u00f3n</span><h3>Orientaciones iniciales para observar barreras</h3><p>Revisa cada categor\u00eda como referencia inicial mientras identificas barreras concretas.</p></div></div>';
 
     results.innerHTML = headerHtml + recsHtml;
