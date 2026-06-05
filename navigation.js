@@ -50,6 +50,9 @@ function bindSectionNavigation() {
         const view = target.dataset.view;
         const primaryTarget = target.id;
         setActiveState(view, primaryTarget);
+        if (window.UiePlannerMetrics && typeof window.UiePlannerMetrics.trackSectionView === 'function') {
+            window.UiePlannerMetrics.trackSectionView(primaryTarget, view);
+        }
 
         if (window.location.hash !== '#' + primaryTarget) {
             try {

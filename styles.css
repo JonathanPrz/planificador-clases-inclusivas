@@ -639,6 +639,86 @@ body.theme-dark .theme-icon-dark {
     color: var(--text-secondary);
 }
 
+.pilot-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.pilot-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(82px, 1fr));
+    gap: 8px;
+    min-width: 220px;
+}
+
+.pilot-metric-card {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    background: color-mix(in oklch, var(--bg-primary) 88%, var(--accent-light));
+    padding: 10px 12px;
+}
+
+.pilot-metric-value {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.pilot-metric-label {
+    display: block;
+    margin-top: 4px;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.btn-like {
+    grid-column: 1 / -1;
+    border: 1px solid color-mix(in oklch, var(--accent) 34%, var(--border));
+    background: var(--bg-primary);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 9px 14px;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform var(--transition), border-color var(--transition), background-color var(--transition);
+}
+
+.btn-like:hover,
+.btn-like:focus-visible {
+    border-color: var(--accent);
+    background: color-mix(in oklch, var(--accent-light) 30%, var(--bg-primary));
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.btn-like.liked {
+    background: var(--accent);
+    color: var(--primary-foreground);
+}
+
+.btn-like:disabled {
+    cursor: not-allowed;
+    opacity: .58;
+    transform: none;
+}
+
+.pilot-metrics-note {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
 .additional-menu {
     grid-template-columns: repeat(5, minmax(0, 1fr));
 }
@@ -2835,6 +2915,15 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
 
     .feedback-panel {
         align-items: stretch;
+    }
+
+    .pilot-actions {
+        justify-content: stretch;
+    }
+
+    .pilot-actions > .btn,
+    .pilot-metrics {
+        width: 100%;
     }
 
     .brand-logo {
