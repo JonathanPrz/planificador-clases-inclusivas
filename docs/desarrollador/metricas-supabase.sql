@@ -42,9 +42,9 @@ set search_path = public
 as $$
 begin
     update public.site_metrics
-    set visits = visits + 1,
+    set visits = public.site_metrics.visits + 1,
         updated_at = now()
-    where id = 'main';
+    where public.site_metrics.id = 'main';
 
     return query
     select site_metrics.visits, site_metrics.hearts
@@ -61,9 +61,9 @@ set search_path = public
 as $$
 begin
     update public.site_metrics
-    set hearts = hearts + 1,
+    set hearts = public.site_metrics.hearts + 1,
         updated_at = now()
-    where id = 'main';
+    where public.site_metrics.id = 'main';
 
     return query
     select site_metrics.visits, site_metrics.hearts
