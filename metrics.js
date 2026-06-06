@@ -3,6 +3,10 @@ var config = window.UIE_METRICS_CONFIG || {};
 var visitKey = 'uie-metrics-visit-counted';
 var heartKey = 'uie-metrics-heart-given';
 var placeholderValues = ['CLARITY_PROJECT_ID', 'https://TU-PROYECTO.supabase.co', 'SUPABASE_ANON_KEY', ''];
+var currentSection = null;
+var currentSectionView = null;
+var currentSectionStartedAt = 0;
+var minimumSectionSeconds = 2;
 
 function isConfigured(value) {
     return value && placeholderValues.indexOf(value) === -1;
@@ -53,7 +57,25 @@ function trackMetric(eventName, params) {
     window.clarity('event', eventName);
 }
 
+function flushSectionTime(reason) {
+    if (!currentSection || !currentSectionStartedAt) return;
+    var durationSeconds = Math.round((Date.now() - currentSectionStartedAt) / 1000);
+    if (durationSeconds < minimumSectionSeconds) return;
+    trackMetric('section_time', {
+        section_id: currentSection,
+        view_group: currentSectionView,
+        duration_seconds: durationSeconds,
+        leave_reason: reason || 'navigation'
+    });
+}
+
 function trackSectionView(sectionId, view) {
+    if (currentSection && currentSection !== sectionId) {
+        flushSectionTime('navigation');
+    }
+    currentSection = sectionId;
+    currentSectionView = view;
+    currentSectionStartedAt = Date.now();
     trackMetric('section_view', {
         section_id: sectionId,
         view_group: view,
@@ -186,6 +208,12 @@ function initMetrics() {
     bindMetricActions();
     bindHeartButton();
     loadPublicMetrics().then(countVisitOnce);
+    window.addEventListener('pagehide', function() {
+        flushSectionTime('pagehide');
+    });
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') flushSectionTime('hidden');
+    });
 }
 
 window.UiePlannerMetrics = {
