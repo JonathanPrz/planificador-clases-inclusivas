@@ -14,6 +14,10 @@ Herramienta web para planificación inclusiva en educación superior. Genera rec
 
 Un punto de encuentro para comprender qué se espera del docente al aplicar DUA, definir adecuaciones curriculares de acceso y coordinar apoyos para estudiantes con discapacidad o necesidades específicas.
 
+## Autoría del prototipo
+
+Prototipo diseñado y desarrollado por Jonathan Pérez, Coordinación de Inclusión, Duoc UC Campus Arauco, como iniciativa de innovación pedagógica para apoyar la planificación inclusiva.
+
 ## Stack
 
 | Tecnología | Uso |
