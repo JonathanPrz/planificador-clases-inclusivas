@@ -24,6 +24,7 @@ Clarity se usa solo cuando `clarityProjectId` tiene un ID real. Con el placehold
 Eventos personalizados previstos:
 
 - `section_view`: cambio de sección principal.
+- `section_time`: permanencia aproximada en una sección antes de navegar, cerrar o cambiar de pestaña.
 - `feedback_form_opened`: apertura del formulario de retroalimentación.
 - `site_heart_given`: corazón marcado.
 - `theme_changed`: cambio entre modo claro y oscuro.
@@ -43,6 +44,7 @@ Solo se registran datos agregados o no sensibles como tags de sesión:
 
 - cantidad de estudiantes,
 - cantidad de estudiantes con matriz CIF aplicada,
+- sección visitada y segundos aproximados de permanencia,
 - cantidad de actividades CIF puntuadas,
 - cantidad de ítems DUA seleccionados,
 - si se incluyó gráfico,
