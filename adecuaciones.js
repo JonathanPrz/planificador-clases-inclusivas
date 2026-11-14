@@ -112,6 +112,7 @@ function renderShell(root) {
             '<li><a href="#adq-paso-2"><span class="adq-step-num" id="adq-s2" data-n="2">2</span>Estudiantes</a></li>' +
             '<li><a href="#adq-paso-3"><span class="adq-step-num" id="adq-s3" data-n="3">3</span>Apoyos y documentos</a></li>' +
         '</ol>' +
+        '<div class="adq-layout"><div class="adq-main">' +
         '<div class="adq-block" id="adq-paso-1">' +
             blockHead(1, 'Conversación con el docente', 'adq-p1', 'Nueve preguntas cerradas que estandarizan la conversación. Se responden una vez por sección y valen para todos sus estudiantes.', 'Responde: asesor de inclusión con el docente') +
             '<div class="adq-fields">' +
@@ -126,16 +127,19 @@ function renderShell(root) {
             '<div id="adq-students" class="adq-students"></div>' +
             '<button class="btn btn-secondary" id="adq-add-student" type="button">+ Agregar estudiante</button>' +
         '</div>' +
+        '</div><aside class="adq-side" aria-label="Apoyos propuestos y documentos">' +
         '<div class="adq-block" id="adq-paso-3">' +
             blockHead(3, 'Apoyos propuestos', 'adq-p3', 'Agrupados por la actividad donde está la barrera, de mayor a menor nivel. Marca los que se acordaron con el docente.', '') +
             '<p class="adq-review-note">Catálogo en revisión por el equipo de asesores. Cada apoyo trae en «Detalle» cuándo se aplica, qué no cambia, cuándo no aplica y su fuente.</p>' +
             '<div id="adq-chart"></div>' +
+            '<div id="adq-whole-class"></div>' +
             '<div id="adq-results" class="adq-results" aria-live="polite"></div>' +
             '<div class="adq-cta">' +
                 '<button class="btn adq-doc-btn adq-doc-primary" type="button" id="adq-doc-teacher">Plan para el docente<small>Solo apoyos acordados. Sin condición ni diagnóstico.</small></button>' +
                 '<button class="btn adq-doc-btn" type="button" id="adq-doc-coord">Ficha de coordinación<small>Uso interno: matriz, origen, coordinaciones y seguimiento.</small></button>' +
             '</div>' +
-        '</div>';
+        '</div>' +
+        '</aside></div>';
 }
 function blockHead(n, title, progressId, text, who) {
     return '<div class="adq-block-head"><span class="adq-block-num" aria-hidden="true">' + n + '</span><div>' +
@@ -188,6 +192,7 @@ function renderStudentCard(student, index) {
             '<label class="adq-inchart"><input type="checkbox" data-student-field="inChart" data-uid="' + u + '"' + (student.inChart ? ' checked' : '') + '> Incluir en el gráfico</label>' +
             (state.students.length > 1 ? '<button class="btn btn-secondary btn-sm" type="button" data-remove="' + u + '">Quitar</button>' : '') +
         '</div>' +
+        '<p class="adq-privacy">Los datos personales son opcionales: puedes usar iniciales o un código. <a href="#" data-open-privacy>¿Qué debo considerar?</a></p>' +
         '<div class="adq-fields">' +
             studentField(u, 'name', 'Nombre o iniciales (opcional)', student.name, 'Ej.: C. M.') +
             studentField(u, 'carrera', 'Carrera (opcional)', student.carrera, 'Sin informar') +
@@ -218,7 +223,8 @@ function renderStudentCard(student, index) {
     '</article>';
 }
 function studentField(uid, key, label, value, placeholder) {
-    return '<label class="adq-field">' + esc(label) + '<input class="text-control" type="text" data-student-field="' + key + '" data-uid="' + uid + '" value="' + esc(value) + '" placeholder="' + esc(placeholder) + '" autocomplete="off"></label>';
+    var personal = key === 'name' || key === 'carrera' ? ' student-personal-field' : '';
+    return '<label class="adq-field">' + esc(label) + '<input class="text-control' + personal + '" type="text" data-student-field="' + key + '" data-uid="' + uid + '" value="' + esc(value) + '" placeholder="' + esc(placeholder) + '" autocomplete="off"></label>';
 }
 
 function levels(student) {
@@ -252,8 +258,37 @@ function coordFor(item) {
     if (has(item.etiquetas, 'apoyo_humano') && !has(item.etiquetas, 'canal_lsch') && !has(item.etiquetas, 'canal_guia_interprete') && has(h, 'ninguno')) out.push('apoyo humano');
     return out;
 }
+function duaCoverage() {
+    var links = DATA.duaCatalogLinks || {};
+    var checked = (window.UiePlannerDua && window.UiePlannerDua.getCheckedDuaItems) ? window.UiePlannerDua.getCheckedDuaItems() : [];
+    var map = {};
+    checked.forEach(function(d) {
+        (links[d.checkId] || []).forEach(function(id) { (map[id] = map[id] || []).push(d); });
+    });
+    return map;
+}
+var DUA_COVER = {};
+function coveredBy(item) { return DUA_COVER[item.id] || []; }
+function getRepeatedSupports() {
+    var counts = {};
+    state.students.forEach(function(student) {
+        selectedItems(student).forEach(function(g) {
+            g.items.forEach(function(it) {
+                if (!counts[it.id]) counts[it.id] = { item: it, students: [] };
+                if (counts[it.id].students.indexOf(student.uid) === -1) counts[it.id].students.push(student.uid);
+            });
+        });
+    });
+    return Object.keys(counts).filter(function(id) { return counts[id].students.length >= 2; }).map(function(id) {
+        return { id: id, texto: counts[id].item.texto, item: counts[id].item, students: counts[id].students };
+    });
+}
+function notifyChange() {
+    document.dispatchEvent(new CustomEvent('uie-adecuaciones-change'));
+}
 function score(student, item, act, L) {
     var s = L.lv[act] * 100;
+    if (coveredBy(item).length) s -= 60;
     if (student.origins.length) {
         var hit = item.origenes.filter(function(o) { return has(student.origins, o); }).length;
         s += hit ? 30 + Math.min(hit, 3) * 2 - (item.origenes.length >= 8 ? 20 : 0) : -40;
@@ -297,6 +332,7 @@ function renderDerived(student, L) {
     box.innerHTML = 'Actividades que no están en la matriz: ' + parts.join(' · ');
 }
 function renderResults() {
+    DUA_COVER = duaCoverage();
     var box = document.getElementById('adq-results');
     var multi = state.students.length > 1;
     lastResults = {};
@@ -317,7 +353,34 @@ function renderResults() {
     box.innerHTML = html;
     state.students.forEach(function(student) { renderCount(student); });
     renderChart();
+    renderWholeClass();
     renderProgress();
+    notifyChange();
+}
+function renderWholeClass() {
+    var box = document.getElementById('adq-whole-class');
+    if (!box) return;
+    var repeated = getRepeatedSupports();
+    var coveredActions = {};
+    state.students.forEach(function(student) {
+        var R = lastResults[student.uid];
+        if (!R) return;
+        R.order.forEach(function(act) {
+            R.groups[act].forEach(function(e) { coveredBy(e.item).forEach(function(d) { coveredActions[d.checkId] = d.text; }); });
+        });
+    });
+    var actions = Object.keys(coveredActions).map(function(k) { return coveredActions[k]; });
+    if (!repeated.length && !actions.length) { box.innerHTML = ''; return; }
+    var html = '<section class="adq-whole" aria-labelledby="adq-whole-title"><h4 id="adq-whole-title">Para todo el curso</h4>';
+    if (actions.length) {
+        html += '<p><b>Ya en la base DUA de la clase.</b> Estas acciones DUA cubren apoyos que necesitan estos estudiantes; los apoyos equivalentes aparecen marcados y al final de cada actividad.</p><ul>' +
+            actions.map(function(t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    }
+    if (repeated.length) {
+        html += '<p><b>Acordados para dos o más estudiantes.</b> Conviene aplicarlos a todo el curso e incorporarlos a la <a href="#planificar">planificación DUA</a>. En el plan para el docente aparecen una sola vez, como apoyos para todo el curso.</p><ul>' +
+            repeated.map(function(r) { return '<li>' + esc(r.texto) + ' <span class="adq-whole-n">(' + r.students.length + ' estudiantes)</span></li>'; }).join('') + '</ul>';
+    }
+    box.innerHTML = html + '</section>';
 }
 function appliedText(student) {
     var mods = ans('modalidad').map(function(m) { return QUESTIONS[0].opts.filter(function(o) { return o[0] === m; })[0][1].replace(/ \(.*\)/, ''); });
@@ -361,6 +424,7 @@ function renderItem(student, it) {
         '<div><label for="' + id + '" class="adq-item-text">' + esc(it.texto) + '</label>' +
         (rv.length ? '<div class="adq-note"><b>Revisar con el docente:</b> cambia ' + esc(rv.join(' y ')) + ', que la asignatura evalúa. Úsalo solo si el docente confirma que no es parte de la competencia.</div>' : '') +
         (co.length ? '<div class="adq-note adq-note-coord"><b>Requiere coordinar</b> ' + esc(co.join(', ')) + ': hoy no está disponible según las preguntas.</div>' : '') +
+        (coveredBy(it).length ? '<div class="adq-note adq-note-dua"><b>Ya está en la base DUA de la clase:</b> «' + esc(coveredBy(it)[0].text) + '». Basta con mantenerlo; no hace falta acordarlo aparte.</div>' : '') +
         '<details class="adq-detail"><summary>Detalle</summary><dl>' +
             '<dt>Cuándo</dt><dd>' + esc(it.momentos.map(function(m) { return MOMENTOS[m]; }).join(', ')) + '</dd>' +
             '<dt>Ajusta</dt><dd>' + esc(TIPOS[it.tipo] || '') + '</dd>' +
@@ -551,7 +615,9 @@ function onChange(event) {
     if (t.hasAttribute('data-select') && student) {
         student.selected[t.getAttribute('data-select')] = t.checked;
         renderCount(student);
-        return renderProgress();
+        renderWholeClass();
+        renderProgress();
+        return notifyChange();
     }
     if (t.getAttribute('data-student-field') === 'inChart' && student) {
         student.inChart = t.checked;
@@ -676,8 +742,33 @@ function openTeacherPlan() {
         layout: PDF.boxLayout(), margin: [0, 0, 0, 8]
     });
     var n = 0;
+    var repeated = getRepeatedSupports();
+    var repeatedIds = repeated.map(function(r) { return r.id; });
+    var duaKept = {};
+    state.students.forEach(function(student) {
+        selectedItems(student).forEach(function(g) { g.items.forEach(function(it) { coveredBy(it).forEach(function(d) { duaKept[d.checkId] = d.text; }); }); });
+    });
+    var duaKeptList = Object.keys(duaKept).map(function(k) { return duaKept[k]; });
+    if (repeated.length || duaKeptList.length) {
+        n++;
+        content.push(PDF.sectionTitle(n, 'Para todo el curso'));
+        if (repeated.length) {
+            content.push({ text: 'Apoyos acordados para varios estudiantes. Conviene aplicarlos a todo el curso:', style: 'bodyText' });
+            content.push(PDF.bulletList(repeated.map(function(r) {
+                var stack = [{ text: r.texto }];
+                if (r.item.noCambia) stack.push({ text: 'No cambia: ' + r.item.noCambia, style: 'metaText' });
+                return { stack: stack, margin: [0, 0, 0, 4] };
+            })));
+        }
+        if (duaKeptList.length) {
+            content.push({ text: 'Acciones de su planificación DUA que ya responden a lo que necesitan estos estudiantes. Basta con mantenerlas:', style: 'bodyText', margin: [0, 6, 0, 2] });
+            content.push(PDF.bulletList(duaKeptList));
+        }
+    }
     state.students.forEach(function(student, index) {
-        var groups = selectedItems(student);
+        var groups = selectedItems(student).map(function(g) {
+            return { act: g.act, level: g.level, items: g.items.filter(function(it) { return repeatedIds.indexOf(it.id) === -1; }) };
+        }).filter(function(g) { return g.items.length; });
         if (!groups.length) return;
         n++;
         content.push(PDF.sectionTitle(n, studentLabel(student, index)));
@@ -694,19 +785,19 @@ function openTeacherPlan() {
                 if (it.noCambia) stack.push({ text: 'No cambia: ' + it.noCambia, style: 'metaText' });
                 var rv = reviewFor(it);
                 if (rv.length) stack.push({ text: 'Revisar con el docente: cambia ' + rv.join(' y ') + ', que la asignatura evalúa.', fontSize: 9, bold: true, color: '#8A5A00', margin: [0, 1, 0, 2] });
+                if (coveredBy(it).length) stack.push({ text: 'Ya está en su planificación DUA.', style: 'metaText' });
                 return { stack: stack, margin: [0, 0, 0, 4] };
             })));
         });
     });
     content.push(PDF.sectionTitle(n + 1, 'Seguimiento'));
-    content.push({ text: 'Revisar con el asesor de inclusión, dentro de las próximas cuatro semanas, si los apoyos funcionan. Si algo no resulta, se ajusta en conjunto.', style: 'bodyText' });
-    content.push({
-        table: { widths: [90, '*', '*'], body: [
+    content.push({ stack: [
+        { text: 'Revisar con el asesor de inclusión, dentro de las próximas cuatro semanas, si los apoyos funcionan. Si algo no resulta, se ajusta en conjunto.', style: 'bodyText' },
+        { table: { widths: [90, '*', '*'], body: [
             [{ text: 'Fecha', style: 'tableHeader' }, { text: 'Qué funcionó', style: 'tableHeader' }, { text: 'Qué ajustar', style: 'tableHeader' }],
             [{ text: ' ', margin: [0, 10] }, '', ''], [{ text: ' ', margin: [0, 10] }, '', '']
-        ] },
-        layout: PDF.tableLayout(), margin: [0, 6, 0, 0]
-    });
+        ] }, layout: PDF.tableLayout(), margin: [0, 6, 0, 0] }
+    ], unbreakable: true });
     PDF.preview({ content: content }, 'plan-docente-' + fileSlug(state.asignatura) + '.pdf', { title: 'Plan para el docente' });
 }
 
@@ -737,6 +828,7 @@ function openCoordinationSheet() {
         })).forEach(function(node) { content.push(node); });
     }
     var num = 3;
+    var repeatedIds = getRepeatedSupports().map(function(r) { return r.id; });
     state.students.forEach(function(student, index) {
         if (!matrixCount(student)) return;
         var R = lastResults[student.uid] || compute(student);
@@ -771,7 +863,7 @@ function openCoordinationSheet() {
         if (groups.length) {
             groups.forEach(function(g) {
                 content.push({ text: LABELS[g.act] + ' · barrera ' + LEVEL_NAMES[g.level].toLowerCase(), style: 'categoryTitle' });
-                content.push(PDF.bulletList(g.items.map(function(it) { return it.texto + '  [' + it.id + ']'; })));
+                content.push(PDF.bulletList(g.items.map(function(it) { return it.texto + '  [' + it.id + ']' + (repeatedIds.indexOf(it.id) !== -1 ? '  · para todo el curso' : '') + (coveredBy(it).length ? '  · ya en base DUA' : ''); })));
             });
         } else {
             content.push({ text: 'Aún no hay apoyos acordados.', style: 'bodyText' });
@@ -805,11 +897,13 @@ function init() {
     root.addEventListener('input', onInput);
     root.addEventListener('click', onClick);
     document.addEventListener('uie-theme-change', function() { if (document.getElementById('adq-radar')) renderChart(); });
+    document.addEventListener('uie-dua-change', renderResults);
 }
 
 window.UiePlannerAdecuaciones = {
     init: init,
     getState: function() { return state; },
+    getRepeatedSupports: getRepeatedSupports,
     compute: compute
 };
 })();

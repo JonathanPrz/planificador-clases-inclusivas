@@ -2829,21 +2829,36 @@ function downloadDuaChecklist() {
     var stages = window.UiePlannerData.duaStagesData || [];
     var total = stages.reduce(function(sum, stage) { return sum + stage.checklist.length; }, 0);
 
-    content.push({ text: 'Checklist DUA para la clase', style: 'mainTitle' });
-    content.push({ text: checkedDua.length + ' de ' + total + ' decisiones seleccionadas. Las casillas marcadas indican lo que ya está incorporado en la planificación; las vacías quedan como opciones para revisar.', style: 'introText' });
+    content.push({ text: 'Planificación DUA para la clase', style: 'mainTitle' });
+    content.push({ text: checkedDua.length + ' de ' + total + ' acciones planificadas. Las casillas marcadas son lo que se planificó para la clase; las vacías quedan como opciones para revisar.', style: 'introText' });
+
+    var principles = window.UiePlannerData.duaPrinciples || {};
+    var coverage = window.UiePlannerDua.getPrincipleCoverage ? window.UiePlannerDua.getPrincipleCoverage() : [];
+    var level = window.UiePlannerDua.getDuaCoverageLevel(checkedDua.length);
+    if (coverage.length) {
+        var statusText = { cubierto: 'Cubierto', inicial: 'Inicial (1 acción)', pendiente: 'Sin acciones' };
+        content.push({ text: [{ text: level.label + '. ', bold: true }, level.text.charAt(0).toUpperCase() + level.text.slice(1)], style: 'bodyText', margin: [0, 0, 0, 6] });
+        content.push({
+            table: { headerRows: 1, widths: ['*', 90, 90], body: [[{ text: 'Principio DUA 3.0', style: 'tableHeader' }, { text: 'Acciones', style: 'tableHeader' }, { text: 'Estado', style: 'tableHeader' }]].concat(coverage.map(function(c) {
+                return [{ text: c.label, style: 'tableCell', bold: true }, { text: c.checked + ' de ' + c.total, style: 'tableCell' }, { text: statusText[c.status], style: 'tableCell', color: c.status === 'pendiente' ? PDF.LEVELS[3].text : PDF.COLORS.body }];
+            })) },
+            layout: PDF.tableLayout({ compact: true }), margin: [0, 0, 0, 6]
+        });
+    }
 
     stages.forEach(function(stage, index) {
         var done = stage.checklist.filter(function(item) { return !!checkedTexts[item]; }).length;
         content.push({
             columns: [
-                { width: '*', text: [{ text: (index + 1) + '  ', color: PDF.COLORS.accent }, stage.label, { text: '  ·  ' + stage.badge, color: PDF.COLORS.muted, bold: false, fontSize: 10 }] },
+                { width: '*', text: [{ text: (index + 1) + '  ', color: PDF.COLORS.accent }, stage.label, { text: '  ·  ' + (stage.when || stage.badge), color: PDF.COLORS.muted, bold: false, fontSize: 10 }] },
                 { width: 'auto', text: done + ' de ' + stage.checklist.length, fontSize: 9, bold: false, color: PDF.COLORS.muted, margin: [0, 3, 0, 0] }
             ],
             style: 'sectionTitle',
             headlineLevel: 1
         });
-        stage.checklist.forEach(function(item) {
-            content.push(checkboxItem(item, !!checkedTexts[item]));
+        stage.checklist.forEach(function(item, itemIndex) {
+            var principle = principles[(stage.principles || [])[itemIndex]];
+            content.push(checkboxItem(item + (principle ? '  ·  ' + principle.short : ''), !!checkedTexts[item]));
         });
     });
 

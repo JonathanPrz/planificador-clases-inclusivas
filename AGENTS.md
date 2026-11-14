@@ -27,6 +27,15 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Paso 3: apoyos de `catalogo.js` agrupados por actividad con barrera. Ninguno viene marcado: el asesor marca los acordados con el docente
 - Dos PDF: «Plan para el docente» (sin condición, matriz ni origen) y «Ficha de coordinación» (uso interno, datos sensibles)
 - `catalogo.js` se genera con `node docs/catalogo/generar-catalogo-js.js` desde `docs/catalogo/catalogo-por-barrera-borrador.json`. No editarlo a mano
+- Diseño pensado primero para PC: desde 1180 px, Adecuaciones usa dos columnas (preguntas y estudiantes a la izquierda; apoyos y documentos fijos a la derecha) y DUA muestra el panel «Cobertura DUA 3.0» al costado. Bajo ese ancho todo se apila. No eliminar la versión estrecha: WCAG 1.4.10 exige que funcione a 320 px (zoom al 400 %)
+- `#apoyos` y `#planificar` usan `overflow: clip` para que las columnas fijas (`position: sticky`) funcionen; no volver a `overflow: hidden`
+- Conexión con DUA: `duaCatalogLinks` (data.js) relaciona acciones DUA con apoyos del catálogo. Si la acción está marcada, el apoyo aparece como «Ya está en la base DUA». Los apoyos acordados para 2+ estudiantes se muestran en «Para todo el curso», van una sola vez en el plan para el docente y aparecen en el panel de DUA. Si se regenera el catálogo y cambian los códigos `apNNN`, revisar esa tabla
+- Eventos entre módulos: `uie-dua-change`, `uie-adecuaciones-change`, `uie-theme-change`
+
+### 0b. DUA (dua.js)
+- Acciones redactadas como lo que se planifica hacer (infinitivo), con `when` por etapa (antes, durante o después de la clase)
+- Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). La cobertura se mide por principio: 0 acciones = sin acciones, 1 = inicial, 2 o más = cubierto. Nunca volver a medir por cantidad total
+- Los índices de `checklist` son la clave guardada en el navegador (`etapa-índice`): agregar acciones solo al final de cada etapa
 - El flujo antiguo por condición en `supports.js` (tarjetas, reglas, modal de plan) quedó sin uso en la página; se conserva solo lo que usan otras partes (checklist DUA, buenas prácticas)
 
 

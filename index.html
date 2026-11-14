@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20261114k">
+    <link rel="stylesheet" href="styles.css?v=20261114p">
 </head>
 <body class="theme-light">
     <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
@@ -88,7 +88,7 @@
                 <article class="start-step">
                     <span>2</span>
                     <h3>Define adecuaciones</h3>
-                    <p>Si corresponde, registra estudiantes de forma anónima y suma adecuaciones según sus condiciones o necesidades.</p>
+                    <p>Si persiste una barrera, el asesor de inclusión acuerda apoyos con el docente a partir de la matriz de psicopedagogía.</p>
                 </article>
                 <article class="start-step">
                     <span>3</span>
@@ -150,17 +150,14 @@
                 <p>Prepara una base común de clase: anticipa barreras, ofrece opciones de participación y mantén claro el resultado de aprendizaje.</p>
             </div>
 
-            <div class="progress-container">
-                <div class="progress-header">
-                    <span class="progress-label">Decisiones DUA seleccionadas</span>
-                    <span class="progress-val" id="progress-text">0 decisiones seleccionadas</span>
+            <div class="dua-layout">
+                <div class="dua-main">
+                    <p class="dua-intro-note">Marca lo que planificas hacer en esta clase. Cada acción indica a qué principio del DUA 3.0 responde, y el panel muestra qué principios quedan cubiertos.</p>
+                    <div class="tabs-nav" id="dua-tabs" role="tablist" aria-label="Etapas de implementación DUA"></div>
+                    <div class="tab-content-container" id="dua-panels"></div>
                 </div>
-                <p class="progress-helper" id="progress-helper">Selecciona las acciones que usarás en la clase.</p>
-                <p class="progress-helper">Luego, si hay estudiantes que requieren apoyos específicos, agrega adecuaciones curriculares de acceso.</p>
+                <aside class="dua-coverage" id="dua-coverage" aria-labelledby="dua-coverage-title" aria-live="polite"></aside>
             </div>
-
-            <div class="tabs-nav" id="dua-tabs" role="tablist" aria-label="Etapas de implementación DUA"></div>
-            <div class="tab-content-container" id="dua-panels"></div>
 
             <div class="planner-actions">
                 <button class="btn btn-secondary" id="btn-reset-checklist" type="button">Limpiar checklist</button>
@@ -656,10 +653,10 @@
             <div class="report-body privacy-body">
                 <ul class="privacy-list">
                     <li><strong>Son datos sensibles.</strong> La Ley 19.628, modificada por la Ley 21.719, considera sensibles los datos relativos a la salud (artículo 2, letra g). Una condición de discapacidad junto a un nombre o RUT identifica a la persona.</li>
-                    <li><strong>Usa solo lo necesario.</strong> Nombre, RUT, carrera y código de asignatura son opcionales. Si no los necesitas, déjalos vacíos o usa iniciales o un código, por ejemplo «E1».</li>
+                    <li><strong>Usa solo lo necesario.</strong> Nombre, carrera, asignatura y condición son opcionales. Si no los necesitas, déjalos vacíos o usa iniciales o un código, por ejemplo «E1».</li>
                     <li><strong>Usa información autorizada.</strong> Registra solo lo que el estudiante aceptó compartir, normalmente a través de la Unidad de Inclusión.</li>
                     <li><strong>El planificador no guarda ni envía estos datos.</strong> Se procesan solo en tu navegador y se borran al recargar o cerrar la página.</li>
-                    <li><strong>El PDF y el correo sí los incluyen.</strong> Compártelos solo con quienes participan del apoyo y por canales institucionales. No los dejes en equipos compartidos.</li>
+                    <li><strong>Los PDF sí los incluyen.</strong> El plan para el docente no lleva la condición ni la matriz; la ficha de coordinación sí, y es de uso interno de la Unidad de Inclusión. Compártelos solo por canales institucionales y no los dejes en equipos compartidos.</li>
                 </ul>
                 <p class="small-note">Esta nota es orientativa y no reemplaza la asesoría jurídica de la institución. Texto oficial: <a href="https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf" target="_blank" rel="noopener">Ley 21.719, Diario Oficial, 13 de diciembre de 2024</a>.</p>
                 <div class="privacy-actions">
@@ -690,21 +687,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.12/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.12/vfs_fonts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
-    <script src="logos.js?v=20261114k"></script>
-    <script src="notice.js?v=20261114k"></script>
-    <script src="data.js?v=20261114k"></script>
-    <script src="tabs.js?v=20261114k"></script>
-    <script src="theme.js?v=20261114k"></script>
-    <script src="content.js?v=20261114k"></script>
-    <script src="dua.js?v=20261114k"></script>
-    <script src="pdf.js?v=20261114k"></script>
-    <script src="supports.js?v=20261114k"></script>
-    <script src="catalogo.js?v=20261114k"></script>
-    <script src="adecuaciones.js?v=20261114k"></script>
-    <script src="report.js?v=20261114k"></script>
-    <script src="navigation.js?v=20261114k"></script>
-    <script src="privacy.js?v=20261114k"></script>
-    <script src="app.js?v=20261114k"></script>
+    <script src="logos.js?v=20261114p"></script>
+    <script src="notice.js?v=20261114p"></script>
+    <script src="data.js?v=20261114p"></script>
+    <script src="tabs.js?v=20261114p"></script>
+    <script src="theme.js?v=20261114p"></script>
+    <script src="content.js?v=20261114p"></script>
+    <script src="dua.js?v=20261114p"></script>
+    <script src="pdf.js?v=20261114p"></script>
+    <script src="supports.js?v=20261114p"></script>
+    <script src="catalogo.js?v=20261114p"></script>
+    <script src="adecuaciones.js?v=20261114p"></script>
+    <script src="report.js?v=20261114p"></script>
+    <script src="navigation.js?v=20261114p"></script>
+    <script src="privacy.js?v=20261114p"></script>
+    <script src="app.js?v=20261114p"></script>
     <script>
         (function() {
             var light = document.getElementById('brand-logo-light');
