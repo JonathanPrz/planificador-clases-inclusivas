@@ -148,31 +148,6 @@ const selectedConditionKeys = [];
 var currentMode = 'medical';
 var editingMode = false;
 
-function trackSupportMetric(eventName, params) {
-    if (window.UiePlannerMetrics && typeof window.UiePlannerMetrics.trackMetric === 'function') {
-        window.UiePlannerMetrics.trackMetric(eventName, params || {});
-    }
-}
-
-function getSupportMetricSummary(students) {
-    var list = students || collectPlanStudents();
-    var conditionKeys = [];
-    var matrixCount = 0;
-    list.forEach(function(student) {
-        (student.conditionKeys || []).forEach(function(key) {
-            if (conditionKeys.indexOf(key) === -1) conditionKeys.push(key);
-        });
-        if (student.assessmentSource === 'matrix' || hasStudentMatrixApplied(student.cardIndex || student.index)) matrixCount += 1;
-    });
-    return {
-        student_count: list.length,
-        matrix_students: matrixCount,
-        condition_groups: window.UiePlannerMetrics && typeof window.UiePlannerMetrics.getConditionGroups === 'function'
-            ? window.UiePlannerMetrics.getConditionGroups(conditionKeys)
-            : []
-    };
-}
-
 function setEditingMode(enabled) {
     editingMode = Boolean(enabled);
     var supportsSection = document.getElementById('apoyos');
@@ -226,7 +201,6 @@ function initModeSelector() {
     if (editToggle && editToggle.dataset.boundEdit !== 'true') {
         editToggle.addEventListener('click', function() {
             setEditingMode(!editingMode);
-            trackSupportMetric('editing_mode_changed', { enabled: editingMode });
         });
         editToggle.setAttribute('data-bound-edit', 'true');
         setEditingMode(editingMode);
@@ -1304,9 +1278,10 @@ function createMedicalStudentCard(studentIndex) {
 
     wrapper.innerHTML =
         '<h4>Estudiante ' + studentIndex + '</h4>' +
+        '<p class="privacy-hint">Los datos personales son opcionales. Puedes usar iniciales o un código. <button type="button" class="privacy-info-btn" data-open-privacy>¿Qué debo considerar?</button></p>' +
         '<div class="student-management-fields">' +
-            '<label><span>Nombre (opcional)</span><input id="student-name-medical-' + studentIndex + '" class="text-control student-name student-profile-field" type="text" placeholder="Estudiante ' + studentIndex + '"></label>' +
-            '<label><span>RUT (opcional)</span><input class="text-control student-rut student-profile-field" type="text" placeholder="Sin informar"></label>' +
+            '<label><span>Nombre (opcional)</span><input id="student-name-medical-' + studentIndex + '" class="text-control student-name student-profile-field student-personal-field" type="text" autocomplete="off" placeholder="Estudiante ' + studentIndex + '"></label>' +
+            '<label><span>RUT (opcional)</span><input class="text-control student-rut student-profile-field student-personal-field" type="text" autocomplete="off" placeholder="Sin informar"></label>' +
             '<label><span>Carrera (opcional)</span><input class="text-control student-career student-profile-field" type="text" placeholder="Sin informar"></label>' +
             '<label><span>Código asignatura (opcional)</span><input class="text-control student-section student-profile-field" type="text" placeholder="Sin informar"></label>' +
         '</div>' +
@@ -1444,7 +1419,6 @@ function addMedicalStudentCard(onStudentChange) {
     if (count >= 8) return;
     container.setAttribute('data-student-count', String(count + 1));
     renderMedicalStudents(onStudentChange);
-    trackSupportMetric('support_student_added', { student_count: count + 1 });
 }
 
 function _unused_addSocialStudentCard(onStudentChange) {
@@ -2675,12 +2649,6 @@ function applyStudentMatrix(studentIndex) {
     updateMedicalAddButton();
     updateMedicalRemoveButtons();
     renderSelectedSupportRecommendations();
-    trackSupportMetric('matrix_cif_applied', {
-        scored_activities: scored.length,
-        condition_groups: window.UiePlannerMetrics && typeof window.UiePlannerMetrics.getConditionGroups === 'function'
-            ? window.UiePlannerMetrics.getConditionGroups(conditionKeys)
-            : []
-    });
 }
 
 function clearStudentMatrix(studentIndex) {
@@ -2702,7 +2670,6 @@ function clearStudentMatrix(studentIndex) {
     updateStudentStatusBadge(studentIndex);
     updateMedicalConditionSummaries();
     renderSelectedSupportRecommendations();
-    trackSupportMetric('matrix_cif_cleared');
 }
 
 function updateStudentMatrixBadge(studentIndex) {
@@ -2796,9 +2763,6 @@ function bindPlanModalEvents(onStudentChange) {
             if (!hasMatrix) {
                 this.checked = false;
                 showToast('Para incluir gráficos, completa la rúbrica CIF de al menos un estudiante.');
-                trackSupportMetric('support_plan_chart_include_blocked');
-            } else {
-                trackSupportMetric('support_plan_chart_include_enabled', getSupportMetricSummary(students));
             }
         });
         chartsCb.setAttribute('data-bound', 'true');
@@ -3017,9 +2981,6 @@ function generatePlanPDF() {
     var filename = 'plan-de-apoyo-por-condicion.pdf';
     try {
         window.pdfMake.createPdf(docDef).download(filename);
-        var summary = getSupportMetricSummary(students);
-        summary.include_charts = includeCharts;
-        trackSupportMetric('support_plan_pdf_downloaded', summary);
     } catch(e) {
         console.error('Error generando PDF:', e);
         alert('Error al generar el PDF: ' + e.message);
@@ -3739,7 +3700,6 @@ function downloadDuaChecklist() {
     }
     try {
         window.pdfMake.createPdf(docDef).download('checklist-dua.pdf');
-        trackSupportMetric('dua_checklist_pdf_downloaded', { checked_count: checkedDua.length });
     } catch(e) {
         console.error('Error generando PDF DUA:', e);
         alert('Error al generar el PDF: ' + e.message);
@@ -3869,7 +3829,6 @@ function generatePlanEmail() {
 
     var subject = 'Plan de apoyo docente - ' + today;
     var mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    trackSupportMetric('support_plan_email_opened', getSupportMetricSummary(students));
     window.location.href = mailto;
 }
 

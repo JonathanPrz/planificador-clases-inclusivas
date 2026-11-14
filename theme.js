@@ -17,9 +17,6 @@ function initTheme() {
         themeToggle.addEventListener('click', () => {
             var nextTheme = body.classList.contains('theme-dark') ? 'theme-light' : 'theme-dark';
             setTheme(nextTheme);
-            if (window.UiePlannerMetrics && typeof window.UiePlannerMetrics.trackMetric === 'function') {
-                window.UiePlannerMetrics.trackMetric('theme_changed', { theme: nextTheme });
-            }
         });
     }
 }

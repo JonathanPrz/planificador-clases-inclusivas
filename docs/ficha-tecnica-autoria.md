@@ -31,7 +31,6 @@ El prototipo busca entregar una herramienta práctica para que docentes y equipo
 - Priorización visual de recomendaciones mediante semáforo.
 - Generación de PDF para coordinación docente.
 - Modo claro/oscuro.
-- Métricas anónimas de uso mediante Microsoft Clarity y contador público de visitas/corazones.
 - Documentación técnica y de usuario.
 
 ## Estado Actual
@@ -52,4 +51,4 @@ Antes de adoptar la herramienta como recurso institucional, se recomienda defini
 
 ## Nota De Alcance
 
-Esta ficha no modifica licencias, titularidad ni condiciones de cesión del código. Su objetivo es documentar el origen del prototipo, su propósito y los elementos mínimos que deberían considerarse en un eventual proceso de traspaso o institucionalización.
+Esta ficha tiene como objetivo documentar el origen del prototipo, su propósito y los elementos mínimos que deberían considerarse en un eventual proceso de traspaso o institucionalización.

@@ -5,7 +5,7 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 
 ## Stack
 - HTML + CSS (`styles.css`, ~4100 líneas) + JS vanilla (`supports.js`, `data.js`, `report.js`)
-- Sin framework. Sin bundler. Sin dependencias runtime (excepto pdfmake para PDF).
+- Sin framework. Sin bundler. Dependencias runtime por CDN: pdfmake (PDF) y Chart.js (radar).
 
 ## Convenciones
 - Código legacy: `var` en lugar de `const/let`, funciones nombradas vs arrow
@@ -46,5 +46,5 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - `index.html`: Punto de entrada
 
 ### 6. Respaldo
-- Los respaldos están en `respaldos/` con fecha
+- Los respaldos se guardan fuera de este repositorio, con fecha
 - No eliminar respaldos antiguos

@@ -1,6 +1,5 @@
 ﻿# Planificador Inclusivo UIE
 
-[![Licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 [![Hecho con](https://img.shields.io/badge/hecho%20con-Vanilla%20JS-f7df1e)](.)
 [![Hosting](https://img.shields.io/badge/hosting-GitHub%20Pages-222222)](.)
 
@@ -68,8 +67,5 @@ npx serve .
 | [Manual de usuario](docs/manual-usuario/README.md) | Docentes |
 | [Documentación técnica](docs/desarrollador/README.md) | Desarrolladores |
 | [Arquitectura](docs/desarrollador/arquitectura.md) | Desarrolladores |
+| [Normativa de datos personales](docs/normativa/ley-21719-proteccion-datos.md) | Docentes / Inclusión |
 | [Presentación ejecutiva](docs/presentacion/index.html) | Directivos |
-
-## Licencia
-
-MIT © Unidad de Inclusión y Equidad — Duoc UC

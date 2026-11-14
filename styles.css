@@ -155,6 +155,9 @@ header {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
 details summary:focus-visible {
     outline: 3px solid var(--ring);
     outline-offset: 2px;
@@ -172,6 +175,28 @@ button, select, input {
 img {
     max-width: 100%;
     height: auto;
+}
+
+.skip-link {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 1000;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--bg-card);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-160%);
+}
+
+.skip-link:focus-visible {
+    transform: none;
+}
+
+#contenido-principal:focus {
+    outline: none;
 }
 
 .sr-only {
@@ -263,7 +288,6 @@ img {
 .nav-links a.active {
     color: var(--accent);
     background: var(--accent-light);
-    outline: none;
 }
 
 .nav-links a.active {
@@ -595,7 +619,7 @@ body.theme-dark .theme-icon-dark {
     align-items: center;
     justify-content: center;
     background: var(--accent);
-    color: var(--primary-foreground);
+    color: var(--bg-card);
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
 }
@@ -647,78 +671,6 @@ body.theme-dark .theme-icon-dark {
     justify-content: flex-end;
 }
 
-.pilot-metrics {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(82px, 1fr));
-    gap: 8px;
-    min-width: 220px;
-}
-
-.pilot-metric-card {
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    background: color-mix(in oklch, var(--bg-primary) 88%, var(--accent-light));
-    padding: 10px 12px;
-}
-
-.pilot-metric-value {
-    display: block;
-    font-family: 'Outfit', sans-serif;
-    font-size: var(--text-2xl);
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1;
-}
-
-.pilot-metric-label {
-    display: block;
-    margin-top: 4px;
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-}
-
-.btn-like {
-    grid-column: 1 / -1;
-    border: 1px solid color-mix(in oklch, var(--accent) 34%, var(--border));
-    background: var(--bg-primary);
-    color: var(--accent);
-    border-radius: 999px;
-    padding: 9px 14px;
-    font: inherit;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform var(--transition), border-color var(--transition), background-color var(--transition);
-}
-
-.btn-like:hover,
-.btn-like:focus-visible {
-    border-color: var(--accent);
-    background: color-mix(in oklch, var(--accent-light) 30%, var(--bg-primary));
-    outline: none;
-    transform: translateY(-1px);
-}
-
-.btn-like.liked {
-    background: var(--accent);
-    color: var(--primary-foreground);
-}
-
-.btn-like:disabled {
-    cursor: not-allowed;
-    opacity: .58;
-    transform: none;
-}
-
-.pilot-metrics-note {
-    grid-column: 1 / -1;
-    margin: 0;
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-}
-
 .additional-menu {
     grid-template-columns: repeat(5, minmax(0, 1fr));
 }
@@ -726,7 +678,6 @@ body.theme-dark .theme-icon-dark {
 .additional-menu .start-step:hover,
 .additional-menu .start-step:focus-visible {
     border-color: var(--accent);
-    outline: none;
     transform: translateY(-1px);
 }
 
@@ -743,7 +694,6 @@ body.theme-dark .theme-icon-dark {
 .back-link:focus-visible {
     color: var(--accent);
     text-decoration: underline;
-    outline: none;
 }
 
 .resource-card,
@@ -911,7 +861,6 @@ body.theme-dark .theme-icon-dark {
 .route-strip a:focus-visible {
     border-color: var(--accent);
     color: var(--accent);
-    outline: none;
 }
 
 .report-workbench {
@@ -1332,7 +1281,6 @@ body.theme-dark .theme-icon-dark {
 .btn-primary:hover,
 .btn-primary:focus-visible {
     background: var(--accent-hover);
-    outline: none;
 }
 
 .btn-secondary {
@@ -1344,7 +1292,6 @@ body.theme-dark .theme-icon-dark {
 .btn-secondary:focus-visible {
     border-color: var(--accent);
     color: var(--accent);
-    outline: none;
 }
 
 .selector-box {
@@ -1581,6 +1528,41 @@ body.theme-dark .theme-icon-dark {
     gap: 20px;
     padding: 20px;
     overflow: auto;
+}
+
+.privacy-dialog {
+    width: min(640px, calc(100vw - 32px));
+}
+
+.privacy-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: var(--text-lg);
+    line-height: 1.55;
+}
+
+.privacy-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.privacy-hint {
+    margin: 0 0 12px;
+    font-size: var(--text-md);
+    color: var(--text-secondary);
+}
+
+.privacy-info-btn {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .dialog-close {
@@ -2517,7 +2499,8 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
 }
 
 .ref-search-input:focus {
-    outline: none;
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
     border-color: var(--accent);
 }
 
@@ -2534,7 +2517,8 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
 }
 
 .ref-filter-select:focus {
-    outline: none;
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
     border-color: var(--accent);
 }
 
@@ -2688,7 +2672,6 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
 .ref-btn:focus-visible {
     border-color: var(--accent);
     color: var(--accent);
-    outline: none;
 }
 
 .ref-btn-link {
@@ -2921,8 +2904,7 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
         justify-content: stretch;
     }
 
-    .pilot-actions > .btn,
-    .pilot-metrics {
+    .pilot-actions > .btn {
         width: 100%;
     }
 

@@ -8,13 +8,6 @@
     <meta name="theme-color" content="#111113" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <script>
-        window.UIE_METRICS_CONFIG = {
-            clarityProjectId: 'x2en890zie',
-            supabaseUrl: 'https://xgcmudquxxdrgpjrqslc.supabase.co',
-            supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhnY211ZHF1eHhkcmdwanJxc2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3MTM4ODcsImV4cCI6MjA5NjI4OTg4N30.BYTJKTURbcRcPa_HashhtpW1nguCR7owKxDSDTGWekM'
-        };
-    </script>
     <title>Planificador Inclusivo UIE - Apoyo docente Duoc UC</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +15,7 @@
     <link rel="stylesheet" href="styles.css?v=20260529-support-scale">
 </head>
 <body class="theme-light">
+    <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
     <nav class="navbar" aria-label="Navegación principal">
         <div class="nav-container">
             <a class="nav-brand" href="#inicio" aria-label="Ir al inicio">
@@ -77,7 +71,7 @@
         </div>
     </header>
 
-    <main class="main-content">
+    <main class="main-content" id="contenido-principal" tabindex="-1">
         <section class="section-card overview-section" id="inicio" aria-labelledby="overview-title" data-view="inicio">
             <div class="section-header">
                 <span class="section-kicker">Inicio</span>
@@ -143,19 +137,7 @@
                     <p class="small-note">Tiempo estimado: 3 minutos.</p>
                 </div>
                 <div class="pilot-actions">
-                    <div class="pilot-metrics" id="pilot-metrics" aria-label="Métricas anónimas de uso">
-                        <div class="pilot-metric-card">
-                            <span class="pilot-metric-value" id="metric-visits">—</span>
-                            <span class="pilot-metric-label">visitas</span>
-                        </div>
-                        <div class="pilot-metric-card">
-                            <span class="pilot-metric-value" id="metric-hearts">—</span>
-                            <span class="pilot-metric-label">corazones</span>
-                        </div>
-                        <button class="btn-like" id="btn-site-heart" type="button" aria-pressed="false">♡ Me gusta</button>
-                        <p class="pilot-metrics-note" id="metrics-note">Métricas anónimas del piloto.</p>
-                    </div>
-                    <a class="btn btn-primary" href="https://forms.cloud.microsoft/r/9RwvPGcZME" target="_blank" rel="noopener" data-metric-action="feedback_form_opened">Responder formulario</a>
+                    <a class="btn btn-primary" href="https://forms.cloud.microsoft/r/9RwvPGcZME" target="_blank" rel="noopener">Responder formulario</a>
                 </div>
             </div>
         </section>
@@ -642,6 +624,32 @@
         </form>
     </dialog>
 
+    <dialog class="report-dialog privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-title" aria-describedby="privacy-lead">
+        <form method="dialog" class="report-modal">
+            <div class="report-header">
+                <div class="resource-heading">
+                    <span class="source-pill">Protección de datos</span>
+                    <h3 id="privacy-title">Datos personales de estudiantes</h3>
+                    <p id="privacy-lead">La información sobre discapacidad o salud de una persona es un dato personal sensible.</p>
+                </div>
+                <button class="dialog-close" type="submit" aria-label="Cerrar nota de protección de datos">×</button>
+            </div>
+            <div class="report-body privacy-body">
+                <ul class="privacy-list">
+                    <li><strong>Son datos sensibles.</strong> La Ley 19.628, modificada por la Ley 21.719, considera sensibles los datos relativos a la salud (artículo 2, letra g). Una condición de discapacidad junto a un nombre o RUT identifica a la persona.</li>
+                    <li><strong>Usa solo lo necesario.</strong> Nombre, RUT, carrera y código de asignatura son opcionales. Si no los necesitas, déjalos vacíos o usa iniciales o un código, por ejemplo «E1».</li>
+                    <li><strong>Usa información autorizada.</strong> Registra solo lo que el estudiante aceptó compartir, normalmente a través de la Unidad de Inclusión.</li>
+                    <li><strong>El planificador no guarda ni envía estos datos.</strong> Se procesan solo en tu navegador y se borran al recargar o cerrar la página.</li>
+                    <li><strong>El PDF y el correo sí los incluyen.</strong> Compártelos solo con quienes participan del apoyo y por canales institucionales. No los dejes en equipos compartidos.</li>
+                </ul>
+                <p class="small-note">Esta nota es orientativa y no reemplaza la asesoría jurídica de la institución. Texto oficial: <a href="https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf" target="_blank" rel="noopener">Ley 21.719, Diario Oficial, 13 de diciembre de 2024</a>.</p>
+                <div class="privacy-actions">
+                    <button class="btn btn-primary" type="submit">Entendido</button>
+                </div>
+            </div>
+        </form>
+    </dialog>
+
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-main">
@@ -731,7 +739,7 @@
     <script src="supports.js?v=20260529-support-scale"></script>
     <script src="report.js"></script>
     <script src="navigation.js"></script>
-    <script src="metrics.js"></script>
+    <script src="privacy.js"></script>
     <script src="app.js"></script>
     <script>
         (function() {
