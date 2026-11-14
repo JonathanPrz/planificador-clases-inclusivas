@@ -40,6 +40,13 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Las preguntas y cada estudiante (datos y matriz) tienen un botón «Listo» que se activa al completarlos y los deja como un resumen con «Editar». No se cierran solos: varias preguntas admiten más de una respuesta
 - No volver a numerar los bloques internos de Adecuaciones: la única numeración visible es la de la barra de reunión
 
+### 0c. Apoyos adicionales
+- Alcance: barreras de aprendizaje asociadas a condiciones de salud o discapacidad. No incluir prevención del suicidio ni protocolos de salud mental general; se derivan a los canales de la sede
+- Menú sin números, en este orden: Accesibilidad digital, Lectura fácil, Desregulación y crisis de salud en clase, Práctica profesional y empleo, Estudiantes cuidadores, Vocabulario y glosario, Referencias
+- Cada tema cita su fuente en una nota breve (WCAG 2.2 y W3C WAI, UNE 153101 e Inclusion Europe, Orientaciones DEC Mineduc 2022, Epilepsy Foundation, leyes 21.015, 21.690 y 21.790). Si se cambia una cifra legal, verificarla en BCN Ley Chile
+- Las fuentes de `docs/catalogo/apoyos-nuevos.json` (campo `fuentes`) están en `referencesData` con la fuente «Catálogo de apoyos». Si se agrega una fuente al catálogo, agregarla también ahí
+- La Gem de lectura fácil es externa: mantener el aviso de no pegar datos de estudiantes
+
 ### 0b. DUA (dua.js)
 - Acciones redactadas como lo que se planifica hacer (infinitivo), con `when` por etapa (antes, durante o después de la clase)
 - Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). DUA funciona como un menú (CAST 3.0 habla de «consideraciones», no de casillas): el panel muestra cuántas acciones se eligieron por principio, sin totales ni metas, y si un principio queda vacío plantea una pregunta en vez de un déficit. No volver a mostrar «X de Y» ni niveles tipo «base parcial»
