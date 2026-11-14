@@ -42,6 +42,7 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 ### 0b. DUA (dua.js)
 - Acciones redactadas como lo que se planifica hacer (infinitivo), con `when` por etapa (antes, durante o después de la clase)
 - Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). La cobertura se mide por principio: 0 acciones = sin acciones, 1 = inicial, 2 o más = cubierto. Nunca volver a medir por cantidad total
+- Cada etapa muestra cuántas acciones tiene marcadas, un punto rojo si aún no se ha abierto y un botón «Continuar con…» al final. El panel de cobertura lista las etapas sin revisar
 - Los índices de `checklist` son la clave guardada en el navegador (`etapa-índice`): agregar acciones solo al final de cada etapa
 - El flujo antiguo por condición en `supports.js` (tarjetas, reglas, modal de plan) quedó sin uso en la página; se conserva solo lo que usan otras partes (checklist DUA, buenas prácticas)
 
@@ -84,6 +85,7 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - `data.js`: Datos de condiciones, matriz CIF, reglas, recomendaciones y referencias
 - `supports.js`: Lógica de UI, renderizado, cálculos de prioridad
 - `report.js`: Resumen imprimible y PDF del diálogo de reporte
+- Vista previa de PDF: si el navegador no puede mostrar PDF dentro de la página (marcos aislados, algunos móviles), `pdf.js` dibuja las páginas con pdf.js de Mozilla (jsDelivr, versión fija 6.2.108)
 - `pdf.js`: Estilo común de los PDF (`window.UiePlannerPdf`), carga de pdfmake y vista previa antes de descargar. Todo PDF nuevo debe pasar por `UiePlannerPdf.preview(docDef, archivo, { title })`
 - `privacy.js`: Nota emergente de protección de datos (Ley 21.719)
 - `notice.js`: Avisos y confirmaciones en diálogo accesible

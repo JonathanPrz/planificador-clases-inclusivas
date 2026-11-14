@@ -5545,3 +5545,16 @@ body[data-mode="reunion"] .section-card, body[data-mode="reunion"] .adq-block { 
 .dua-principle-status { white-space: nowrap; }
 .adq-block-head h3 { font-size: 21px; }
 .adq-layout { margin-top: 6px; }
+.pdf-preview-stage { overflow: auto; }
+.pdf-preview-pages { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; padding: 16px; }
+.pdf-preview-page { max-width: 100%; height: auto; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .18); }
+.tab-link { position: relative; }
+.tab-count { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center; margin-left: 6px; background: var(--support); color: #fff; font-size: 12px; font-weight: 700; }
+.tab-count[hidden] { display: none; }
+.tab-link:not(.is-visited)::after { content: ""; position: absolute; top: 8px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.stage-next { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-light); color: var(--text-secondary); }
+.stage-next strong { color: var(--text-primary); }
+.dua-pending { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; background: var(--access-light); font-size: 13.5px; color: var(--text-primary); }
+.dua-pending.is-done { background: var(--support-light); color: var(--support); font-weight: 700; }
+.dua-pending-link { margin: 4px 4px 0 0; padding: 3px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-card); color: var(--accent); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.dua-pending-link:hover { border-color: var(--accent); }

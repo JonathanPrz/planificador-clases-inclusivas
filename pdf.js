@@ -317,9 +317,76 @@ function closePreview() {
     if (dialog && dialog.open) dialog.close();
 }
 
+var PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/';
+var pdfjsLoading = null;
+
+function isFramed() {
+    try {
+        return window.self !== window.top;
+    } catch (error) {
+        return true;
+    }
+}
+
 function canEmbedPdf() {
+    if (isFramed()) return false;
     if (typeof navigator.pdfViewerEnabled === 'boolean') return navigator.pdfViewerEnabled;
     return !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+}
+
+function loadPdfjs() {
+    if (!pdfjsLoading) {
+        pdfjsLoading = import(PDFJS_BASE + 'pdf.min.mjs').then(function(lib) {
+            lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.mjs';
+            return lib;
+        });
+        pdfjsLoading.catch(function() { pdfjsLoading = null; });
+    }
+    return pdfjsLoading;
+}
+
+function renderPages(blob, stage, onError) {
+    setStageMessage(stage, 'Dibujando las páginas…', 'Esto toma solo unos segundos.');
+    var doc;
+    loadPdfjs().then(function(lib) {
+        return blob.arrayBuffer().then(function(buffer) {
+            return lib.getDocument({ data: new Uint8Array(buffer), isEvalSupported: false }).promise;
+        });
+    }).then(function(pdf) {
+        doc = pdf;
+        var pages = document.createElement('div');
+        pages.className = 'pdf-preview-pages';
+        var width = Math.max(320, Math.min(stage.clientWidth - 32, 860));
+        var ratio = Math.min(window.devicePixelRatio || 1, 2);
+        var chain = Promise.resolve();
+        for (var n = 1; n <= pdf.numPages; n++) {
+            (function(number) {
+                chain = chain.then(function() {
+                    return pdf.getPage(number).then(function(page) {
+                        var base = page.getViewport({ scale: 1 });
+                        var viewport = page.getViewport({ scale: (width / base.width) * ratio });
+                        var canvas = document.createElement('canvas');
+                        canvas.className = 'pdf-preview-page';
+                        canvas.width = Math.floor(viewport.width);
+                        canvas.height = Math.floor(viewport.height);
+                        canvas.style.width = Math.floor(viewport.width / ratio) + 'px';
+                        canvas.setAttribute('role', 'img');
+                        canvas.setAttribute('aria-label', 'Página ' + number + ' de ' + pdf.numPages);
+                        pages.appendChild(canvas);
+                        return page.render({ canvasContext: canvas.getContext('2d'), canvas: canvas, viewport: viewport }).promise;
+                    });
+                });
+            })(n);
+        }
+        stage.innerHTML = '';
+        stage.appendChild(pages);
+        return chain;
+    }).then(function() {
+        if (doc) doc.destroy();
+    }).catch(function() {
+        if (doc) doc.destroy();
+        onError();
+    });
 }
 
 function setStageMessage(stage, title, text, isError) {
@@ -387,7 +454,9 @@ function preview(docDef, filename, meta) {
                 frame.src = url + '#view=FitH';
                 stage.appendChild(frame);
             } else {
-                setStageMessage(stage, 'El documento está listo.', 'Este navegador no muestra PDF dentro de la página. Usa «Abrir en pestaña nueva» para revisarlo o descárgalo directamente.');
+                renderPages(blob, stage, function() {
+                    setStageMessage(stage, 'El documento está listo.', 'No se pudo mostrar dentro de la página. Usa «Abrir en pestaña nueva» para revisarlo o descárgalo directamente.');
+                });
             }
             download.focus();
         });

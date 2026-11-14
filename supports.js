@@ -2865,7 +2865,7 @@ function downloadDuaChecklist() {
     content.push({ canvas: [{ type: 'line', x1: 0, y1: 14, x2: 499, y2: 14, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
     content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
 
-    PDF.preview({ content: content }, 'checklist-dua.pdf', { title: 'Checklist DUA', subject: 'Decisiones DUA para la clase' });
+    PDF.preview({ content: content }, 'planificacion-dua.pdf', { title: 'Planificación DUA', subject: 'Diseño de la clase con DUA' });
 }
 
 function checkboxItem(text, checked) {

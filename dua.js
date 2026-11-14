@@ -8,8 +8,9 @@ function renderDua(onChecklistChange = () => {}) {
     if (!tabs || !panels) return;
 
     tabs.innerHTML = duaStagesData.map((stage, index) => `
-        <button class="tab-link ${index === 0 ? 'active' : ''}" id="tab-${stage.id}" type="button" role="tab" aria-selected="${index === 0}" aria-controls="panel-${stage.id}">
+        <button class="tab-link ${index === 0 ? 'active is-visited' : ''}" id="tab-${stage.id}" type="button" role="tab" aria-selected="${index === 0}" aria-controls="panel-${stage.id}" data-stage-tab="${stage.id}">
             <span class="tab-num">${index + 1}</span>${stage.label}
+            <span class="tab-count" data-count-for="${stage.id}"></span>
         </button>
     `).join('');
 
@@ -44,11 +45,59 @@ function renderDua(onChecklistChange = () => {}) {
                 <strong>Ejemplo aplicado:</strong>
                 <p>${stage.example}</p>
             </div>
+            <div class="stage-next">
+                ${index < duaStagesData.length - 1
+                    ? `<span>Siguiente etapa: <strong>${duaStagesData[index + 1].label}</strong> · ${duaStagesData[index + 1].when.toLowerCase()}</span>
+                       <button class="btn btn-primary" type="button" data-go-stage="${duaStagesData[index + 1].id}">Continuar con ${duaStagesData[index + 1].label}</button>`
+                    : `<span>Es la última etapa. Revisa la cobertura y descarga tu planificación.</span>
+                       <button class="btn btn-secondary" type="button" data-go-stage="${duaStagesData[0].id}">Volver a Exploración</button>`}
+            </div>
         </div>
     `).join('');
 
     bindTabs(tabs, panels);
     bindChecklist(onChecklistChange);
+    tabs.addEventListener('click', event => {
+        const tab = event.target.closest('[data-stage-tab]');
+        if (tab) markVisited(tab.dataset.stageTab);
+    });
+    tabs.addEventListener('keyup', () => {
+        const active = tabs.querySelector('[aria-selected="true"]');
+        if (active) markVisited(active.dataset.stageTab);
+    });
+    document.addEventListener('click', event => {
+        const go = event.target.closest('[data-go-stage]');
+        if (!go) return;
+        goToStage(go.dataset.goStage);
+    });
+}
+
+function goToStage(stageId) {
+    const tab = document.getElementById('tab-' + stageId);
+    if (!tab) return;
+    tab.click();
+    tab.focus();
+    const nav = document.getElementById('dua-tabs');
+    if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function markVisited(stageId) {
+    const tab = document.getElementById('tab-' + stageId);
+    if (tab && !tab.classList.contains('is-visited')) {
+        tab.classList.add('is-visited');
+        renderCoverage();
+    }
+}
+
+function updateStageCounts() {
+    duaStagesData.forEach(stage => {
+        const badge = document.querySelector(`[data-count-for="${stage.id}"]`);
+        if (!badge) return;
+        const checked = document.querySelectorAll(`#panel-${stage.id} .DUA-checkbox:checked`).length;
+        badge.textContent = checked ? String(checked) : '';
+        badge.hidden = !checked;
+        badge.setAttribute('aria-label', checked === 1 ? '1 acción marcada' : `${checked} acciones marcadas`);
+    });
 }
 
 function bindChecklist(onChecklistChange) {
@@ -90,6 +139,7 @@ function updateProgress() {
             : `${checkedCount} decisiones seleccionadas`;
     }
     if (progressHelper) progressHelper.textContent = `${level.label}: ${level.text}`;
+    updateStageCounts();
     renderCoverage();
 }
 
@@ -126,8 +176,16 @@ function renderCoverage() {
             <p>${repeated.length === 1 ? 'Un apoyo se acordó' : repeated.length + ' apoyos se acordaron'} para dos o más estudiantes. Conviene incorporarlos a la planificación de toda la clase:</p>
             <ul>${repeated.map(r => `<li>${escapeText(r.texto)}</li>`).join('')}</ul>
         </div>` : '';
+    const pending = duaStagesData.filter(stage => {
+        const tab = document.getElementById('tab-' + stage.id);
+        return tab && !tab.classList.contains('is-visited');
+    });
+    const stagesNote = pending.length
+        ? `<div class="dua-pending"><strong>Etapas sin revisar:</strong> ${pending.map(stage => `<button type="button" class="dua-pending-link" data-go-stage="${stage.id}">${stage.label}</button>`).join(' ')}</div>`
+        : '<div class="dua-pending is-done">Revisaste las cuatro etapas.</div>';
     box.innerHTML = `
         <h3 id="dua-coverage-title">Cobertura DUA 3.0</h3>
+        ${stagesNote}
         <p class="dua-coverage-level"><strong>${level.label}.</strong> ${level.text}</p>
         <p class="dua-coverage-count">${checked === 1 ? '1 acción seleccionada' : checked + ' acciones seleccionadas'}</p>
         <ul class="dua-principles">${rows}</ul>
