@@ -192,6 +192,7 @@ function renderStudentCard(student, index) {
             '<label class="adq-inchart"><input type="checkbox" data-student-field="inChart" data-uid="' + u + '"' + (student.inChart ? ' checked' : '') + '> Incluir en el gráfico</label>' +
             (state.students.length > 1 ? '<button class="btn btn-secondary btn-sm" type="button" data-remove="' + u + '">Quitar</button>' : '') +
         '</div>' +
+        '<p class="adq-privacy">Los datos personales son opcionales: puedes usar iniciales o un código. <a href="#" data-open-privacy>¿Qué debo considerar?</a></p>' +
         '<div class="adq-fields">' +
             studentField(u, 'name', 'Nombre o iniciales (opcional)', student.name, 'Ej.: C. M.') +
             studentField(u, 'carrera', 'Carrera (opcional)', student.carrera, 'Sin informar') +
@@ -222,7 +223,8 @@ function renderStudentCard(student, index) {
     '</article>';
 }
 function studentField(uid, key, label, value, placeholder) {
-    return '<label class="adq-field">' + esc(label) + '<input class="text-control" type="text" data-student-field="' + key + '" data-uid="' + uid + '" value="' + esc(value) + '" placeholder="' + esc(placeholder) + '" autocomplete="off"></label>';
+    var personal = key === 'name' || key === 'carrera' ? ' student-personal-field' : '';
+    return '<label class="adq-field">' + esc(label) + '<input class="text-control' + personal + '" type="text" data-student-field="' + key + '" data-uid="' + uid + '" value="' + esc(value) + '" placeholder="' + esc(placeholder) + '" autocomplete="off"></label>';
 }
 
 function levels(student) {

@@ -5496,3 +5496,5 @@ body:not([data-view="inicio"]) .hero {
     .adq-side .adq-doc-btn { padding: 10px 14px; }
     .adq-side .adq-doc-btn small { font-size: 12.5px; }
 }
+.adq-privacy { margin: 0; padding: 10px 16px 0; font-size: 13.5px; color: var(--text-muted); }
+.adq-privacy a { color: var(--accent); font-weight: 700; }
