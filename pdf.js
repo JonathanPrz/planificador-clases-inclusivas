@@ -15,10 +15,10 @@ var COLORS = {
 };
 
 var LEVELS = {
-    0: { fill: '#D1D5DB', soft: '#F3F4F6', text: '#374151', label: 'Sin ajuste' },
-    1: { fill: '#F2B8B1', soft: '#FDEDEB', text: '#7A1F18', label: 'Ajuste menor' },
-    2: { fill: '#DE6A5E', soft: '#FBE1DE', text: '#7A1F18', label: 'Ajuste moderado' },
-    3: { fill: '#9B2C24', soft: '#F6D3CF', text: '#6B1A14', label: 'Ajuste prioritario' }
+    0: { fill: '#D1D5DB', soft: '#F3F4F6', text: '#374151', label: 'Sin barrera' },
+    1: { fill: '#F2B8B1', soft: '#FDEDEB', text: '#7A1F18', label: 'Leve' },
+    2: { fill: '#DE6A5E', soft: '#FBE1DE', text: '#7A1F18', label: 'Moderada' },
+    3: { fill: '#9B2C24', soft: '#F6D3CF', text: '#6B1A14', label: 'Significativa' }
 };
 
 var STYLES = {
@@ -157,7 +157,7 @@ function levelLegend() {
 
 function levelBarChart(activityLabels, series) {
     var maxBar = series.length > 2 ? 54 : series.length === 2 ? 90 : 170;
-    var header = [{ text: 'Actividad CIF', style: 'tableHeader' }];
+    var header = [{ text: 'Actividad', style: 'tableHeader' }];
     series.forEach(function(s) { header.push({ text: s.label, style: 'tableHeader' }); });
     var widths = [series.length > 2 ? 92 : 130];
     series.forEach(function() { widths.push('*'); });

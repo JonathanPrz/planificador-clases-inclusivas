@@ -18,3 +18,7 @@ Todos los apoyos quedan en estado `pendiente` hasta que el equipo de asesores lo
 Actividades nuevas, además de las 11 de la matriz: `grupo` (Trabajo en grupo), `ava` (Aula virtual AVA) y `terreno` (Prácticas en terreno).
 
 Vacíos que siguen: «Hablar» y «Participar en la sala de clases» no tienen apoyos para práctica profesional, y la práctica profesional comparte pocos apoyos con el resto del catálogo. El equipo puede marcar qué apoyos generales también sirven en práctica profesional.
+
+## Uso en la web
+
+`node generar-catalogo-js.js` crea `catalogo.js` en la raíz del repositorio, que es lo que carga la página. Después de cambiar el borrador o `apoyos-nuevos.json`, ejecutar `node migrar.js` y luego `node generar-catalogo-js.js`, y subir el `?v=` en `index.html`.
