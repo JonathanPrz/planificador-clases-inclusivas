@@ -34,6 +34,7 @@ function setTheme(themeName) {
     if (window.UiePlannerSupports && window.UiePlannerSupports.rethemeAllRadarCharts) {
         window.UiePlannerSupports.rethemeAllRadarCharts();
     }
+    document.dispatchEvent(new CustomEvent('uie-theme-change'));
 }
 
 window.UiePlannerTheme = { initTheme };

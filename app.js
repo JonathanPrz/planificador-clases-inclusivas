@@ -19,6 +19,7 @@ function initApp() {
     bindGlobalActions();
     bindSectionNavigation();
     initConditionPills();
+    if (window.UiePlannerAdecuaciones) window.UiePlannerAdecuaciones.init();
 }
 
 function bindGlobalActions() {

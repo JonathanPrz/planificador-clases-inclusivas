@@ -19,6 +19,17 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 
 ## Decisiones técnicas clave
 
+### 0. Flujo de adecuaciones por barrera (adecuaciones.js, vigente)
+- `adecuaciones.js` (`window.UiePlannerAdecuaciones`) maneja toda la sección «Adecuaciones curriculares» dentro de `#adecuaciones-app`
+- Paso 1: 9 preguntas que el asesor responde con el docente, una vez por sección (valen para todos los estudiantes). Filtran por modalidad (teórica, práctica, práctica profesional, online), marcan «Revisar con el docente» si un apoyo cambia un formato que se evalúa, y «Requiere coordinar» si falta un apoyo humano
+- Paso 2: estudiantes (máx. 8). La matriz CIF se digita igual que la ficha de psicopedagogía (PAEDIS), escala 4 a 1. Nivel de barrera = 4 − valor (0 sin barrera, 1 leve, 2 moderada, 3 significativa). Condición opcional, varias permitidas; solo sugiere el origen de la barrera
+- Actividades derivadas (no están en la matriz): trabajo en grupo, aula virtual, salidas a terreno. Se activan con las preguntas y toman el nivel más alto de sus actividades relacionadas
+- Paso 3: apoyos de `catalogo.js` agrupados por actividad con barrera. Ninguno viene marcado: el asesor marca los acordados con el docente
+- Dos PDF: «Plan para el docente» (sin condición, matriz ni origen) y «Ficha de coordinación» (uso interno, datos sensibles)
+- `catalogo.js` se genera con `node docs/catalogo/generar-catalogo-js.js` desde `docs/catalogo/catalogo-por-barrera-borrador.json`. No editarlo a mano
+- El flujo antiguo por condición en `supports.js` (tarjetas, reglas, modal de plan) quedó sin uso en la página; se conserva solo lo que usan otras partes (checklist DUA, buenas prácticas)
+
+
 ### 1. Recomendaciones viven en data.js
 - `recommendationsData` tiene catálogo de apoyos clasificados por condición y dimensión
 - `matrixRecommendationRules` asigna reglas específicas según puntajes CIF
