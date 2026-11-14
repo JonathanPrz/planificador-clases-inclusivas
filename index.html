@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20261114e">
+    <link rel="stylesheet" href="styles.css?v=20261114f">
 </head>
 <body class="theme-light">
     <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
@@ -164,7 +164,7 @@
 
             <div class="planner-actions">
                 <button class="btn btn-secondary" id="btn-reset-checklist" type="button">Limpiar checklist</button>
-                <button class="btn btn-primary" id="btn-download-dua" type="button">📄 Descargar checklist DUA</button>
+                <button class="btn btn-primary" id="btn-download-dua" type="button">Revisar y descargar PDF</button>
             </div>
         </section>
 
@@ -252,7 +252,7 @@
                     <span class="plan-cta-divider-text">¿Listo para generar?</span>
                 </div>
                 <button id="btn-toggle-editing-mode" class="btn btn-secondary btn-cta" type="button" aria-pressed="false">Editar recomendaciones</button>
-                <button id="btn-generate-plan-medical" class="btn btn-generate-plan btn-cta" type="button">📄 Generar plan de apoyo</button>
+                <button id="btn-generate-plan-medical" class="btn btn-generate-plan btn-cta" type="button">Generar plan de apoyo</button>
             </div>
 
             <div class="section-footer-action">
@@ -757,11 +757,9 @@
                 </label>
                 <div class="plan-modal-actions">
                     <button class="btn btn-generate-pdf" id="btn-generate-pdf" type="button">
-                        <span class="btn-generate-plan-icon">📄</span>
-                        Generar PDF
+                        Ver vista previa del PDF
                     </button>
                     <button class="btn btn-generate-email" id="btn-generate-email" type="button">
-                        <span class="btn-generate-plan-icon">📧</span>
                         Enviar por correo
                     </button>
                 </div>
@@ -772,18 +770,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.12/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.12/vfs_fonts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
-    <script src="logos.js?v=20261114e"></script>
-    <script src="notice.js?v=20261114e"></script>
-    <script src="data.js?v=20261114e"></script>
-    <script src="tabs.js?v=20261114e"></script>
-    <script src="theme.js?v=20261114e"></script>
-    <script src="content.js?v=20261114e"></script>
-    <script src="dua.js?v=20261114e"></script>
-    <script src="supports.js?v=20261114e"></script>
-    <script src="report.js?v=20261114e"></script>
-    <script src="navigation.js?v=20261114e"></script>
-    <script src="privacy.js?v=20261114e"></script>
-    <script src="app.js?v=20261114e"></script>
+    <script src="logos.js?v=20261114f"></script>
+    <script src="notice.js?v=20261114f"></script>
+    <script src="data.js?v=20261114f"></script>
+    <script src="tabs.js?v=20261114f"></script>
+    <script src="theme.js?v=20261114f"></script>
+    <script src="content.js?v=20261114f"></script>
+    <script src="dua.js?v=20261114f"></script>
+    <script src="pdf.js?v=20261114f"></script>
+    <script src="supports.js?v=20261114f"></script>
+    <script src="report.js?v=20261114f"></script>
+    <script src="navigation.js?v=20261114f"></script>
+    <script src="privacy.js?v=20261114f"></script>
+    <script src="app.js?v=20261114f"></script>
     <script>
         (function() {
             var light = document.getElementById('brand-logo-light');

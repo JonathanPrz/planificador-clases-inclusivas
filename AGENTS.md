@@ -4,7 +4,7 @@
 App web (sin backend/build) para planificación inclusiva en educación superior. Genera recomendaciones de apoyo pedagógico según condiciones de estudiantes, usando matriz CIF-OMS.
 
 ## Stack
-- HTML + CSS (`styles.css`, ~4400 líneas) + JS vanilla (`supports.js`, `data.js`, `report.js`)
+- HTML + CSS (`styles.css`, ~4900 líneas) + JS vanilla (`supports.js`, `data.js`, `report.js`, `pdf.js`)
 - Sin framework. Sin bundler. Dependencias runtime por CDN: pdfmake (PDF) y Chart.js (radar).
 
 ## Convenciones
@@ -37,7 +37,8 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Esto permite mostrar badges de prioridad incluso sin datos de matriz
 - Scores de referencia se calculan con `barrierProfiles[condición]` × dimensiones CIF
 
-### 4. Prioridades (semaforo)
+### 4. Prioridades (niveles de barrera)
+- Colores: escala secuencial de un solo tono (gris → rojo claro → rojo → rojo oscuro), legible para daltonismo y en blanco y negro. Variables `--lvl-0` a `--lvl-3` en CSS y `UiePlannerPdf.LEVELS` en PDF. Siempre acompañar el color con número o texto
 - Severidad 0 → score 4 → Sin ajuste
 - Severidad 1 → score 3 → Observación
 - Severidad 2 → score 2 → Recomendado
@@ -46,7 +47,8 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 ### 5. Archivos principales
 - `data.js`: Datos de condiciones, matriz CIF, reglas, recomendaciones y referencias
 - `supports.js`: Lógica de UI, renderizado, cálculos de prioridad
-- `report.js`: Generación de PDF
+- `report.js`: Resumen imprimible y PDF del diálogo de reporte
+- `pdf.js`: Estilo común de los PDF (`window.UiePlannerPdf`), carga de pdfmake y vista previa antes de descargar. Todo PDF nuevo debe pasar por `UiePlannerPdf.preview(docDef, archivo, { title })`
 - `privacy.js`: Nota emergente de protección de datos (Ley 21.719)
 - `notice.js`: Avisos y confirmaciones en diálogo accesible
 - `index.html`: Punto de entrada
