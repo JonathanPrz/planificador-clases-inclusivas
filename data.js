@@ -36,14 +36,13 @@ const duaStagesData = [
             intro: 'Conoce al grupo antes de escoger estrategias. No todos los cursos son diversos en el mismo sentido.',
             focus: ['Levantar preferencias, barreras e intereses.', 'Revisar antecedentes compartidos por equipos de apoyo.', 'Observar rutinas, comprensión, motivación, sensibilidad sensorial, movilidad y participación socioemocional.'],
             checklist: [
-            'Revisar los antecedentes disponibles y los acuerdos de apoyo autorizados.',
+            'Revisar la información y los acuerdos de apoyo que la Unidad de Inclusión haya compartido.',
             'Aplicar una encuesta, diálogo o actividad breve para conocer intereses y preferencias.',
-            'Identificar barreras físicas, sensoriales, digitales o actitudinales del curso.',
-            'Caracterizar el curso: rutinas, comunicación, motivación, sensibilidad sensorial, movilidad y participación socioemocional.',
+            'Identificar las barreras del curso (físicas, sensoriales, digitales, comunicacionales o actitudinales) y cómo responde a rutinas, cambios y trabajo en grupo.',
             'Detectar posibles distractores, fuentes de ansiedad o momentos de baja previsibilidad.',
-            'Considerar identidades, experiencias y capital cultural del estudiantado al diseñar ejemplos.'
+            'Usar ejemplos que reflejen las experiencias, realidades y orígenes de los estudiantes.'
         ],
-        principles: ['base', 'compromiso', 'base', 'base', 'compromiso', 'compromiso'],
+        principles: ['base', 'compromiso', 'base', 'compromiso', 'compromiso'],
         when: 'Antes de la clase',
         example: 'Antes de iniciar una unidad, pregunta qué formatos ayudan más a comprender: demostración, guía paso a paso, video breve, práctica acompañada o lectura.'
     },
@@ -52,18 +51,19 @@ const duaStagesData = [
         label: 'Preparación',
         badge: 'Diseño de la sesión',
         source: 'Marco DUA 3.0',
-        intro: 'Diseña opciones alineadas al objetivo de aprendizaje: elección, representación flexible y formas variadas de respuesta.',
+        intro: 'Prepara la clase con opciones para entender, participar y responder, sin cambiar el objetivo.',
         focus: ['Aclarar propósito y criterios de logro.', 'Preparar materiales accesibles y editables.', 'Planificar apoyos sin bajar exigencias.'],
         checklist: [
             'Definir objetivos claros y comunicarlos en más de un formato.',
-            'Incluir opciones de elección auténtica vinculadas al objetivo.',
-            'Preparar materiales con estructura, contraste, fuente legible y texto alternativo.',
+            'Dar opciones reales para elegir cómo trabajar o entregar, sin cambiar el objetivo.',
+            'Preparar materiales legibles: títulos, buen contraste, letra clara y descripción de las imágenes importantes.',
             'Diseñar instrucciones paso a paso con tiempos, roles y criterios explícitos.',
             'Anticipar alternativas de respuesta: escrita, oral, visual, práctica o digital.',
-            'Preparar vocabulario, símbolos o conceptos clave con ejemplos y apoyos visuales.',
-            'Permitir herramientas de apoyo para producir (corrector, plantillas, calculadora, software) cuando no sean lo que se evalúa.'
+            'Preparar vocabulario, símbolos o conceptos clave con ejemplos y apoyos visuales, considerando a quienes tienen otro idioma materno.',
+            'Permitir herramientas de apoyo para producir (corrector, plantillas, calculadora, software) cuando no sean lo que se evalúa.',
+            'Activar conocimientos previos y destacar las ideas clave de la clase, por ejemplo con un caso, un esquema o una pregunta inicial.'
         ],
-        principles: ['representacion', 'compromiso', 'representacion', 'accion', 'accion', 'representacion', 'accion'],
+        principles: ['representacion', 'compromiso', 'representacion', 'accion', 'accion', 'representacion', 'accion', 'representacion'],
         when: 'Antes de la clase',
         example: 'Para una evaluación aplicada, permite escoger entre informe breve, demostración técnica o defensa oral con pauta común.'
     },
@@ -72,18 +72,19 @@ const duaStagesData = [
         label: 'Integración',
         badge: 'En el aula',
             source: 'Experiencia DUA Duoc UC',
-        intro: 'Observa cómo interactúan los estudiantes con materiales, tiempos, equipos y AVA. La implementación también produce nueva información.',
+        intro: 'Durante la clase, observa cómo responde el curso y ajusta sobre la marcha.',
         focus: ['Monitorear participación real.', 'Ajustar ritmos y apoyos durante la clase.', 'Promover pertenencia, colaboración con roles claros y retroalimentación formativa.'],
         checklist: [
             'Explicar la estructura de la clase y anticipar cambios de rutina.',
-            'Usar ejemplos conectados con contextos reales y diversos.',
+            'Usar ejemplos conectados con contextos reales y diversos, e incluir momentos de juego o desafío cuando sirvan al objetivo.',
             'Organizar el trabajo colaborativo con roles definidos, normas de convivencia e instrucciones orales, escritas y visuales.',
-            'Entregar retroalimentación oportuna, clara y empática, por texto, audio, video o ejemplos según necesidad.',
-            'Considerar tanto el proceso de colaboración como el producto final al retroalimentar.',
+            'Dar comentarios a tiempo que digan qué hacer para mejorar, sobre el proceso y el resultado, por escrito, en audio o con ejemplos.',
             'Permitir pausas, aclaraciones o apoyos cuando aparezcan barreras no previstas.',
-            'Verificar la comprensión durante la clase con preguntas, reformulación o ejemplos antes de avanzar.'
+            'Verificar la comprensión durante la clase con preguntas, reformulación o ejemplos antes de avanzar.',
+            'Modelar el procedimiento y dar práctica guiada antes del trabajo autónomo, retirando el apoyo de a poco.',
+            'Cuidar que todos tengan un lugar en el curso: normas de respeto acordadas y conflictos que se reparan conversando.'
         ],
-        principles: ['compromiso', 'compromiso', 'compromiso', 'compromiso', 'compromiso', 'compromiso', 'representacion'],
+        principles: ['compromiso', 'compromiso', 'compromiso', 'compromiso', 'compromiso', 'representacion', 'accion', 'compromiso'],
         when: 'Durante la clase',
         example: 'En trabajo grupal, asigna roles visibles: coordinación, registro, vocería y control de tiempos, permitiendo ajustes si un rol genera sobrecarga.'
     },
@@ -92,27 +93,26 @@ const duaStagesData = [
         label: 'Optimización',
         badge: 'Mejora continua',
         source: 'Marco DUA 3.0',
-        intro: 'Después de implementar, revisa evidencias y decide qué mantener, ajustar o retirar. La inclusión es un ciclo, no un evento.',
+        intro: 'Después de la clase, decide qué mantener, qué ajustar y qué dejar para la próxima.',
         focus: ['Revisar datos de participación y logro.', 'Detectar nuevas barreras.', 'Documentar decisiones útiles para la próxima versión.'],
         checklist: [
-            'Analizar qué apoyos aumentaron la participación, la comprensión o la autonomía.',
+            'Registrar qué apoyos aumentaron la participación, la comprensión o la autonomía, para reutilizarlos o ajustarlos.',
             'Preguntar al curso qué facilitó o dificultó el aprendizaje.',
-            'Ajustar los materiales del AVA según accesibilidad, claridad y navegación.',
-            'Registrar los apoyos que conviene reutilizar o personalizar.',
+            'Ordenar los materiales del AVA para que sean fáciles de encontrar, leer y usar.',
             'Planificar una mejora concreta para la siguiente clase.',
             'Dejar criterios, pasos y recursos visibles para que el estudiante revise su avance.',
-            'Incluir una breve autoevaluación o cierre metacognitivo para reconocer estrategias útiles.'
+            'Cerrar con una breve reflexión donde los estudiantes digan qué les ayudó a aprender.'
         ],
-        principles: ['base', 'compromiso', 'representacion', 'base', 'base', 'accion', 'accion'],
+        principles: ['base', 'base', 'representacion', 'base', 'accion', 'accion'],
         when: 'Después de la clase',
         example: 'Si muchos estudiantes pidieron instrucciones nuevamente, convierte la pauta en una lista visible con ejemplo de entrega esperada.'
     }
 ];
 
 const duaPrinciples = {
-    compromiso: { label: 'Compromiso', short: 'Compromiso', text: 'Por qué aprender: interés, relevancia, pertenencia y autorregulación.' },
-    representacion: { label: 'Representación', short: 'Representación', text: 'Qué aprender: la información en más de un formato y con apoyos para comprenderla.' },
-    accion: { label: 'Acción y expresión', short: 'Acción y expresión', text: 'Cómo demostrar lo aprendido: formas de responder, herramientas y organización.' },
+    compromiso: { label: 'Motivación', short: 'Motivación', term: 'Compromiso', text: 'Que quieran aprender: interés, sentido y sentirse parte del curso.' },
+    representacion: { label: 'Comprensión', short: 'Comprensión', term: 'Representación', text: 'Que puedan entender: la información en más de una forma y con apoyos.' },
+    accion: { label: 'Expresión', short: 'Expresión', term: 'Acción y expresión', text: 'Que puedan mostrar lo aprendido: formas de responder, herramientas y organización.' },
     base: { label: 'Conocer y revisar', short: 'Conocer y revisar', text: 'Conocer al curso y revisar la clase. No cuenta como principio, pero sostiene los tres.' }
 };
 
@@ -124,8 +124,9 @@ const duaCatalogLinks = {
     'preparacion-6': ['ap016', 'ap067', 'ap139'],
     'integracion-0': ['ap052', 'ap116', 'ap127', 'ap159'],
     'integracion-2': ['ap076', 'ap157'],
-    'integracion-6': ['ap104'],
-    'optimizacion-5': ['ap141']
+    'integracion-5': ['ap104'],
+    'integracion-6': ['ap150'],
+    'optimizacion-4': ['ap141']
 };
 
 const accommodationsData = {

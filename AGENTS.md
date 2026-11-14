@@ -32,10 +32,20 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Conexión con DUA: `duaCatalogLinks` (data.js) relaciona acciones DUA con apoyos del catálogo. Si la acción está marcada, el apoyo aparece como «Ya está en la base DUA». Los apoyos acordados para 2+ estudiantes se muestran en «Para todo el curso», van una sola vez en el plan para el docente y aparecen en el panel de DUA. Si se regenera el catálogo y cambian los códigos `apNNN`, revisar esa tabla
 - Eventos entre módulos: `uie-dua-change`, `uie-adecuaciones-change`, `uie-theme-change`
 
+### 0a. Recorrido y modos (navigation.js)
+- Inicio es solo una puerta de entrada con tres caminos: «Planificar mi clase» (docente), «Reunión de acompañamiento» (asesor y docente) y «Consultar un tema». Diagrama en `docs/diagramas/flujo-planificador.svg`
+- El modo se guarda en `body[data-mode]` y en sessionStorage (`uie-modo`). En modo `reunion` aparece la barra `#meeting-bar` (1 Diseño de la clase → 2 Casos particulares → 3 Documentos) en las vistas DUA y Adecuaciones, y se oculta la nota para docentes solos (`#solo-note`)
+- Menú: «Diseño de la clase» (DUA) y «Casos particulares» (adecuaciones). Dentro de la sección se mantienen los términos «Base DUA» y «Adecuaciones curriculares de acceso»
+- Evitar texto que repita lo que la herramienta ya aplica. Antes de agregar una sección nueva, revisar si ya existe en Apoyos adicionales
+- No volver a numerar los bloques internos de Adecuaciones: la única numeración visible es la de la barra de reunión
+
 ### 0b. DUA (dua.js)
 - Acciones redactadas como lo que se planifica hacer (infinitivo), con `when` por etapa (antes, durante o después de la clase)
-- Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). La cobertura se mide por principio: 0 acciones = sin acciones, 1 = inicial, 2 o más = cubierto. Nunca volver a medir por cantidad total
-- Los índices de `checklist` son la clave guardada en el navegador (`etapa-índice`): agregar acciones solo al final de cada etapa
+- Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). DUA funciona como un menú (CAST 3.0 habla de «consideraciones», no de casillas): el panel muestra cuántas acciones se eligieron por principio, sin totales ni metas, y si un principio queda vacío plantea una pregunta en vez de un déficit. No volver a mostrar «X de Y» ni niveles tipo «base parcial»
+- Cada etapa muestra cuántas acciones tiene marcadas, un punto rojo si aún no se ha abierto y un botón «Continuar con…» al final. El panel de cobertura lista las etapas sin revisar
+- Los índices de `checklist` son la clave guardada en el navegador (`etapa-índice`, clave `dua-checklist-state-v2`): agregar acciones solo al final de cada etapa. Si se reordenan, cambiar la versión de la clave y actualizar `duaCatalogLinks`
+- Escrito para docentes sin formación pedagógica: los principios se muestran como Motivación, Comprensión y Expresión (el término de CAST va solo como dato secundario en `duaPrinciples[].term`). Evitar jerga en las acciones («metacognitivo», «capital cultural», «elección auténtica»). Arriba de la sección hay una definición de DUA en una frase y un «Cómo funciona» de una línea
+- Menú revisado contra las 36 consideraciones DUA 3.0 (noviembre de 2026): 27 acciones, 10 de compromiso, 6 de representación, 6 de acción y expresión y 5 de conocer y revisar
 - El flujo antiguo por condición en `supports.js` (tarjetas, reglas, modal de plan) quedó sin uso en la página; se conserva solo lo que usan otras partes (checklist DUA, buenas prácticas)
 
 
@@ -77,6 +87,7 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - `data.js`: Datos de condiciones, matriz CIF, reglas, recomendaciones y referencias
 - `supports.js`: Lógica de UI, renderizado, cálculos de prioridad
 - `report.js`: Resumen imprimible y PDF del diálogo de reporte
+- Vista previa de PDF: si el navegador no puede mostrar PDF dentro de la página (marcos aislados, algunos móviles), `pdf.js` dibuja las páginas con pdf.js de Mozilla (jsDelivr, versión fija 6.2.108)
 - `pdf.js`: Estilo común de los PDF (`window.UiePlannerPdf`), carga de pdfmake y vista previa antes de descargar. Todo PDF nuevo debe pasar por `UiePlannerPdf.preview(docDef, archivo, { title })`
 - `privacy.js`: Nota emergente de protección de datos (Ley 21.719)
 - `notice.js`: Avisos y confirmaciones en diálogo accesible

@@ -2830,17 +2830,17 @@ function downloadDuaChecklist() {
     var total = stages.reduce(function(sum, stage) { return sum + stage.checklist.length; }, 0);
 
     content.push({ text: 'Planificación DUA para la clase', style: 'mainTitle' });
-    content.push({ text: checkedDua.length + ' de ' + total + ' acciones planificadas. Las casillas marcadas son lo que se planificó para la clase; las vacías quedan como opciones para revisar.', style: 'introText' });
+    content.push({ text: (checkedDua.length === 1 ? '1 acción elegida' : checkedDua.length + ' acciones elegidas') + '. DUA funciona como un menú: no se espera marcarlo todo. Las casillas vacías quedan como opciones para otras clases.', style: 'introText' });
 
     var principles = window.UiePlannerData.duaPrinciples || {};
     var coverage = window.UiePlannerDua.getPrincipleCoverage ? window.UiePlannerDua.getPrincipleCoverage() : [];
     var level = window.UiePlannerDua.getDuaCoverageLevel(checkedDua.length);
     if (coverage.length) {
-        var statusText = { cubierto: 'Cubierto', inicial: 'Inicial (1 acción)', pendiente: 'Sin acciones' };
+
         content.push({ text: [{ text: level.label + '. ', bold: true }, level.text.charAt(0).toUpperCase() + level.text.slice(1)], style: 'bodyText', margin: [0, 0, 0, 6] });
         content.push({
-            table: { headerRows: 1, widths: ['*', 90, 90], body: [[{ text: 'Principio DUA 3.0', style: 'tableHeader' }, { text: 'Acciones', style: 'tableHeader' }, { text: 'Estado', style: 'tableHeader' }]].concat(coverage.map(function(c) {
-                return [{ text: c.label, style: 'tableCell', bold: true }, { text: c.checked + ' de ' + c.total, style: 'tableCell' }, { text: statusText[c.status], style: 'tableCell', color: c.status === 'pendiente' ? PDF.LEVELS[3].text : PDF.COLORS.body }];
+            table: { headerRows: 1, widths: [150, 90, '*'], body: [[{ text: 'Principio DUA 3.0', style: 'tableHeader' }, { text: 'Elegidas', style: 'tableHeader' }, { text: 'Para considerar', style: 'tableHeader' }]].concat(coverage.map(function(c) {
+                return [{ text: [c.label, { text: '  ' + c.term, bold: false, color: PDF.COLORS.muted, fontSize: 8.5 }], style: 'tableCell', bold: true }, { text: String(c.checked), style: 'tableCell' }, { text: c.checked ? '—' : c.question, style: 'tableCell', color: PDF.COLORS.secondary }];
             })) },
             layout: PDF.tableLayout({ compact: true }), margin: [0, 0, 0, 6]
         });
@@ -2851,7 +2851,7 @@ function downloadDuaChecklist() {
         content.push({
             columns: [
                 { width: '*', text: [{ text: (index + 1) + '  ', color: PDF.COLORS.accent }, stage.label, { text: '  ·  ' + (stage.when || stage.badge), color: PDF.COLORS.muted, bold: false, fontSize: 10 }] },
-                { width: 'auto', text: done + ' de ' + stage.checklist.length, fontSize: 9, bold: false, color: PDF.COLORS.muted, margin: [0, 3, 0, 0] }
+                { width: 'auto', text: done ? (done === 1 ? '1 elegida' : done + ' elegidas') : '', fontSize: 9, bold: false, color: PDF.COLORS.muted, margin: [0, 3, 0, 0] }
             ],
             style: 'sectionTitle',
             headlineLevel: 1
@@ -2865,7 +2865,7 @@ function downloadDuaChecklist() {
     content.push({ canvas: [{ type: 'line', x1: 0, y1: 14, x2: 499, y2: 14, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
     content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
 
-    PDF.preview({ content: content }, 'checklist-dua.pdf', { title: 'Checklist DUA', subject: 'Decisiones DUA para la clase' });
+    PDF.preview({ content: content }, 'planificacion-dua.pdf', { title: 'Planificación DUA', subject: 'Diseño de la clase con DUA' });
 }
 
 function checkboxItem(text, checked) {
