@@ -13,4 +13,8 @@ Primera clasificación automática de los 166 apoyos actuales (148 del catálogo
 
 Todos los apoyos quedan en estado `pendiente` hasta que el equipo de asesores los revise en la planilla «Revisión del catálogo de apoyos por barrera». `migrar.js` regenera el borrador desde `data.js` (`node migrar.js`).
 
-Vacíos conocidos: ningún apoyo para práctica profesional y ninguno para las actividades nuevas (trabajo en grupo, aula virtual, prácticas en terreno).
+`apoyos-nuevos.json` agrega 34 apoyos propuestos por la UIE para los vacíos de cobertura (práctica profesional, aula virtual, trabajo en grupo, prácticas en terreno y ramos prácticos), cada uno con su fuente, «qué no cambia» y «cuándo no aplica». También asigna las actividades nuevas a 11 apoyos existentes. `migrar.js` los incorpora al borrador (ap167 a ap200). Tres apoyos llevan la fuente «Propuesta UIE sin fuente específica»: requieren validación del equipo.
+
+Actividades nuevas, además de las 11 de la matriz: `grupo` (Trabajo en grupo), `ava` (Aula virtual AVA) y `terreno` (Prácticas en terreno).
+
+Vacíos que siguen: «Hablar» y «Participar en la sala de clases» no tienen apoyos para práctica profesional, y la práctica profesional comparte pocos apoyos con el resto del catálogo. El equipo puede marcar qué apoyos generales también sirven en práctica profesional.

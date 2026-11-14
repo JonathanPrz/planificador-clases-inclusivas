@@ -598,7 +598,8 @@
   "texto": "Asegura subtítulos, transcripciones o guiones de material audiovisual.",
   "actividades": [
    "leer",
-   "sala_clases"
+   "sala_clases",
+   "ava"
   ],
   "origenes": [
    "auditivo"
@@ -1124,7 +1125,8 @@
   "texto": "En salidas a terreno, anticipe barreras para permitir la participación del estudiante.",
   "actividades": [
    "practicas_rec",
-   "practicos"
+   "practicos",
+   "terreno"
   ],
   "origenes": [
    "visual"
@@ -1248,7 +1250,8 @@
   "actividades": [
    "leer",
    "escribir",
-   "examenes"
+   "examenes",
+   "ava"
   ],
   "origenes": [
    "visual"
@@ -1499,7 +1502,8 @@
   "id": "ap050",
   "texto": "Sube materiales al AVA con anticipación y formatos compatibles con líneas Braille.",
   "actividades": [
-   "leer"
+   "leer",
+   "ava"
   ],
   "origenes": [
    "visual",
@@ -1659,7 +1663,8 @@
   "texto": "Confirma acuerdos de apoyo antes de actividades fuera del aula.",
   "actividades": [
    "ayuda",
-   "practicas_rec"
+   "practicas_rec",
+   "terreno"
   ],
   "origenes": [
    "visual",
@@ -1845,7 +1850,8 @@
   "id": "ap061",
   "texto": "Disponibiliza materiales en AVA con anterioridad para consulta previa.",
   "actividades": [
-   "leer"
+   "leer",
+   "ava"
   ],
   "origenes": [
    "sensorial"
@@ -2295,7 +2301,8 @@
   "id": "ap076",
   "texto": "En trabajos en equipo, entrega instrucciones y roles definidos con anticipación.",
   "actividades": [
-   "sociales"
+   "sociales",
+   "grupo"
   ],
   "origenes": [
    "sensorial",
@@ -2716,7 +2723,8 @@
   "texto": "Facilita plataformas digitales para continuidad cuando el estudiante no pueda asistir.",
   "actividades": [
    "leer",
-   "escribir"
+   "escribir",
+   "ava"
   ],
   "origenes": [
    "salud"
@@ -3993,7 +4001,8 @@
   "actividades": [
    "hablar",
    "sociales",
-   "sala_clases"
+   "sala_clases",
+   "grupo"
   ],
   "origenes": [
    "social",
@@ -4014,7 +4023,7 @@
    "methods"
   ],
   "noCambia": "",
-  "noAplica": "",
+  "noAplica": "Cuando colaborar con otros es parte de la competencia que se evalúa: en ese caso se ajusta el grupo (tamaño, roles, seguimiento) en vez de reemplazarlo por trabajo individual.",
   "fuentes": [
    "catalogo:autismo.methods"
   ],
@@ -4805,7 +4814,8 @@
   "id": "ap157",
   "texto": "Asignar roles explícitos, pasos observables y criterios de colaboración para reducir ambigüedad en actividades prácticas.",
   "actividades": [
-   "practicos"
+   "practicos",
+   "grupo"
   ],
   "origenes": [
    "social",
@@ -4934,7 +4944,8 @@
   "id": "ap161",
   "texto": "Estructurar interacciones sociales con roles claros, acuerdos de comunicación y opción de participación gradual.",
   "actividades": [
-   "sociales"
+   "sociales",
+   "grupo"
   ],
   "origenes": [
    "social",
@@ -5117,5 +5128,1120 @@
    "regla:acceder_visual_orientacion"
   ],
   "estado": "pendiente"
+ },
+ {
+  "id": "ap167",
+  "texto": "Antes de la práctica, revisar con el estudiante y el supervisor qué tareas del puesto son competencias esenciales del perfil de egreso y cuáles admiten otra forma de ejecución, y dejarlo por escrito.",
+  "actividades": [
+   "practicas_rec",
+   "ayuda"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "motor",
+   "sensorial",
+   "cognitivo",
+   "social",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "Las competencias del perfil de egreso y los criterios de la pauta de evaluación de práctica.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:requisitos-inherentes",
+   "nuevo:adcet-practicas"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap168",
+  "texto": "Acordar con el estudiante qué se informa al centro de práctica, a quién y para qué. Sin su consentimiento se informan solo los ajustes, nunca la condición.",
+  "actividades": [
+   "ayuda",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "motor",
+   "sensorial",
+   "cognitivo",
+   "social",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:ley-21719",
+   "nuevo:leeds-pasaporte"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap169",
+  "texto": "Elaborar con el estudiante una ficha de ajustes para la práctica (qué le ayuda, qué evitar, a quién recurrir) que él conserve y actualice entre un centro y otro.",
+  "actividades": [
+   "ayuda",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "motor",
+   "sensorial",
+   "cognitivo",
+   "social",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:leeds-pasaporte"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap170",
+  "texto": "Definir un contacto en Duoc y otro en el centro de práctica, y fijar una revisión en las dos primeras semanas para comprobar si los ajustes funcionan y corregirlos.",
+  "actividades": [
+   "ayuda"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "motor",
+   "sensorial",
+   "cognitivo",
+   "social",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:leeds-pasaporte",
+   "nuevo:sturgess-grupo"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap171",
+  "texto": "Elegir el centro de práctica junto con el estudiante, revisando accesos, transporte, horarios y ambiente (ruido, iluminación, ritmo) antes de asignarlo.",
+  "actividades": [
+   "acceder",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "motor",
+   "visual",
+   "sensorial",
+   "salud",
+   "regulacion"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "Cuando la carrera tiene un solo tipo de centro posible: entonces se ajusta el puesto dentro de ese centro.",
+  "fuentes": [
+   "nuevo:adcet-practicas"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap172",
+  "texto": "Entregar por escrito, antes del inicio, los protocolos, procedimientos, organigrama y glosario del centro de práctica.",
+  "actividades": [
+   "leer",
+   "recordar",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "auditivo",
+   "cognitivo",
+   "regulacion",
+   "social"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "El estudiante debe aplicar los mismos protocolos que el resto.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:sheridan-autismo",
+   "nuevo:adcet-practicas"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap173",
+  "texto": "Ajustar la distribución de la jornada de práctica (pausas, inicio o término diferido, días alternos) manteniendo el total de horas exigido.",
+  "actividades": [
+   "practicas_rec",
+   "acceder"
+  ],
+  "origenes": [
+   "salud",
+   "regulacion",
+   "motor"
+  ],
+  "tipo": "tiempo",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "El total de horas y las competencias que se evalúan.",
+  "noAplica": "Cuando un horario o turno específico es parte de lo que se evalúa o lo exige la normativa del sector.",
+  "fuentes": [
+   "nuevo:adcet-practicas",
+   "nuevo:requisitos-inherentes"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap174",
+  "texto": "Explicar con ejemplos las reglas no escritas del lugar de trabajo: vestimenta, trato, cómo pedir ayuda, a quién reportar y qué hacer ante un error.",
+  "actividades": [
+   "sociales",
+   "ayuda"
+  ],
+  "origenes": [
+   "social",
+   "cognitivo",
+   "regulacion"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:sheridan-autismo",
+   "nuevo:fabri-autismuni"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap175",
+  "texto": "Coordinar con el centro de práctica que el estudiante pueda usar las mismas ayudas técnicas que usa en clases (lector de pantalla, sistema FM, aplicaciones de recordatorio).",
+  "actividades": [
+   "leer",
+   "escribir",
+   "recordar",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "cognitivo"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "tecnologia",
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:adcet-practicas"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap176",
+  "texto": "Entregar la pauta de evaluación de la práctica al inicio y dar retroalimentación escrita en hitos acordados, no solo al cierre.",
+  "actividades": [
+   "examenes",
+   "recordar"
+  ],
+  "origenes": [
+   "cognitivo",
+   "regulacion",
+   "auditivo",
+   "social"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "profesional"
+  ],
+  "momentos": [
+   "evaluacion"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "Los criterios y el estándar de la pauta.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:sheridan-autismo",
+   "nuevo:leeds-pasaporte"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap177",
+  "texto": "Organizar el aula virtual igual todas las semanas (misma ubicación de materiales, tareas y foros) con un calendario único de entregas.",
+  "actividades": [
+   "ava",
+   "recordar"
+  ],
+  "origenes": [
+   "cognitivo",
+   "regulacion",
+   "visual"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:doit-online",
+   "nuevo:ualr-online"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap178",
+  "texto": "Revisar y corregir los subtítulos automáticos antes de publicar un video, y adjuntar la transcripción.",
+  "actividades": [
+   "ava",
+   "leer"
+  ],
+  "origenes": [
+   "auditivo",
+   "cognitivo"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "tecnologia"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:wwu-online",
+   "nuevo:wcag-22"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap179",
+  "texto": "Publicar documentos con estilos de título, texto seleccionable (no escaneado) y descripción de las imágenes que aportan información, y revisarlos con el comprobador de accesibilidad.",
+  "actividades": [
+   "ava",
+   "leer"
+  ],
+  "origenes": [
+   "visual",
+   "cognitivo"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "tecnologia"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:ualr-online",
+   "nuevo:wcag-22"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap180",
+  "texto": "Configurar en la plataforma el tiempo adicional de cada evaluación online y comprobarlo antes de abrirla.",
+  "actividades": [
+   "ava",
+   "examenes"
+  ],
+  "origenes": [
+   "visual",
+   "motor",
+   "cognitivo",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "tiempo",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "evaluacion"
+  ],
+  "etiquetas": [
+   "tecnologia"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "Las preguntas y los criterios de corrección.",
+  "noAplica": "Cuando la rapidez es parte de la competencia que se evalúa.",
+  "fuentes": [
+   "nuevo:ualr-online"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap181",
+  "texto": "Ofrecer una vía asincrónica equivalente a la participación en vivo o en chats rápidos, por ejemplo un aporte escrito en el foro dentro de un plazo acordado.",
+  "actividades": [
+   "ava",
+   "hablar",
+   "sala_clases"
+  ],
+  "origenes": [
+   "auditivo",
+   "regulacion",
+   "salud",
+   "social",
+   "cognitivo"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "online"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "El contenido y la calidad del aporte que se espera.",
+  "noAplica": "Cuando la interacción en tiempo real es el resultado de aprendizaje.",
+  "fuentes": [
+   "nuevo:ualr-online",
+   "nuevo:doit-online"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap182",
+  "texto": "En sesiones en vivo, activar subtítulos, compartir el material antes y publicar la grabación con un resumen después.",
+  "actividades": [
+   "ava",
+   "sala_clases",
+   "recordar"
+  ],
+  "origenes": [
+   "auditivo",
+   "cognitivo",
+   "regulacion"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "online"
+  ],
+  "momentos": [
+   "clase",
+   "fuera"
+  ],
+  "etiquetas": [
+   "tecnologia"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:ndc-online",
+   "nuevo:ualr-online"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap183",
+  "texto": "Comprobar que las actividades y evaluaciones del aula virtual se pueden completar solo con teclado y con lector de pantalla. Si no es posible, ofrecer un formato equivalente.",
+  "actividades": [
+   "ava",
+   "examenes",
+   "escribir"
+  ],
+  "origenes": [
+   "visual",
+   "motor"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "fuera",
+   "evaluacion"
+  ],
+  "etiquetas": [
+   "tecnologia"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:doit-online",
+   "nuevo:wcag-22"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap184",
+  "texto": "Al inicio de una asignatura online, verificar con el estudiante que tiene el equipo, la conexión y las ayudas técnicas que exige, y derivar a préstamo de equipos si falta algo.",
+  "actividades": [
+   "acceder",
+   "ava"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "motor",
+   "cognitivo",
+   "salud"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "online"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "tecnologia",
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:doit-online"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap185",
+  "texto": "Formar los grupos el docente, en lugar de dejarlos a libre elección, y preferir grupos pequeños.",
+  "actividades": [
+   "grupo",
+   "sociales"
+  ],
+  "origenes": [
+   "social",
+   "regulacion",
+   "cognitivo"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "La exigencia del trabajo grupal.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:sturgess-grupo"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap186",
+  "texto": "Pedir a cada grupo un acuerdo inicial escrito: roles, canal de comunicación, plazos internos y qué hacer si alguien no cumple.",
+  "actividades": [
+   "grupo",
+   "sociales"
+  ],
+  "origenes": [
+   "social",
+   "cognitivo",
+   "regulacion"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:fabri-autismuni",
+   "nuevo:sturgess-grupo"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap187",
+  "texto": "Nombrar a una persona del equipo docente a quien el grupo o el estudiante pueda reportar dificultades, y revisar el avance a mitad del trabajo para intervenir si la comunicación falla, la carga es injusta o alguien queda excluido.",
+  "actividades": [
+   "grupo",
+   "ayuda"
+  ],
+  "origenes": [
+   "social",
+   "regulacion",
+   "cognitivo",
+   "auditivo"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:sturgess-grupo",
+   "nuevo:fabri-autismuni"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap188",
+  "texto": "Ofrecer al grupo canales de coordinación escritos y asincrónicos (documento compartido, foro) además de las reuniones presenciales.",
+  "actividades": [
+   "grupo",
+   "ava"
+  ],
+  "origenes": [
+   "auditivo",
+   "social",
+   "salud",
+   "motor",
+   "regulacion"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "tecnologia"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:doit-online",
+   "nuevo:propuesta-uie"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap189",
+  "texto": "Evaluar la contribución individual además del producto grupal, por ejemplo con bitácora o autoevaluación guiada.",
+  "actividades": [
+   "grupo",
+   "examenes"
+  ],
+  "origenes": [
+   "social",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "teorica",
+   "practica",
+   "online"
+  ],
+  "momentos": [
+   "evaluacion"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "El producto grupal y sus criterios.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:propuesta-uie"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap190",
+  "texto": "Antes de una salida a terreno, reunir información del lugar (accesos, distancias a pie, baños, sombra, ruido) y compartirla con el estudiante para decidir juntos los ajustes.",
+  "actividades": [
+   "terreno",
+   "acceder"
+  ],
+  "origenes": [
+   "motor",
+   "salud",
+   "sensorial",
+   "visual",
+   "regulacion"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "teorica",
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:the-terreno",
+   "nuevo:gcu-terreno"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap191",
+  "texto": "Publicar al inicio del semestre las fechas, el itinerario, los horarios y el equipo necesario de cada salida a terreno.",
+  "actividades": [
+   "terreno",
+   "recordar"
+  ],
+  "origenes": [
+   "cognitivo",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "teorica",
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:gcu-terreno"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap192",
+  "texto": "Si el lugar no puede hacerse accesible, cambiar el sitio o diseñar una actividad equivalente que logre el mismo resultado de aprendizaje, en vez de eximir al estudiante.",
+  "actividades": [
+   "terreno"
+  ],
+  "origenes": [
+   "motor",
+   "salud",
+   "sensorial"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "teorica",
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "El resultado de aprendizaje de la salida.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:adcet-practicas",
+   "nuevo:doit-terreno"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap193",
+  "texto": "Planificar la jornada en terreno con transporte accesible, pausas y un lugar de descanso.",
+  "actividades": [
+   "terreno",
+   "acceder"
+  ],
+  "origenes": [
+   "motor",
+   "salud",
+   "regulacion"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "teorica",
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:gcu-terreno",
+   "nuevo:the-terreno"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap194",
+  "texto": "Después de la salida, revisar con el estudiante qué funcionó y qué no, y ajustar la siguiente.",
+  "actividades": [
+   "terreno",
+   "ayuda"
+  ],
+  "origenes": [
+   "visual",
+   "auditivo",
+   "motor",
+   "sensorial",
+   "cognitivo",
+   "social",
+   "regulacion",
+   "salud"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "teorica",
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:the-terreno"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap195",
+  "texto": "Antes de la primera sesión de taller o laboratorio, revisar con el estudiante sus necesidades: alcance, alturas, tiempo de pie, materiales que no tolera y equipo de protección.",
+  "actividades": [
+   "practicos",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "motor",
+   "salud",
+   "sensorial",
+   "visual"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:ucdavis-lab",
+   "nuevo:ottawa-lab"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap196",
+  "texto": "Entregar por escrito y con imágenes las instrucciones de seguridad, y complementar alarmas y avisos sonoros con señales visuales.",
+  "actividades": [
+   "practicos",
+   "practicas_rec",
+   "leer"
+  ],
+  "origenes": [
+   "auditivo",
+   "cognitivo"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "practica",
+   "profesional"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:doit-lab"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap197",
+  "texto": "Si el estudiante trabaja con intérprete, revisar antes con el intérprete las instrucciones de seguridad y el vocabulario técnico de la sesión.",
+  "actividades": [
+   "practicos",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "auditivo"
+  ],
+  "tipo": "presentacion",
+  "modalidades": [
+   "practica",
+   "profesional"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [
+   "apoyo_humano",
+   "canal_lsch",
+   "coordinacion"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:doit-lab"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap198",
+  "texto": "Si el estudiante trabaja en pareja por razones de acceso, asignarle un rol activo y esencial (dirigir el procedimiento, registrar, interpretar resultados) y no solo observar.",
+  "actividades": [
+   "practicos",
+   "practicas_rec",
+   "grupo"
+  ],
+  "origenes": [
+   "motor",
+   "visual",
+   "auditivo"
+  ],
+  "tipo": "respuesta",
+  "modalidades": [
+   "practica"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [
+   "apoyo_humano"
+  ],
+  "dimensionesDuoc": [],
+  "noCambia": "El estudiante demuestra el dominio del procedimiento.",
+  "noAplica": "Cuando la ejecución manual misma es la competencia que se evalúa: entonces se ajusta el puesto o la herramienta.",
+  "fuentes": [
+   "nuevo:accesscomputing-lab",
+   "nuevo:doit-lab"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap199",
+  "texto": "Ofrecer un material sustituto o una tarea equivalente cuando el estudiante no tolera un material del taller (alergias, olores intensos).",
+  "actividades": [
+   "practicos",
+   "practicas_rec"
+  ],
+  "origenes": [
+   "salud",
+   "sensorial"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "practica"
+  ],
+  "momentos": [
+   "clase"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "El procedimiento y la técnica que se aprenden.",
+  "noAplica": "Cuando manipular ese material es parte del perfil de egreso: revisar con la jefatura de carrera.",
+  "fuentes": [
+   "nuevo:doit-salud"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
+ },
+ {
+  "id": "ap200",
+  "texto": "Permitir conocer el taller, los equipos y la secuencia de trabajo antes de una sesión evaluada.",
+  "actividades": [
+   "practicos",
+   "examenes"
+  ],
+  "origenes": [
+   "regulacion",
+   "visual",
+   "cognitivo",
+   "sensorial"
+  ],
+  "tipo": "entorno",
+  "modalidades": [
+   "practica"
+  ],
+  "momentos": [
+   "fuera"
+  ],
+  "etiquetas": [],
+  "dimensionesDuoc": [],
+  "noCambia": "La tarea evaluada y sus criterios.",
+  "noAplica": "",
+  "fuentes": [
+   "nuevo:propuesta-uie"
+  ],
+  "estado": "pendiente",
+  "nuevo": true
  }
 ]

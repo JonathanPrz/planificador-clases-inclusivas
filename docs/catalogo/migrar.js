@@ -59,6 +59,15 @@ R.forEach(r=>{
   (r.dimensions||['methods']).forEach((d,i)=>{ if(i===0) add(r.text,r.activities,origs,d,'regla:'+r.id); else byText.get(r.text.trim()).dimensionesDuoc.add(d); });
 });
 let n=0; const out=[...byText.values()].map(e=>({...e,id:'ap'+String(++n).padStart(3,'0'),actividades:[...e.actividades],origenes:[...e.origenes],dimensionesDuoc:[...e.dimensionesDuoc],fuentes:[...e.fuentes]}));
+const NUEVOS=JSON.parse(fs.readFileSync(require('path').join(__dirname,'apoyos-nuevos.json'),'utf8'));
+out.forEach(e=>{
+  (NUEVOS.reclasificar[e.id]||[]).forEach(a=>{ if(!e.actividades.includes(a)) e.actividades.push(a); });
+  if(NUEVOS.noAplicaExistentes[e.id]&&!e.noAplica) e.noAplica=NUEVOS.noAplicaExistentes[e.id];
+});
+NUEVOS.apoyos.forEach(a=>{
+  if(byText.has(a.texto.trim())) return;
+  out.push({id:'ap'+String(++n).padStart(3,'0'),texto:a.texto,actividades:a.actividades,origenes:a.origenes,tipo:a.tipo,modalidades:a.modalidades,momentos:a.momentos,etiquetas:a.etiquetas,dimensionesDuoc:[],noCambia:a.noCambia,noAplica:a.noAplica,fuentes:a.fuentes.map(f=>'nuevo:'+f),estado:'pendiente',nuevo:true});
+});
 fs.writeFileSync(require('path').join(__dirname,'catalogo-por-barrera-borrador.json'),JSON.stringify(out,null,1));
 const c=k=>{const m={};out.forEach(e=>[].concat(e[k]).forEach(v=>m[v]=(m[v]||0)+1));return m;};
 console.log('total',out.length,'sin actividad',out.filter(e=>!e.actividades.length).length);
