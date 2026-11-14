@@ -10,7 +10,7 @@ Bienvenido a la documentación del Planificador Inclusivo UIE, herramienta web d
 | [Documentación técnica](desarrollador/README.md) | Desarrolladores | Markdown | Stack, setup, convenciones de código |
 | [Arquitectura](desarrollador/arquitectura.md) | Desarrolladores | Markdown + Mermaid | Diagramas de flujo, modelo de datos, PDF |
 | [Fuentes de referencia](fuentes/README.md) | Docentes / Inclusión | Markdown | Documentos que respaldan el contenido y sus enlaces oficiales |
-| [Normativa de datos personales](normativa/ley-21719-proteccion-datos.md) | Docentes / Inclusión | Markdown | Ley 21.719 y cómo se aplica al planificador |
+| [Normativa](normativa/README.md) | Docentes / Inclusión | Markdown | Leyes que respaldan el planificador, con fichas por norma |
 | [Presentación ejecutiva](presentacion/index.html) | Directivos / Jefatura | HTML interactivo | 12 slides con animaciones y navegación por teclado |
 
 ## Enlaces

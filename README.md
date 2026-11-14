@@ -72,5 +72,5 @@ npx serve .
 | [Manual de usuario](docs/manual-usuario/README.md) | Docentes |
 | [Documentación técnica](docs/desarrollador/README.md) | Desarrolladores |
 | [Arquitectura](docs/desarrollador/arquitectura.md) | Desarrolladores |
-| [Normativa de datos personales](docs/normativa/ley-21719-proteccion-datos.md) | Docentes / Inclusión |
+| [Normativa](docs/normativa/README.md) | Docentes / Inclusión |
 | [Presentación ejecutiva](docs/presentacion/index.html) | Directivos |
