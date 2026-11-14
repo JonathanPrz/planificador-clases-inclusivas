@@ -1,6 +1,6 @@
 # Fuentes de referencia
 
-Documentos que respaldan el contenido del planificador. Los PDF no se guardan en el repositorio: se enlazan a su fuente oficial o a la carpeta institucional de respaldo, donde también está la versión en Markdown de cada documento.
+Documentos que respaldan el contenido del planificador. Los PDF de terceros no se guardan en el repositorio: se enlazan a su fuente oficial. Existe un respaldo en Markdown de todos ellos fuera del repositorio, junto con los PDF originales.
 
 ## Documentos con enlace oficial
 
@@ -20,15 +20,13 @@ Documentos que respaldan el contenido del planificador. Los PDF no se guardan en
 
 ## Documentos institucionales Duoc UC
 
-Se publican en una carpeta de OneDrive institucional, junto con el respaldo en Markdown y los PDF originales de todas las fuentes: [respaldo-fuentes](https://duoccl0-my.sharepoint.com/:f:/g/personal/jperezas_duoc_cl/IgAr9EYQbJg_S72MOb0hDQFNAZ57BycOLUHV272CYYwA68M?e=TjNrmv).
+Siguen en `docs/guias/` y `docs/investigacion/` mientras no tengan un enlace definitivo. Cuando se publiquen en Drive u otro sitio institucional, se reemplaza la ruta en `data.js` y se eliminan los PDF del repositorio.
 
-| Documento |
-| --- |
-| Guía de orientaciones docentes para estudiantes del espectro autista (2024) |
-| Guía de adecuaciones curriculares de acceso |
-| Guía de introducción a la accesibilidad digital |
-| Orientaciones para un vocabulario inclusivo |
-| De la formación a la práctica: cuadernillo de apoyo |
-| Experiencia DUA en Duoc UC, sede Puerto Montt |
-
-Si se generan enlaces individuales por archivo, reemplazarlos en `referencesData` de `data.js`.
+| Documento | Ubicación actual |
+| --- | --- |
+| Guía de orientaciones docentes para estudiantes del espectro autista (2024) | `docs/guias/Guia Orientaciones Autismo v2024.pdf` |
+| Guía de adecuaciones curriculares de acceso | `docs/guias/Guía Adecuaciones Curriculares de Acceso.pdf` |
+| Guía de introducción a la accesibilidad digital | `docs/guias/Guía de Introducción a la Accesibilidad Digital.pdf` |
+| Orientaciones para un vocabulario inclusivo | `docs/guias/Orientaciones Vocabulario Inclusivo.pdf` |
+| De la formación a la práctica: cuadernillo de apoyo | `docs/guias/Cuadernillo de la Formación a la Práctica.pdf` |
+| Experiencia DUA en Duoc UC, sede Puerto Montt | `docs/investigacion/Experiencia DUA.pdf` |
