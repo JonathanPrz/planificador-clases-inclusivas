@@ -32,6 +32,10 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - También se renderiza en PDF descargable vía `renderCIFChartPdfSection` (tabla nativa pdfmake con barras vectoriales)
 - Se incluye en vista de impresión `updatePrintableRecommendations`
 
+### 2b. Panel «Mapa de barreras CIF» (web)
+- `renderCIFChartPanel` + `activateCIFChartPanel`: un solo panel con vistas «Comparar» (radar, máx. 3 estudiantes) y «Detalle» (barras). Por defecto: radar si hay 2+ estudiantes con matriz, barras si hay 1
+- La casilla «Incluir en el gráfico» de cada ficha elige qué estudiantes entran; si ninguna está marcada, entran todos los que tienen matriz
+
 ### 3. Recomendaciones sin matriz
 - `renderProfileGroup` usa `getReferenceScores` para asignar scores basados en perfiles de barrera
 - Esto permite mostrar badges de prioridad incluso sin datos de matriz

@@ -629,10 +629,10 @@ const shortActivityLabels = {
     'hablar': 'Hablar',
     'recordar': 'Recordar',
     'examenes': 'Evaluación',
-    'practicos': 'Prácticos',
+    'practicos': 'Ramos prácticos',
     'sala_clases': 'Aula',
     'sociales': 'Social',
-    'practicas_rec': 'Prácticas',
+    'practicas_rec': 'Act. prácticas',
     'ayuda': 'Ayuda',
     'acceder': 'Acceso'
 };

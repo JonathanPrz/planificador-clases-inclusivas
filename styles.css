@@ -5095,3 +5095,128 @@ body:not([data-view="inicio"]) .hero {
     white-space: nowrap;
     flex: 0 0 auto;
 }
+
+.cif-chart-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    padding: 20px;
+    margin: 4px 0 20px;
+}
+
+.cif-chart-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.cif-chart-head h3 {
+    margin: 0 0 4px;
+    font-size: var(--text-2xl);
+}
+
+.cif-chart-head p {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--text-secondary);
+    font-size: var(--text-md);
+}
+
+.cif-view-switch {
+    flex: 0 0 auto;
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-primary);
+}
+
+.cif-view-switch button {
+    min-height: 34px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cif-view-switch button:hover {
+    color: var(--text-primary);
+}
+
+.cif-view-switch button[aria-pressed="true"] {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--text-primary) 14%, transparent);
+}
+
+.cif-chart-panel .cif-radar-container {
+    margin: 8px 0 0;
+}
+
+.cif-chart-panel .cif-radar-card {
+    box-shadow: none;
+    padding: 0;
+    max-width: 760px;
+    background: transparent;
+}
+
+.cif-chart-panel .cif-radar-wrapper {
+    height: 400px;
+}
+
+.cif-chart-panel .cif-radar-legend-right {
+    border-left: 1px solid var(--border-light);
+}
+
+.cif-radar-note {
+    margin: 8px 0 0;
+}
+
+@media (max-width: 700px) {
+    .cif-chart-panel {
+        padding: 16px;
+    }
+
+    .cif-chart-head {
+        flex-direction: column;
+    }
+
+    .cif-chart-panel .cif-radar-body {
+        flex-direction: column;
+    }
+
+    .cif-chart-panel .cif-radar-wrapper {
+        height: 320px;
+        min-height: 0;
+    }
+
+    .cif-chart-panel .cif-radar-legend-right {
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: none;
+        border-left: 0;
+        padding-left: 0;
+    }
+
+    .cif-chart-panel .radar-legend-item {
+        width: auto;
+    }
+}
+
+.cif-chart-panel .cif-radar-legend-right {
+    min-width: 140px;
+    max-width: 200px;
+}
+
+.cif-chart-panel .legend-item-label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}

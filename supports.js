@@ -300,7 +300,7 @@ function renderConditionDetail() {
     }
 
     var radarId = 'cif-radar-detail';
-    var profilesHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' +
+    var profilesHtml = renderCIFChartPanel(students, radarId) +
     students.map(function(student) {
         var group = {
             conditions: student.conditions,
@@ -323,7 +323,7 @@ function renderConditionDetail() {
         '</div>' +
         profilesHtml;
 
-    renderCIFRadarChart(students, radarId, { height: '380px' });
+    activateCIFChartPanel(students, radarId);
 }
 
 function getStudentMatrixProfile(studentIndex) {
@@ -394,19 +394,79 @@ function renderSelectedSupportRecommendations() {
         profilesHtml = '<p style="color:red">Error en recomendaciones: ' + e.message + '</p>';
     }
 
-    profilesHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + profilesHtml;
+    profilesHtml = renderCIFChartPanel(students, radarId) + profilesHtml;
 
     var headerHtml = hasMatrixApplied
         ? '<div class="results-title-header"><div><span class="source-pill">Perfil CIF</span><p>' + descriptionText + '</p></div></div>'
         : '<div class="results-title-header"><div><span class="source-pill">Consultor por condici\u00f3n</span><h3>Orientaciones iniciales para observar barreras</h3><p>' + descriptionText + '</p></div></div>';
 
     results.innerHTML = headerHtml + profilesHtml;
-    renderCIFRadarChart(students, radarId, { height: '380px' });
+    activateCIFChartPanel(students, radarId);
     bindRecommendationEditing();
     bindManualRecommendationEditing();
     bindAdvisorCommentFields();
     bindClarificationModal();
     bindClarificationButtons();
+}
+
+var cifChartView = null;
+
+function studentHasMatrix(student, index) {
+    var scores = getStudentMatrixScores(student.cardIndex || student.index || (index + 1));
+    return Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
+}
+
+function getChartStudents(students) {
+    var withMatrix = students.filter(function(student, index) { return studentHasMatrix(student, index); });
+    var chosen = withMatrix.filter(function(student) {
+        var card = document.querySelector('.support-student-card[data-student-index="' + student.cardIndex + '"]');
+        var box = card ? card.querySelector('.show-in-chart') : null;
+        return box && box.checked;
+    });
+    return chosen.length ? chosen : withMatrix;
+}
+
+function renderCIFChartPanel(students, radarId) {
+    var chartStudents = getChartStudents(students || []);
+    if (!chartStudents.length) return '';
+    var view = cifChartView || (chartStudents.length > 1 ? 'radar' : 'bars');
+    var radarNote = chartStudents.length > 3 ? '<p class="small-note cif-radar-note">El radar compara hasta 3 estudiantes. Marca «Incluir en el gráfico» en las fichas para elegir cuáles, o usa la vista Detalle.</p>' : '';
+    return '<section class="cif-chart-panel" aria-labelledby="' + radarId + '-title" data-view="' + view + '">' +
+        '<div class="cif-chart-head">' +
+            '<div>' +
+                '<h3 id="' + radarId + '-title">Mapa de barreras CIF</h3>' +
+                '<p>Nivel de ajuste sugerido por actividad, de 0 (sin ajuste) a 3 (prioritario), según la matriz CIF.</p>' +
+            '</div>' +
+            '<div class="cif-view-switch" role="group" aria-label="Tipo de gráfico">' +
+                '<button type="button" data-cif-view="radar" aria-pressed="' + (view === 'radar') + '">Comparar</button>' +
+                '<button type="button" data-cif-view="bars" aria-pressed="' + (view === 'bars') + '">Detalle</button>' +
+            '</div>' +
+        '</div>' +
+        '<div class="cif-view-radar"' + (view === 'radar' ? '' : ' hidden') + '>' + radarNote + '<div id="' + radarId + '" class="cif-radar-container"></div></div>' +
+        '<div class="cif-view-bars"' + (view === 'bars' ? '' : ' hidden') + '>' + renderCIFBarChart(chartStudents, { bare: true }) + '</div>' +
+    '</section>';
+}
+
+function activateCIFChartPanel(students, radarId) {
+    var container = document.getElementById(radarId);
+    if (!container) return;
+    var panel = container.closest('.cif-chart-panel');
+    var chartStudents = getChartStudents(students || []).slice(0, 3);
+    var radarView = panel.querySelector('.cif-view-radar');
+    if (!radarView.hidden) renderCIFRadarChart(chartStudents, radarId);
+    panel.querySelectorAll('[data-cif-view]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var view = button.getAttribute('data-cif-view');
+            cifChartView = view;
+            panel.setAttribute('data-view', view);
+            panel.querySelectorAll('[data-cif-view]').forEach(function(b) {
+                b.setAttribute('aria-pressed', String(b === button));
+            });
+            panel.querySelector('.cif-view-bars').hidden = view !== 'bars';
+            radarView.hidden = view !== 'radar';
+            if (view === 'radar' && !container.__cifRadarChart) renderCIFRadarChart(chartStudents, radarId);
+        });
+    });
 }
 
 function renderCIFBarChart(students, options) {
@@ -415,7 +475,8 @@ function renderCIFBarChart(students, options) {
     var hasAnyMatrix = false;
 
     var studentCols = [];
-    students.slice(0, 4).forEach(function(student, index) {
+    var chartStudents = options.bare ? students.filter(function(student, index) { return studentHasMatrix(student, index); }) : students;
+    chartStudents.slice(0, 4).forEach(function(student, index) {
         var studentIndex = student.cardIndex || (index + 1);
         var matrixScores = getStudentMatrixScores(studentIndex);
         var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
@@ -449,9 +510,12 @@ function renderCIFBarChart(students, options) {
         studentCols.push({ label: formatStudentLabel(student), rows: rows, isReference: isReference });
     });
 
-    var extraCount = Math.max(0, students.length - 4);
+    var extraCount = Math.max(0, chartStudents.length - 4);
 
     if (!hasAnyMatrix) return '';
+    if (options.bare) {
+        studentCols = studentCols.filter(function(col) { return !col.isReference; });
+    }
 
     var headerCells = studentCols.map(function(col) {
         return '<th scope="col">' + escapeSupportHtml(col.label) + '</th>';
@@ -481,6 +545,18 @@ function renderCIFBarChart(students, options) {
             return '<li><span class="cif-swatch requirement-level-' + lvl + '" aria-hidden="true"></span>' + lvl + ' · ' + requirementLabel(lvl) + '</li>';
         }).join('') +
         '</ul>';
+
+    if (options.bare) {
+        return '<div class="cif-chart">' +
+            '<table class="cif-table">' +
+                '<caption class="sr-only">Nivel de barrera por actividad CIF y estudiante, de 0 a 3</caption>' +
+                '<thead><tr><th scope="col">Actividad CIF</th>' + headerCells + '</tr></thead>' +
+                '<tbody>' + bodyRows + '</tbody>' +
+            '</table>' +
+            legendHtml +
+            (extraCount ? '<p class="small-note">Se muestran los primeros 4 estudiantes con matriz. Usa «Incluir en el gráfico» para elegir otros.</p>' : '') +
+        '</div>';
+    }
 
     return '<div class="barrier-map-panel">' +
         '<div class="resource-heading">' +
@@ -560,7 +636,7 @@ function getCIFRadarDataset(student, index) {
         pointRadius: 4,
         pointHoverRadius: 6,
         fill: true,
-        tension: 0.15
+        tension: 0
     };
 }
 
@@ -584,14 +660,12 @@ function renderCIFRadarChart(students, containerId, options) {
         var hasMatrix = Object.values(matrixScores).some(function(v) {
             return Number(v || 0) > 0;
         });
-        if (hasMatrix || student.conditions) filteredStudents.push(student);
+        if (hasMatrix) filteredStudents.push(student);
     });
     if (!filteredStudents.length) return;
 
     container.__radarStudents = students;
     container.__radarOptions = options;
-
-    if (options.height) container.style.height = options.height;
 
     var card = document.createElement('div');
     card.className = 'cif-radar-card';
@@ -601,7 +675,6 @@ function renderCIFRadarChart(students, containerId, options) {
 
     var wrapper = document.createElement('div');
     wrapper.className = 'cif-radar-wrapper';
-    if (options.height) wrapper.style.height = options.height;
 
     var canvas = document.createElement('canvas');
     wrapper.appendChild(canvas);
@@ -674,7 +747,7 @@ function renderCIFRadarChart(students, containerId, options) {
 
         var legendTitle = document.createElement('div');
         legendTitle.className = 'radar-legend-title';
-        legendTitle.textContent = 'Estudiantes (clic para mostrar u ocultar)';
+        legendTitle.textContent = 'Estudiantes';
         legendEl.appendChild(legendTitle);
 
         filteredStudents.forEach(function(student, i) {
@@ -915,7 +988,7 @@ function createMedicalStudentCard(studentIndex) {
         '</div>' +
         '<label class="radar-visibility-toggle">' +
             '<input type="checkbox" class="show-in-chart">' +
-            '<span>Mostrar en gráfico</span>' +
+            '<span>Incluir en el gráfico</span>' +
         '</label>' +
         '<details class="student-matrix-toggle assessment-tools">' +
             '<summary>Ajustar perfil con matriz CIF <span class="student-matrix-badge" id="student-matrix-badge-' + studentIndex + '"></span></summary>' +
