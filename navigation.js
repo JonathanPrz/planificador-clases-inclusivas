@@ -21,6 +21,7 @@ function bindSectionNavigation() {
 
     const setActiveState = function(view, activeId) {
         document.body.dataset.view = view;
+        updateMeetingBar(view);
         navLinks.forEach(function(link) {
             const isActive = link.dataset.view === view;
             link.classList.toggle('active', isActive);
@@ -75,6 +76,16 @@ function bindSectionNavigation() {
     });
 
     document.addEventListener('click', function(event) {
+        const modeLink = event.target.closest('[data-mode]');
+        if (modeLink) setMode(modeLink.dataset.mode);
+        const docsLink = event.target.closest('[data-step="documentos"]');
+        if (docsLink) {
+            event.preventDefault();
+            activate('apoyos', false);
+            const target = document.getElementById('adq-paso-3');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
         if (event.defaultPrevented) return;
         const link = event.target.closest('a[href^="#"]');
         if (!link) return;
@@ -94,8 +105,42 @@ function bindSectionNavigation() {
         activate(id, false);
     });
 
+    const exit = document.getElementById('meeting-exit');
+    if (exit) exit.addEventListener('click', function() { setMode(''); });
+
     bindMobileMenu();
+    setMode(readMode());
     activate(window.location.hash.slice(1) || 'inicio', false);
+}
+
+function readMode() {
+    try {
+        return sessionStorage.getItem('uie-modo') || '';
+    } catch (error) {
+        return document.body.dataset.mode || '';
+    }
+}
+
+function setMode(mode) {
+    document.body.dataset.mode = mode || '';
+    try {
+        if (mode) sessionStorage.setItem('uie-modo', mode);
+        else sessionStorage.removeItem('uie-modo');
+    } catch (error) {}
+    updateMeetingBar(document.body.dataset.view);
+}
+
+function updateMeetingBar(view) {
+    const bar = document.getElementById('meeting-bar');
+    if (!bar) return;
+    const inMeeting = document.body.dataset.mode === 'reunion' && (view === 'dua' || view === 'adecuaciones');
+    bar.hidden = !inMeeting;
+    bar.querySelectorAll('[data-step]').forEach(function(link) {
+        const current = link.dataset.step === view;
+        link.classList.toggle('is-current', current);
+        if (current) link.setAttribute('aria-current', 'step');
+        else link.removeAttribute('aria-current');
+    });
 }
 
 function bindMobileMenu() {

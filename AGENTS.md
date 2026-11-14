@@ -32,6 +32,13 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Conexión con DUA: `duaCatalogLinks` (data.js) relaciona acciones DUA con apoyos del catálogo. Si la acción está marcada, el apoyo aparece como «Ya está en la base DUA». Los apoyos acordados para 2+ estudiantes se muestran en «Para todo el curso», van una sola vez en el plan para el docente y aparecen en el panel de DUA. Si se regenera el catálogo y cambian los códigos `apNNN`, revisar esa tabla
 - Eventos entre módulos: `uie-dua-change`, `uie-adecuaciones-change`, `uie-theme-change`
 
+### 0a. Recorrido y modos (navigation.js)
+- Inicio es solo una puerta de entrada con tres caminos: «Planificar mi clase» (docente), «Reunión de acompañamiento» (asesor y docente) y «Consultar un tema». Diagrama en `docs/diagramas/flujo-planificador.svg`
+- El modo se guarda en `body[data-mode]` y en sessionStorage (`uie-modo`). En modo `reunion` aparece la barra `#meeting-bar` (1 Diseño de la clase → 2 Casos particulares → 3 Documentos) en las vistas DUA y Adecuaciones, y se oculta la nota para docentes solos (`#solo-note`)
+- Menú: «Diseño de la clase» (DUA) y «Casos particulares» (adecuaciones). Dentro de la sección se mantienen los términos «Base DUA» y «Adecuaciones curriculares de acceso»
+- Evitar texto que repita lo que la herramienta ya aplica. Antes de agregar una sección nueva, revisar si ya existe en Apoyos adicionales
+- No volver a numerar los bloques internos de Adecuaciones: la única numeración visible es la de la barra de reunión
+
 ### 0b. DUA (dua.js)
 - Acciones redactadas como lo que se planifica hacer (infinitivo), con `when` por etapa (antes, durante o después de la clase)
 - Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). La cobertura se mide por principio: 0 acciones = sin acciones, 1 = inicial, 2 o más = cubierto. Nunca volver a medir por cantidad total

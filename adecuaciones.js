@@ -107,11 +107,6 @@ function matrixCount(student) {
 
 function renderShell(root) {
     root.innerHTML =
-        '<ol class="adq-steps" aria-label="Pasos">' +
-            '<li><a href="#adq-paso-1"><span class="adq-step-num" id="adq-s1" data-n="1">1</span>La asignatura</a></li>' +
-            '<li><a href="#adq-paso-2"><span class="adq-step-num" id="adq-s2" data-n="2">2</span>Estudiantes</a></li>' +
-            '<li><a href="#adq-paso-3"><span class="adq-step-num" id="adq-s3" data-n="3">3</span>Apoyos y documentos</a></li>' +
-        '</ol>' +
         '<div class="adq-layout"><div class="adq-main">' +
         '<div class="adq-block" id="adq-paso-1">' +
             blockHead(1, 'Conversación con el docente', 'adq-p1', 'Nueve preguntas cerradas que estandarizan la conversación. Se responden una vez por sección y valen para todos sus estudiantes.', 'Responde: asesor de inclusión con el docente') +
@@ -142,7 +137,7 @@ function renderShell(root) {
         '</aside></div>';
 }
 function blockHead(n, title, progressId, text, who) {
-    return '<div class="adq-block-head"><span class="adq-block-num" aria-hidden="true">' + n + '</span><div>' +
+    return '<div class="adq-block-head"><div>' +
         '<h3>' + esc(title) + ' <span class="adq-progress" id="' + progressId + '"></span></h3>' +
         '<p>' + esc(text) + '</p>' +
         (who ? '<span class="adq-who">' + esc(who) + '</span>' : '') +
@@ -457,12 +452,12 @@ function renderCount(student) {
 function setProgress(pid, sid, text, done) {
     var p = document.getElementById(pid);
     if (p) { p.textContent = text; p.className = 'adq-progress' + (done ? ' is-done' : ''); }
-    var s = document.getElementById(sid);
+    var s = sid ? document.getElementById(sid) : null;
     if (s) { s.className = 'adq-step-num' + (done ? ' is-done' : ''); s.textContent = done ? '✓' : s.getAttribute('data-n'); }
 }
 function renderProgress() {
     var q = QUESTIONS.filter(function(x) { return answered(ans(x.id)); }).length;
-    setProgress('adq-p1', 'adq-s1', q + ' de ' + QUESTIONS.length + ' respondidas', q === QUESTIONS.length);
+    setProgress('adq-p1', null, q + ' de ' + QUESTIONS.length + ' respondidas', q === QUESTIONS.length);
     var complete = 0;
     state.students.forEach(function(student) {
         var m = matrixCount(student);
@@ -470,9 +465,9 @@ function renderProgress() {
         var el = document.getElementById('adq-mp-' + student.uid);
         if (el) { el.textContent = 'Matriz ' + m + ' de ' + ACTIVITIES.length; el.className = 'adq-progress' + (m === ACTIVITIES.length ? ' is-done' : ''); }
     });
-    setProgress('adq-p2', 'adq-s2', complete + ' de ' + state.students.length + ' con matriz completa', complete === state.students.length);
+    setProgress('adq-p2', null, complete + ' de ' + state.students.length + ' con matriz completa', complete === state.students.length);
     var sel = state.students.reduce(function(n, s) { return n + countSelected(s); }, 0);
-    setProgress('adq-p3', 'adq-s3', sel + ' acordados', sel > 0);
+    setProgress('adq-p3', null, sel + ' acordados', sel > 0);
 }
 
 function chartStudents() {
