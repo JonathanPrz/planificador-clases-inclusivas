@@ -2840,7 +2840,7 @@ function downloadDuaChecklist() {
         content.push({ text: [{ text: level.label + '. ', bold: true }, level.text.charAt(0).toUpperCase() + level.text.slice(1)], style: 'bodyText', margin: [0, 0, 0, 6] });
         content.push({
             table: { headerRows: 1, widths: [150, 90, '*'], body: [[{ text: 'Principio DUA 3.0', style: 'tableHeader' }, { text: 'Elegidas', style: 'tableHeader' }, { text: 'Para considerar', style: 'tableHeader' }]].concat(coverage.map(function(c) {
-                return [{ text: c.label, style: 'tableCell', bold: true }, { text: String(c.checked), style: 'tableCell' }, { text: c.checked ? '—' : c.question, style: 'tableCell', color: PDF.COLORS.secondary }];
+                return [{ text: [c.label, { text: '  ' + c.term, bold: false, color: PDF.COLORS.muted, fontSize: 8.5 }], style: 'tableCell', bold: true }, { text: String(c.checked), style: 'tableCell' }, { text: c.checked ? '—' : c.question, style: 'tableCell', color: PDF.COLORS.secondary }];
             })) },
             layout: PDF.tableLayout({ compact: true }), margin: [0, 0, 0, 6]
         });

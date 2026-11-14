@@ -5564,3 +5564,19 @@ body[data-mode="reunion"] .section-card, body[data-mode="reunion"] .adq-block { 
 .dua-principle.is-elegido .dua-principle-status { background: var(--support-light); color: var(--support); }
 .dua-principle.is-vacio .dua-principle-status { background: var(--bg-elevated); color: var(--text-secondary); }
 .dua-principle.is-vacio p { font-style: italic; }
+.dua-intro { margin: 0 0 18px; padding: 16px 18px; border-radius: 12px; background: var(--dua-light); color: var(--text-primary); max-width: 82ch; }
+.dua-intro p { margin: 0 0 6px; font-size: 15.5px; }
+.dua-more summary { cursor: pointer; font-weight: 700; color: var(--dua); font-size: 14.5px; width: fit-content; }
+.dua-more p { margin-top: 8px; font-size: 14.5px; color: var(--text-secondary); }
+.dua-more a { color: var(--dua); font-weight: 700; }
+.tab-when { margin-right: 6px; padding: 1px 7px; border-radius: 999px; background: var(--bg-elevated); color: var(--text-secondary); font-size: 12px; font-weight: 700; }
+.tab-link.active .tab-when { background: color-mix(in oklch, var(--accent) 14%, transparent); color: var(--accent); }
+.dua-principle-term { display: block; font-size: 12px; font-weight: 400; color: var(--text-muted); }
+@media (min-width: 760px) {
+    #dua-tabs.tabs-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; }
+    #dua-tabs .tab-link { flex-wrap: wrap; justify-content: flex-start; white-space: normal; padding: 10px 12px; gap: 6px; text-align: left; }
+}
+@media (min-width: 760px) {
+    #dua-tabs .tab-count { order: 2; }
+    #dua-tabs .tab-label { order: 3; flex-basis: 100%; font-size: 17px; }
+}

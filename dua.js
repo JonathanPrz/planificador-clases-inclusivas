@@ -9,7 +9,7 @@ function renderDua(onChecklistChange = () => {}) {
 
     tabs.innerHTML = duaStagesData.map((stage, index) => `
         <button class="tab-link ${index === 0 ? 'active is-visited' : ''}" id="tab-${stage.id}" type="button" role="tab" aria-selected="${index === 0}" aria-controls="panel-${stage.id}" data-stage-tab="${stage.id}">
-            <span class="tab-num">${index + 1}</span>${stage.label}
+            <span class="tab-num">${index + 1}</span><span class="tab-when">${stage.when.split(' ')[0]}</span><span class="tab-label">${stage.label}</span>
             <span class="tab-count" data-count-for="${stage.id}"></span>
         </button>
     `).join('');
@@ -22,10 +22,6 @@ function renderDua(onChecklistChange = () => {}) {
                     <h3>${stage.label}</h3>
                     <p>${stage.intro}</p>
                 </div>
-                <span class="source-pill">${stage.source}</span>
-            </div>
-            <div class="focus-grid">
-                ${stage.focus.map(item => `<div class="focus-card">${item}</div>`).join('')}
             </div>
             <div class="checklist-items">
                 ${stage.checklist.map((item, itemIndex) => {
@@ -154,7 +150,7 @@ function getPrincipleCoverage() {
     return ['compromiso', 'representacion', 'accion'].map(key => {
         const boxes = checkboxes.filter(box => box.dataset.principle === key);
         const checked = boxes.filter(box => box.checked).length;
-        return { key, label: duaPrinciples[key].label, text: duaPrinciples[key].text, question: PRINCIPLE_QUESTIONS[key], checked, total: boxes.length, status: checked ? 'elegido' : 'vacio' };
+        return { key, label: duaPrinciples[key].label, term: duaPrinciples[key].term, text: duaPrinciples[key].text, question: PRINCIPLE_QUESTIONS[key], checked, total: boxes.length, status: checked ? 'elegido' : 'vacio' };
     });
 }
 
@@ -170,7 +166,7 @@ function renderCoverage() {
     const level = getDuaCoverageLevel(checked);
     const rows = coverage.map(item => `
         <li class="dua-principle is-${item.status}">
-            <div class="dua-principle-head"><strong>${item.label}</strong><span class="dua-principle-status">${item.checked ? (item.checked === 1 ? '1 elegida' : item.checked + ' elegidas') : 'Sin elegir'}</span></div>
+            <div class="dua-principle-head"><strong>${item.label} <span class="dua-principle-term">${item.term}</span></strong><span class="dua-principle-status">${item.checked ? (item.checked === 1 ? '1 elegida' : item.checked + ' elegidas') : 'Sin elegir'}</span></div>
             <p>${item.checked ? item.text : item.question}</p>
         </li>`).join('');
     const repeated = window.UiePlannerAdecuaciones && window.UiePlannerAdecuaciones.getRepeatedSupports ? window.UiePlannerAdecuaciones.getRepeatedSupports() : [];
@@ -188,7 +184,7 @@ function renderCoverage() {
         ? `<div class="dua-pending"><strong>Etapas que aún no abres:</strong> ${pending.map(stage => `<button type="button" class="dua-pending-link" data-go-stage="${stage.id}">${stage.label}</button>`).join(' ')}</div>`
         : '<div class="dua-pending is-done">Revisaste las cuatro etapas.</div>';
     box.innerHTML = `
-        <h3 id="dua-coverage-title">Tu selección por principio</h3>
+        <h3 id="dua-coverage-title">Tu selección</h3>
         <p class="dua-coverage-intro">No hace falta marcarlo todo: elige lo que esta clase necesita.</p>
         ${stagesNote}
         <p class="dua-coverage-level"><strong>${level.label}.</strong> ${level.text}</p>
