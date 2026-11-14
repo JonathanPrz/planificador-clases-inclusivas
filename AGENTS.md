@@ -4,10 +4,14 @@
 App web (sin backend/build) para planificación inclusiva en educación superior. Genera recomendaciones de apoyo pedagógico según condiciones de estudiantes, usando matriz CIF-OMS.
 
 ## Stack
-- HTML + CSS (`styles.css`, ~4100 líneas) + JS vanilla (`supports.js`, `data.js`, `report.js`)
+- HTML + CSS (`styles.css`, ~4400 líneas) + JS vanilla (`supports.js`, `data.js`, `report.js`)
 - Sin framework. Sin bundler. Dependencias runtime por CDN: pdfmake (PDF) y Chart.js (radar).
 
 ## Convenciones
+- Al cambiar un `.css` o `.js`, actualizar el `?v=` de todos los archivos locales en `index.html`
+- Usar `window.UiePlannerNotice.showNotice` / `askConfirm` en lugar de `alert` / `confirm`
+- Escapar con `escapeSupportHtml` todo texto escrito por el usuario antes de insertarlo como HTML
+- No subir datos reales de estudiantes al repositorio (fichas, nombres, RUT)
 - Código legacy: `var` en lugar de `const/let`, funciones nombradas vs arrow
 - Mantener ese estilo en el archivo donde se trabaje
 - No agregar comentarios a menos que se solicite
@@ -40,11 +44,17 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Severidad ≥3 → score 1 → Prioritario
 
 ### 5. Archivos principales
-- `data.js`: Datos de condiciones, matriz CIF, reglas, recomendaciones
+- `data.js`: Datos de condiciones, matriz CIF, reglas, recomendaciones y referencias
 - `supports.js`: Lógica de UI, renderizado, cálculos de prioridad
 - `report.js`: Generación de PDF
+- `privacy.js`: Nota emergente de protección de datos (Ley 21.719)
+- `notice.js`: Avisos y confirmaciones en diálogo accesible
 - `index.html`: Punto de entrada
 
-### 6. Respaldo
+### 6. Privacidad
+- Sin analítica ni contadores externos
+- Los datos de estudiantes no se guardan en el navegador ni se envían a servidores
+
+### 7. Respaldo
 - Los respaldos se guardan fuera de este repositorio, con fecha
 - No eliminar respaldos antiguos

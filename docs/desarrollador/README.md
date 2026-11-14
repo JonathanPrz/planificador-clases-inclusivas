@@ -7,7 +7,7 @@
 | HTML5 | Sin framework |
 | CSS3 | ~4400 líneas en `styles.css` |
 | JavaScript | Vanilla (ES5 — usar `var`, funciones nombradas) |
-| [Chart.js](https://www.chartjs.org/) | v4.x (CDN) — radar chart |
+| [Chart.js](https://www.chartjs.org/) | v4.5.1 (CDN, versión fija) — radar chart |
 | [pdfMake](https://pdfmake.org/) | v0.2.12 (CDN) — generación de PDF |
 | Hosting | GitHub Pages (static) |
 
@@ -41,8 +41,11 @@ npx serve .
 ├── tabs.js                 ← Tabs dentro de vistas
 ├── dua.js                  ← Módulo DUA
 ├── content.js              ← Contenido de apoyos adicionales
-├── logos.js                ← Logos en base64
-├── sw.js                   ← Service Worker
+├── privacy.js              ← Nota emergente de protección de datos
+├── notice.js               ← Avisos y confirmaciones accesibles
+├── logos.js                ← Logos en base64 (PDF e impresión)
+├── favicon.png             ← Ícono del sitio
+├── sw.js                   ← Desinstala service workers antiguos
 ├── AGENTS.md               ← Contexto para asistentes IA
 └── docs/                   ← Documentación
 ```
@@ -53,6 +56,10 @@ npx serve .
 - **Funciones**: nombradas (`function nombre()`) en lugar de arrow functions
 - **Sin comentarios** a menos que la lógica sea críptica
 - **Idioma**: nombres de funciones y variables en inglés; textos de UI en español
+- **Texto del usuario**: escapar con `escapeSupportHtml` antes de insertarlo como HTML
+- **Avisos**: `window.UiePlannerNotice.showNotice` y `askConfirm`, nunca `alert` ni `confirm`
+- **Caché**: al cambiar un `.css` o `.js`, actualizar el `?v=` en `index.html`
+- **Datos reales**: nunca subir fichas, nombres o RUT de estudiantes al repositorio
 
 ## Archivos clave
 

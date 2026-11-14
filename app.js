@@ -28,9 +28,7 @@ function bindGlobalActions() {
 
     if (reset) {
         reset.addEventListener('click', function() {
-            if (confirm('¿Limpiar todas las decisiones DUA seleccionadas?')) {
-                resetDuaChecklist();
-            }
+            window.UiePlannerNotice.askConfirm('¿Limpiar todas las decisiones DUA seleccionadas?', resetDuaChecklist, 'Limpiar');
         });
     }
 
@@ -41,7 +39,7 @@ function bindGlobalActions() {
     if (duaDownload) {
         duaDownload.addEventListener('click', function() {
             if (!window.UiePlannerSupports) {
-                alert('Error: El módulo de apoyos no está cargado.');
+                window.UiePlannerNotice.showNotice('Error: El módulo de apoyos no está cargado.');
                 return;
             }
             if (typeof window.UiePlannerSupports.downloadDuaChecklist === 'function') {
@@ -49,10 +47,10 @@ function bindGlobalActions() {
                     window.UiePlannerSupports.downloadDuaChecklist();
                 } catch (e) {
                     console.error('Error al descargar checklist:', e);
-                    alert('Error al generar el PDF: ' + e.message);
+                    window.UiePlannerNotice.showNotice('Error al generar el PDF: ' + e.message);
                 }
             } else {
-                alert('El generador de PDF no está disponible.');
+                window.UiePlannerNotice.showNotice('El generador de PDF no está disponible.');
             }
         });
     }
@@ -64,9 +62,4 @@ try {
     console.error('No se pudo inicializar el planificador inclusivo.', error);
 }
 
-if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
-    navigator.serviceWorker.register('sw.js').catch(function(error) {
-        console.warn('No se pudo registrar el Service Worker.', error);
-    });
-}
 })();

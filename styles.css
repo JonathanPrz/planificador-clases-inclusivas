@@ -139,7 +139,7 @@ body {
         radial-gradient(circle at 92% 22%, color-mix(in oklch, var(--access-light) 70%, transparent) 0 240px, transparent 380px),
         linear-gradient(180deg, var(--bg-primary), color-mix(in oklch, var(--cool-soft) 34%, var(--bg-primary)) 46%, var(--bg-primary));
     color: var(--text-primary);
-    font-family: 'Atkinson Hyperlegible', 'Nunito', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, sans-serif;
     font-size: var(--text-xl);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -1530,6 +1530,22 @@ body.theme-dark .theme-icon-dark {
     overflow: auto;
 }
 
+.notice-dialog {
+    width: min(480px, calc(100vw - 32px));
+}
+
+.notice-message {
+    margin: 0;
+    font-size: var(--text-lg);
+    line-height: 1.55;
+}
+
+.notice-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
 .privacy-dialog {
     width: min(640px, calc(100vw - 32px));
 }
@@ -2493,7 +2509,7 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
     border-radius: var(--radius);
     background: var(--bg-card);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: inherit;
     font-size: var(--text-base);
     transition: border-color var(--transition);
 }
@@ -2510,7 +2526,7 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
     border-radius: var(--radius);
     background: var(--bg-card);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
     min-width: 150px;
@@ -2654,7 +2670,7 @@ body.theme-dark .radar-legend-item:hover { background: rgba(255,255,255,0.06); }
     align-items: center;
     gap: 4px;
     padding: 6px 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: inherit;
     font-size: var(--text-sm);
     font-weight: 500;
     border-radius: 6px;
