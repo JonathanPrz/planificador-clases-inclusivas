@@ -19,7 +19,7 @@ Esta recopilación es orientativa y no reemplaza la asesoría jurídica de la in
 | Ley 21.303 (2021) | Lengua de señas chilena como lengua oficial de las personas sordas | Complementaria | [ficha](ley-21303-lengua-de-senas.md) |
 | Ley 21.403 (2022) | Sordoceguera como discapacidad única y sistemas de comunicación oficiales | Complementaria | [ficha](ley-21403-sordoceguera.md) |
 | Leyes 21.015 (2017) y 21.690 (2024) | Inclusión laboral; cuota de contratación del 1% al 2% | Complementaria (prácticas y empleabilidad) | [ficha](leyes-21015-21690-inclusion-laboral.md) |
-| Ley 21.790 (2026) | Estudiantes cuidadores en educación superior | Nueva, aún no incluida en la herramienta | [ficha](ley-21790-estudiantes-cuidadores.md) |
+| Ley 21.790 (2026) | Estudiantes cuidadores en educación superior | Complementaria (sección "Estudiantes cuidadores") | [ficha](ley-21790-estudiantes-cuidadores.md) |
 | Ley 21.544, art. 8 (2023) | Ingreso a la educación superior sin prueba de acceso para estudiantes del Registro Nacional de la Discapacidad | Contexto de admisión | [ficha](ley-21544-acceso-sin-paes.md) |
 
 ## Cómo se relacionan
@@ -30,4 +30,4 @@ La Convención (Decreto 201) fija el estándar internacional. La Ley 20.422 lo b
 
 - Reglamentos de los artículos 26 bis y 26 ter de la Ley 20.422 (lengua de señas y sordoceguera): en consulta ciudadana en 2026.
 - Fecha de entrada en vigencia de la Ley 21.719: el Congreso tramita postergarla al 15 de octubre de 2027.
-- Ley 21.790: definir si el planificador debe orientar a docentes sobre flexibilidad para estudiantes cuidadores.
+- Ley 21.790: incorporar el nombre de la unidad de Duoc UC a la que se deriva cuando la institución publique sus normas internas.

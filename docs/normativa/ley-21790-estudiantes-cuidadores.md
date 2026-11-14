@@ -19,7 +19,7 @@ Protege a estudiantes de educación superior que estén embarazadas, que sean ma
 
 ## Uso en el planificador
 
-Hoy no aparece en la herramienta. Es pertinente porque algunos estudiantes cuidan a una persona con discapacidad. Podría sumarse a "Apoyos adicionales" como orientación para docentes sobre flexibilidad académica.
+Sección "Estudiantes cuidadores" en Apoyos adicionales (`#cuidadores`). Orienta al docente para informar, derivar a la unidad institucional y acordar ajustes de plazos y evaluación, sin pedir detalles de la situación familiar.
 
 ## Fuentes
 

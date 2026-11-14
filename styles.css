@@ -672,7 +672,7 @@ body.theme-dark .theme-icon-dark {
 }
 
 .additional-menu {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .additional-menu .start-step:hover,
