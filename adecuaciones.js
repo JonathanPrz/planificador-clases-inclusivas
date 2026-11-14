@@ -90,7 +90,7 @@ function newStudent() {
     return {
         uid: uid, name: '', carrera: '', fecha: '', entregadaPor: 'Psicopedagogía', vigencia: 'Semestre en curso',
         matrix: {}, conditions: [], origins: [], funciona: '', evitar: '',
-        selected: {}, expanded: {}, inChart: true
+        selected: {}, expanded: {}, inChart: true, done: false
     };
 }
 function studentLabel(student, index) {
@@ -110,12 +110,22 @@ function renderShell(root) {
         '<div class="adq-layout"><div class="adq-main">' +
         '<div class="adq-block" id="adq-paso-1">' +
             blockHead(1, 'Conversación con el docente', 'adq-p1', 'Nueve preguntas cerradas que estandarizan la conversación. Se responden una vez por sección y valen para todos sus estudiantes.', 'Responde: asesor de inclusión con el docente') +
-            '<div class="adq-fields">' +
-                textField('asignatura', 'Asignatura (opcional)', 'Texto libre') +
-                textField('seccion', 'Sección (opcional)', 'Sin informar') +
-                textField('docente', 'Docente (opcional)', 'Sin informar') +
+            '<div class="adq-summary" id="adq-q-summary" hidden>' +
+                '<div class="adq-summary-text" id="adq-q-summary-text"></div>' +
+                '<button class="btn btn-secondary btn-sm" type="button" id="adq-q-edit">Editar respuestas</button>' +
             '</div>' +
-            '<div class="adq-questions">' + QUESTIONS.map(renderQuestion).join('') + '</div>' +
+            '<div id="adq-q-body">' +
+                '<div class="adq-fields">' +
+                    textField('asignatura', 'Asignatura (opcional)', 'Texto libre') +
+                    textField('seccion', 'Sección (opcional)', 'Sin informar') +
+                    textField('docente', 'Docente (opcional)', 'Sin informar') +
+                '</div>' +
+                '<div class="adq-questions">' + QUESTIONS.map(renderQuestion).join('') + '</div>' +
+                '<div class="adq-done-row">' +
+                    '<button class="btn btn-primary" type="button" id="adq-q-done" disabled>Listo</button>' +
+                    '<span class="adq-done-hint" id="adq-q-hint"></span>' +
+                '</div>' +
+            '</div>' +
         '</div>' +
         '<div class="adq-block" id="adq-paso-2">' +
             blockHead(2, 'Estudiantes', 'adq-p2', 'Copia la matriz CIF tal como la entrega psicopedagogía, con su misma escala de 4 a 1. El origen de la barrera es opcional y ayuda a ordenar.', 'Fuente: entrevista PAEDIS de psicopedagogía') +
@@ -187,6 +197,11 @@ function renderStudentCard(student, index) {
             '<label class="adq-inchart"><input type="checkbox" data-student-field="inChart" data-uid="' + u + '"' + (student.inChart ? ' checked' : '') + '> Incluir en el gráfico</label>' +
             (state.students.length > 1 ? '<button class="btn btn-secondary btn-sm" type="button" data-remove="' + u + '">Quitar</button>' : '') +
         '</div>' +
+        '<div class="adq-summary adq-student-summary" id="adq-ss-' + u + '"' + (student.done ? '' : ' hidden') + '>' +
+            '<div class="adq-summary-text">' + studentSummary(student) + '</div>' +
+            '<button class="btn btn-secondary btn-sm" type="button" data-edit-student="' + u + '">Editar matriz y datos</button>' +
+        '</div>' +
+        '<div id="adq-sb-' + u + '"' + (student.done ? ' hidden' : '') + '>' +
         '<p class="adq-privacy">Los datos personales son opcionales: puedes usar iniciales o un código. <a href="#" data-open-privacy>¿Qué debo considerar?</a></p>' +
         '<div class="adq-fields">' +
             studentField(u, 'name', 'Nombre o iniciales (opcional)', student.name, 'Ej.: C. M.') +
@@ -203,6 +218,11 @@ function renderStudentCard(student, index) {
                 '<thead><tr><th scope="col">Actividad</th>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
             '<p class="adq-matrix-help">Se digita igual que en la ficha: 4 participa sin ajustes y 1 no participa sin apoyo. El planificador lo convierte en nivel de barrera.</p>' +
             '<div class="adq-derived" id="adq-derived-' + u + '"></div>' +
+            '<div class="adq-done-row">' +
+                '<button class="btn btn-primary" type="button" data-done-student="' + u + '"' + (matrixCount(student) === ACTIVITIES.length ? '' : ' disabled') + '>Listo</button>' +
+                '<span class="adq-done-hint" id="adq-sh-' + u + '"></span>' +
+            '</div>' +
+        '</div>' +
         '</div>' +
         '<details class="adq-sub adq-opt"><summary>Origen de la barrera (opcional) <span class="adq-private">Solo ficha de coordinación</span></summary>' +
             '<p class="adq-hint">Si se conoce, prioriza los apoyos que responden a ese origen. Se pueden marcar varias condiciones: cada una suma su origen sugerido, y el origen se puede corregir a mano.</p>' +
@@ -216,6 +236,33 @@ function renderStudentCard(student, index) {
             '</div>' +
         '</details>' +
     '</article>';
+}
+var Q_SHORT = { modalidad: 'Modalidad', evalua: 'Evaluación', competencia: 'Parte de la competencia', grupo: 'Trabajo en grupo', materiales: 'Materiales', incluye: 'Incluye', oralclase: 'Oral obligatoria', preocupa: 'Preocupa', humano: 'Apoyo humano' };
+function questionsSummary() {
+    var head = [state.asignatura, state.seccion].filter(function(v) { return v && v.trim(); }).map(function(v) { return esc(v.trim()); }).join(' · ');
+    return (head ? '<p class="adq-summary-title">' + head + '</p>' : '') + '<ul class="adq-summary-list">' + QUESTIONS.map(function(q) {
+        return '<li><b>' + Q_SHORT[q.id] + ':</b> ' + esc(answerText(q).replace(/ \(.*?\)/g, '')) + '</li>';
+    }).join('') + '</ul>';
+}
+function studentSummary(student) {
+    var levels = ACTIVITIES.filter(function(a) { return student.matrix[a.id] && student.matrix[a.id] < 4; }).sort(function(a, b) {
+        return student.matrix[a.id] - student.matrix[b.id];
+    }).map(function(a) {
+        var lvl = 4 - student.matrix[a.id];
+        return '<li><span class="adq-badge adq-badge-' + lvl + '">' + LEVEL_NAMES[lvl] + '</span> ' + esc(a.label) + '</li>';
+    }).join('');
+    var meta = 'Matriz entregada por ' + esc(student.entregadaPor || 'Psicopedagogía') + (student.fecha ? ' · ' + formatDate(student.fecha) : '') + (student.carrera.trim() ? ' · ' + esc(student.carrera.trim()) : '');
+    return '<p class="adq-summary-title">' + meta + '</p>' + (levels ? '<ul class="adq-summary-list adq-summary-levels">' + levels + '</ul>' : '<p>Sin barreras en la matriz (todas las actividades en 4).</p>');
+}
+function setQuestionsDone(done) {
+    state.qDone = done;
+    var body = document.getElementById('adq-q-body');
+    var summary = document.getElementById('adq-q-summary');
+    if (done) document.getElementById('adq-q-summary-text').innerHTML = questionsSummary();
+    body.hidden = done;
+    summary.hidden = !done;
+    var focusTarget = document.getElementById(done ? 'adq-q-edit' : 'adq-q-done');
+    if (focusTarget) focusTarget.focus();
 }
 function studentField(uid, key, label, value, placeholder) {
     var personal = key === 'name' || key === 'carrera' ? ' student-personal-field' : '';
@@ -457,6 +504,18 @@ function setProgress(pid, sid, text, done) {
 }
 function renderProgress() {
     var q = QUESTIONS.filter(function(x) { return answered(ans(x.id)); }).length;
+    var qDone = document.getElementById('adq-q-done');
+    if (qDone) {
+        qDone.disabled = q < QUESTIONS.length;
+        document.getElementById('adq-q-hint').textContent = q < QUESTIONS.length ? (QUESTIONS.length - q === 1 ? 'Falta 1 pregunta por responder.' : 'Faltan ' + (QUESTIONS.length - q) + ' preguntas por responder.') : 'Al terminar, las preguntas quedan resumidas y puedes editarlas cuando quieras.';
+    }
+    state.students.forEach(function(student) {
+        var btn = document.querySelector('[data-done-student="' + student.uid + '"]');
+        var hint = document.getElementById('adq-sh-' + student.uid);
+        var missing = ACTIVITIES.length - matrixCount(student);
+        if (btn) btn.disabled = missing > 0;
+        if (hint) hint.textContent = missing ? (missing === 1 ? 'Falta 1 actividad de la matriz.' : 'Faltan ' + missing + ' actividades de la matriz.') : 'Matriz completa.';
+    });
     setProgress('adq-p1', null, q + ' de ' + QUESTIONS.length + ' respondidas', q === QUESTIONS.length);
     var complete = 0;
     state.students.forEach(function(student) {
@@ -688,6 +747,18 @@ function onClick(event) {
         renderChart();
         var btn = document.querySelector('[data-chart-view="' + state.chartView + '"]');
         if (btn) btn.focus();
+        return;
+    }
+    if (t.id === 'adq-q-done') return setQuestionsDone(true);
+    if (t.id === 'adq-q-edit') return setQuestionsDone(false);
+    if (t.hasAttribute('data-done-student') || t.hasAttribute('data-edit-student')) {
+        var sid = Number(t.getAttribute('data-done-student') || t.getAttribute('data-edit-student'));
+        var stu = findStudent(sid);
+        stu.done = t.hasAttribute('data-done-student');
+        renderStudents();
+        renderResults();
+        var next = stu.done ? document.querySelector('[data-edit-student="' + sid + '"]') : document.querySelector('[data-done-student="' + sid + '"]');
+        if (next) next.focus();
         return;
     }
     if (t.id === 'adq-doc-teacher') return openTeacherPlan();

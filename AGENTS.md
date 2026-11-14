@@ -37,6 +37,7 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - El modo se guarda en `body[data-mode]` y en sessionStorage (`uie-modo`). En modo `reunion` aparece la barra `#meeting-bar` (1 Diseño de la clase → 2 Casos particulares → 3 Documentos) en las vistas DUA y Adecuaciones, y se oculta la nota para docentes solos (`#solo-note`)
 - Menú: «Diseño de la clase» (DUA) y «Casos particulares» (adecuaciones). Dentro de la sección se mantienen los términos «Base DUA» y «Adecuaciones curriculares de acceso»
 - Evitar texto que repita lo que la herramienta ya aplica. Antes de agregar una sección nueva, revisar si ya existe en Apoyos adicionales
+- Las preguntas y cada estudiante (datos y matriz) tienen un botón «Listo» que se activa al completarlos y los deja como un resumen con «Editar». No se cierran solos: varias preguntas admiten más de una respuesta
 - No volver a numerar los bloques internos de Adecuaciones: la única numeración visible es la de la barra de reunión
 
 ### 0b. DUA (dua.js)
