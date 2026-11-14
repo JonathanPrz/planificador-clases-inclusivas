@@ -342,7 +342,7 @@ function renderProfilePdfSection(grouped, index, firstSupportNumber) {
                 buckets[level].push(item);
             });
             var priorityHeaders = { 1: 'Barrera significativa — intervenir', 2: 'Barrera moderada — ajustar', 3: 'Barrera leve — observar', 0: 'Sin barrera detectada' };
-            var priorityColors = { 1: '#ea4335', 2: '#fbbc04', 3: '#34a853', 0: '#9aa0a6' };
+            var priorityColors = { 1: '#9B2C24', 2: '#DE6A5E', 3: '#F2B8B1', 0: '#D1D5DB' };
             [1, 2, 3, 0].forEach(function(level) {
                 var bucket = buckets[level];
                 if (!bucket || !bucket.length) return;
@@ -388,7 +388,7 @@ function renderCIFChartPdfSection(students) {
         return Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
     });
     if (!hasAnyMatrix) return [];
-    var levelColors = { 0: '#9aa0a6', 1: '#34a853', 2: '#fbbc04', 3: '#ea4335', 4: '#ea4335' };
+    var levelColors = { 0: '#D1D5DB', 1: '#F2B8B1', 2: '#DE6A5E', 3: '#9B2C24', 4: '#9B2C24' };
 
     var cols = [];
     students.slice(0, 4).forEach(function(student, index) {
@@ -434,7 +434,7 @@ function renderCIFChartPdfSection(students) {
         cols.forEach(function(col) {
             var rd = col.rows[ai];
             var level = rd.severity;
-            var color = levelColors[level] || '#9aa0a6';
+            var color = levelColors[level] || '#D1D5DB';
             var bw = level > 0 ? Math.min(Math.round((level / 3) * (colW - hPad * 2 - 4) * 1.5), colW - hPad * 2) : 0;
             row.push({
                 stack: [
@@ -500,39 +500,11 @@ function updatePrintableRecommendations() {
 }
 
 function ensurePdfMake(callback, onError) {
-    if (window.pdfMake) { callback(); return; }
-    var script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.12/pdfmake.min.js';
-    script.onerror = function() {
-        if (onError) onError();
-        else window.UiePlannerNotice.showNotice('No se pudo generar el PDF. Verifica tu conexión a internet.');
-    };
-    var fonts = document.createElement('script');
-    fonts.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.12/vfs_fonts.min.js';
-    var loaded = 0;
-    function onLoad() {
-        loaded++;
-        if (loaded === 2) callback();
-    }
-    script.onload = onLoad;
-    fonts.onload = onLoad;
-    fonts.onerror = script.onerror;
-    document.head.appendChild(script);
-    document.head.appendChild(fonts);
+    window.UiePlannerPdf.ensureLibrary(callback, onError);
 }
 
 function checkboxItem(text, checked) {
-    var s = 9;
-    var canvas = [
-        { type: 'rect', x: 0, y: 0, w: s, h: s, r: 1.5, lineWidth: 1, lineColor: '#6b7280' }
-    ];
-    if (checked) {
-        canvas.push(
-            { type: 'line', x1: 2, y1: 5, x2: 4, y2: 7.5, lineWidth: 2.5, lineColor: '#16a34a' },
-            { type: 'line', x1: 4, y1: 7.5, x2: 8, y2: 2, lineWidth: 2.5, lineColor: '#16a34a' }
-        );
-    }
-    return { columns: [{ canvas: canvas, width: s + 4, margin: [0, 1.5, 0, 0] }, { text: text, width: '*' }], margin: [0, 2, 0, 2] };
+    return window.UiePlannerPdf.checkbox(text, checked);
 }
 
 function generatePdfMake(callback) {
@@ -591,7 +563,7 @@ function generatePdfMake(callback) {
         ] });
         content.push({ text: '' });
 
-        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
+        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 499, y2: 0, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
         content.push({ text: '' });
         content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
 
@@ -613,7 +585,7 @@ function generatePdfMake(callback) {
         };
 
         try {
-            pdfMake.createPdf(docDefinition).download('plan-apoyo-docente.pdf');
+            window.UiePlannerPdf.preview(docDefinition, 'plan-apoyo-docente.pdf', { title: 'Plan de apoyo docente' });
         } catch(e) {
             console.error('Error generando PDF:', e);
             window.UiePlannerNotice.showNotice('No se pudo generar el PDF. Intenta recargar la página e intentar de nuevo.');
@@ -644,7 +616,7 @@ function generateDuaPdf(callback) {
             content.push({ text: '' });
         });
 
-        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
+        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 499, y2: 0, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
         content.push({ text: '' });
         content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE.', style: 'footerText' });
 
@@ -663,7 +635,7 @@ function generateDuaPdf(callback) {
         };
 
         try {
-            pdfMake.createPdf(docDefinition).download('base-dua-clase.pdf');
+            window.UiePlannerPdf.preview(docDefinition, 'base-dua-clase.pdf', { title: 'Base DUA para la clase' });
         } catch(e) {
             console.error('Error generando PDF DUA:', e);
             window.UiePlannerNotice.showNotice('No se pudo generar el PDF. Intenta recargar la página e intentar de nuevo.');
@@ -713,7 +685,7 @@ function generateAccPdf(callback) {
         ] });
         content.push({ text: '' });
 
-        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
+        content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 499, y2: 0, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
         content.push({ text: '' });
         content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
 
@@ -734,7 +706,7 @@ function generateAccPdf(callback) {
         };
 
         try {
-            pdfMake.createPdf(docDefinition).download('adecuaciones-curriculares.pdf');
+            window.UiePlannerPdf.preview(docDefinition, 'adecuaciones-curriculares.pdf', { title: 'Adecuaciones curriculares de acceso' });
         } catch(e) {
             console.error('Error generando PDF adecuaciones:', e);
             window.UiePlannerNotice.showNotice('No se pudo generar el PDF. Intenta recargar la página e intentar de nuevo.');

@@ -1,4 +1,5 @@
 (function () {
+var PDF = window.UiePlannerPdf;
 const { accommodationsData, autismMyths, goodPracticesData, matrixRecommendationRules, accommodationCifMap, shortActivityLabels, prioridadLabels, recommendationsData } = window.UiePlannerData;
 
 const barrierDimensions = [
@@ -160,7 +161,24 @@ function setEditingMode(enabled) {
     renderSelectedSupportRecommendations();
 }
 
+function bindChartToggle() {
+    if (document.body.dataset.chartToggleBound === 'true') return;
+    document.body.dataset.chartToggleBound = 'true';
+    document.addEventListener('click', function(event) {
+        var toggle = event.target.closest('.cif-bar-toggle');
+        if (!toggle) return;
+        var panel = toggle.closest('.barrier-map-panel');
+        var chart = panel ? panel.querySelector('.cif-chart') : null;
+        if (!chart) return;
+        var expanded = toggle.getAttribute('aria-expanded') !== 'false';
+        chart.hidden = expanded;
+        toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        toggle.textContent = expanded ? 'Mostrar gráfico' : 'Ocultar gráfico';
+    });
+}
+
 function initModeSelector() {
+    bindChartToggle();
     var genMedical = document.getElementById('btn-generate-plan-medical');
     var editToggle = document.getElementById('btn-toggle-editing-mode');
 
@@ -436,24 +454,21 @@ function renderCIFBarChart(students, options) {
     if (!hasAnyMatrix) return '';
 
     var headerCells = studentCols.map(function(col) {
-        return '<div class="cif-student-header">' + escapeSupportHtml(col.label) + '</div>';
+        return '<th scope="col">' + escapeSupportHtml(col.label) + '</th>';
     }).join('');
 
     var bodyRows = activities.map(function(act, ai) {
         var label = shortActivityLabels[act.id] || act.label;
         var cells = studentCols.map(function(col) {
-            var row = col.rows[ai];
-            var level = row.severity;
-            var widthPct = level > 0 ? (level / 3) * 100 : 0;
-            return '<div class="cif-cell">' +
-                '<div class="cif-minibar requirement-level-' + level + '" style="width:' + widthPct + '%"></div>' +
-                '</div>';
+            var level = Math.max(0, Math.min(3, col.rows[ai].severity));
+            var widthPct = level > 0 ? Math.round((level / 3) * 100) : 0;
+            return '<td>' +
+                '<span class="cif-meter" aria-hidden="true"><span class="cif-minibar requirement-level-' + level + '" style="width:' + widthPct + '%"></span></span>' +
+                '<span class="cif-value' + (level ? '' : ' is-zero') + '" aria-hidden="true">' + level + '</span>' +
+                '<span class="sr-only">' + requirementLabel(level) + '</span>' +
+                '</td>';
         }).join('');
-        var labelCls = ai % 2 === 0 ? 'cif-label-even' : 'cif-label-odd';
-        return '<div class="cif-row">' +
-            '<div class="cif-label ' + labelCls + '">' + label + '</div>' +
-            cells +
-            '</div>';
+        return '<tr><th scope="row">' + escapeSupportHtml(label) + '</th>' + cells + '</tr>';
     }).join('');
 
     var sourceLabel = hasAnyMatrix ? 'Matriz CIF aplicada' : 'Orientaci\u00f3n por condici\u00f3n';
@@ -461,11 +476,11 @@ function renderCIFBarChart(students, options) {
         ? 'Datos de la matriz CIF del estudiante. Cada barra muestra el nivel de apoyo sugerido seg\u00fan la compatibilidad registrada.'
         : 'Valores de referencia basados en el perfil t\u00edpico de la condici\u00f3n. Aplica la matriz CIF para obtener datos reales del estudiante.';
 
-    var legendHtml = '<div class="cif-legend">' +
+    var legendHtml = '<ul class="cif-legend" aria-label="Niveles de barrera">' +
         [0,1,2,3].map(function(lvl) {
-            return '<span class="level-badge level-badge-' + lvl + '">' + requirementLabel(lvl) + '</span>';
+            return '<li><span class="cif-swatch requirement-level-' + lvl + '" aria-hidden="true"></span>' + lvl + ' · ' + requirementLabel(lvl) + '</li>';
         }).join('') +
-        '</div>';
+        '</ul>';
 
     return '<div class="barrier-map-panel">' +
         '<div class="resource-heading">' +
@@ -479,11 +494,11 @@ function renderCIFBarChart(students, options) {
             '</div>' +
         '</div>' +
         '<div class="cif-chart">' +
-            '<div class="cif-row">' +
-                '<div class="cif-label cif-header-label">Actividad CIF</div>' +
-                headerCells +
-            '</div>' +
-            bodyRows +
+            '<table class="cif-table">' +
+                '<caption class="sr-only">Nivel de barrera por actividad CIF y estudiante, de 0 a 3</caption>' +
+                '<thead><tr><th scope="col">Actividad CIF</th>' + headerCells + '</tr></thead>' +
+                '<tbody>' + bodyRows + '</tbody>' +
+            '</table>' +
             legendHtml +
             (extraCount ? '<p class="small-note">+ ' + extraCount + ' estudiante(s) no graficados.</p>' : '') +
         '</div>' +
@@ -491,14 +506,14 @@ function renderCIFBarChart(students, options) {
 }
 
 var CIF_RADAR_COLORS = [
-    { border: '#4361ee', bg: 'rgba(67,97,238,0.12)' },
-    { border: '#f72585', bg: 'rgba(247,37,133,0.12)' },
-    { border: '#06d6a0', bg: 'rgba(6,214,160,0.12)' },
-    { border: '#ffb703', bg: 'rgba(255,183,3,0.12)' },
-    { border: '#7209b7', bg: 'rgba(114,9,183,0.12)' },
-    { border: '#e36414', bg: 'rgba(227,100,20,0.12)' },
-    { border: '#4cc9f0', bg: 'rgba(76,201,240,0.12)' },
-    { border: '#f94144', bg: 'rgba(249,65,68,0.12)' }
+    { border: '#2a78d6', bg: 'rgba(42,120,214,0.10)' },
+    { border: '#eb6834', bg: 'rgba(235,104,52,0.10)' },
+    { border: '#1baf7a', bg: 'rgba(27,175,122,0.10)' },
+    { border: '#eda100', bg: 'rgba(237,161,0,0.10)' },
+    { border: '#e87ba4', bg: 'rgba(232,123,164,0.10)' },
+    { border: '#008300', bg: 'rgba(0,131,0,0.10)' },
+    { border: '#6250d6', bg: 'rgba(98,80,214,0.10)' },
+    { border: '#e34948', bg: 'rgba(227,73,72,0.10)' }
 ];
 
 function getRadarThemeColors() {
@@ -538,11 +553,11 @@ function getCIFRadarDataset(student, index) {
         data: data,
         borderColor: color.border,
         backgroundColor: color.bg,
-        borderWidth: 3,
+        borderWidth: 2,
         pointBackgroundColor: color.border,
-        pointBorderColor: color.border,
+        pointBorderColor: '#ffffff',
         pointBorderWidth: 1.5,
-        pointRadius: 3.5,
+        pointRadius: 4,
         pointHoverRadius: 6,
         fill: true,
         tension: 0.15
@@ -659,35 +674,34 @@ function renderCIFRadarChart(students, containerId, options) {
 
         var legendTitle = document.createElement('div');
         legendTitle.className = 'radar-legend-title';
-        legendTitle.textContent = 'Estudiantes';
+        legendTitle.textContent = 'Estudiantes (clic para mostrar u ocultar)';
         legendEl.appendChild(legendTitle);
 
         filteredStudents.forEach(function(student, i) {
             var color = CIF_RADAR_COLORS[i % CIF_RADAR_COLORS.length];
-            var item = document.createElement('div');
+            var item = document.createElement('button');
+            item.type = 'button';
             item.className = 'radar-legend-item';
+            item.setAttribute('aria-pressed', 'true');
 
             var dot = document.createElement('span');
             dot.className = 'legend-item-dot';
+            dot.setAttribute('aria-hidden', 'true');
             dot.style.backgroundColor = color.border;
 
             var label = document.createElement('span');
             label.className = 'legend-item-label';
             label.textContent = formatStudentLabel(student);
 
-            var eye = document.createElement('span');
-            eye.className = 'legend-item-eye';
-            eye.textContent = '👁';
-
             item.appendChild(dot);
             item.appendChild(label);
-            item.appendChild(eye);
 
             item.addEventListener('click', function() {
                 var meta = chart.getDatasetMeta(i);
                 var wasHidden = !!(meta.hidden || false);
                 chart.setDatasetVisibility(i, wasHidden);
                 item.classList.toggle('radar-hidden', !wasHidden);
+                item.setAttribute('aria-pressed', wasHidden ? 'true' : 'false');
                 chart.update();
             });
 
@@ -2328,201 +2342,37 @@ function generatePlanPDF() {
     var docDef;
     try {
         docDef = buildPlanPDFDocument(students, false, includeCharts);
-        var headerContent = buildPdfHeader();
-        docDef.content = headerContent.concat(docDef.content);
+        docDef.content = buildPdfHeader().concat(docDef.content);
     } catch (e) {
         console.error('Error construyendo documento PDF:', e);
-        window.UiePlannerNotice.showNotice('Error al construir el documento: ' + e.message);
+        window.UiePlannerNotice.showNotice('No se pudo preparar el documento. Revisa que cada estudiante tenga al menos una condición seleccionada e intenta de nuevo.');
         return;
     }
 
-    if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
-        window.UiePlannerNotice.showNotice('Librería PDF no disponible. Recarga la página.');
-        return;
-    }
-    var filename = 'plan-de-apoyo-por-condicion.pdf';
-    try {
-        window.pdfMake.createPdf(docDef).download(filename);
-    } catch(e) {
-        console.error('Error generando PDF:', e);
-        window.UiePlannerNotice.showNotice('Error al generar el PDF: ' + e.message);
-    }
+    PDF.preview(docDef, 'plan-de-apoyo-por-condicion.pdf', { title: 'Plan de apoyo docente', subject: 'Apoyos y adecuaciones curriculares de acceso' });
 }
 
-function renderPdfCIFRadarChartCanvas(students) {
+function getStudentAdjustmentLevels(student, si) {
     var activities = window.UiePlannerData.accessMatrixActivities;
-    if (!activities || !students || !students.length || activities.length < 3) return '';
-
-    var W = 320, H = 315, CX = 160, CY = 122, MAX_R = 94;
-    var n = activities.length;
-    var maxStudents = Math.min(students.length, 4);
-
-    var scale = 3;
-    var canvas = document.createElement('canvas');
-    canvas.width = W * scale;
-    canvas.height = H * scale;
-    var ctx = canvas.getContext('2d');
-    ctx.scale(scale, scale);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-
-    var angles = [];
-    for (var i = 0; i < n; i++) { angles.push(-Math.PI / 2 + (2 * Math.PI * i) / n); }
-
-    function getPoint(ri, ai) {
-        return { x: CX + ri * Math.cos(angles[ai]), y: CY + ri * Math.sin(angles[ai]) };
-    }
-
-    // Rings
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-    ctx.lineWidth = 0.5;
-    for (var ri = 1; ri <= 3; ri++) {
-        var r = (ri / 3) * MAX_R;
-        ctx.beginPath();
-        for (var j = 0; j < n; j++) {
-            var p = getPoint(r, j);
-            j === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
-        }
-        ctx.closePath();
-        ctx.stroke();
-    }
-
-    // Spokes
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-    ctx.lineWidth = 0.5;
-    for (var j = 0; j < n; j++) {
-        var p = getPoint(MAX_R, j);
-        ctx.beginPath();
-        ctx.moveTo(CX, CY); ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-    }
-
-    // Activity labels
-    ctx.font = 'bold 9px Arial';
-    ctx.fillStyle = '#374151';
-    for (var j = 0; j < n; j++) {
-        var act = activities[j];
-        var label = shortActivityLabels[act.id] || act.label;
-        var a = angles[j];
-        var lx = CX + (MAX_R + 8) * Math.cos(a);
-        var ly = CY + (MAX_R + 8) * Math.sin(a);
-        ctx.textAlign = Math.abs(Math.cos(a)) < 0.1 ? 'center' : Math.cos(a) > 0 ? 'left' : 'right';
-        ctx.textBaseline = Math.abs(Math.sin(a)) < 0.1 ? 'middle' : Math.sin(a) > 0 ? 'top' : 'bottom';
-        ctx.fillText(label, lx, ly);
-    }
-
-    // Data for each student (max 4)
-    for (var si = 0; si < maxStudents; si++) {
-        var student = students[si];
-        var color = CIF_RADAR_COLORS[si % CIF_RADAR_COLORS.length];
-        var studentIndex = student.cardIndex || student.index || (si + 1);
-        var matrixScores = getStudentMatrixScores(studentIndex);
-        var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
-
-        var data;
-        if (hasMatrix) {
-            data = activities.map(function(act) {
-                var score = Number(matrixScores[act.id] || 0);
-                return score > 0 ? 4 - score : 0;
-            });
-        } else {
-            var condKeys = student.conditions.map(function(c) { return c.key; });
-            data = activities.map(function(act) {
-                var maxSev = 0;
-                condKeys.forEach(function(ck) {
-                    var profile = barrierProfiles[ck];
-                    if (!profile) return;
-                    act.dims.forEach(function(dim) { maxSev = Math.max(maxSev, profile[dim] || 0); });
-                });
-                return maxSev;
-            });
-        }
-
-        var pts = [];
-        for (var j = 0; j < n; j++) {
-            var val = Math.min(3, Math.max(0, Number(data[j] || 0)));
-            pts.push(getPoint((val / 3) * MAX_R, j));
-        }
-
-        // Fill
-        ctx.globalAlpha = maxStudents === 1 ? 0.12 : 0.08;
-        ctx.beginPath();
-        pts.forEach(function(p, j) { j === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
-        ctx.closePath();
-        ctx.fillStyle = color.border;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-
-        // Stroke
-        ctx.beginPath();
-        pts.forEach(function(p, j) { j === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
-        ctx.closePath();
-        ctx.strokeStyle = color.border;
-        ctx.lineWidth = maxStudents === 1 ? 2.5 : 2;
-        ctx.stroke();
-
-        // Points
-        pts.forEach(function(p) {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
-            ctx.fillStyle = color.border;
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.stroke();
+    var studentIndex = student.cardIndex || student.index || (si + 1);
+    var matrixScores = getStudentMatrixScores(studentIndex);
+    var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
+    if (hasMatrix) {
+        return activities.map(function(act) {
+            var score = Number(matrixScores[act.id] || 0);
+            return score > 0 ? 4 - score : 0;
         });
     }
-
-    // Bottom legend
-    var ly = 258;
-    ctx.font = '10px Arial';
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'center';
-    var spacing = W / (maxStudents + 1);
-    for (var si = 0; si < maxStudents; si++) {
-        var student = students[si];
-        var color = CIF_RADAR_COLORS[si % CIF_RADAR_COLORS.length];
-        var cx = spacing * (si + 1);
-        ctx.fillStyle = color.border;
-        ctx.fillRect(cx - 50, ly + 1, 8, 8);
-        ctx.fillStyle = '#111827';
-        ctx.textAlign = 'left';
-        ctx.fillText(formatStudentLabel(student), cx - 38, ly);
-    }
-
-    // Severity level legend
-    var ly2 = ly + 22;
-    ctx.font = '9px Arial';
-    ctx.textBaseline = 'top';
-    var levelColors = ['#9aa0a6', '#34a853', '#fbbc04', '#ea4335'];
-    var levelTexts = ['0 Sin ajuste', '1 Menor', '2 Moderado', '3 Prioritario'];
-    var prefix = 'Niveles: ';
-    var fullStr = prefix;
-    for (var li = 0; li < levelTexts.length; li++) {
-        fullStr += levelTexts[li];
-        if (li < levelTexts.length - 1) fullStr += ' · ';
-    }
-    var totalW = ctx.measureText(fullStr).width;
-    var cx = W / 2 - totalW / 2;
-    ctx.fillStyle = '#6b7280';
-    ctx.textAlign = 'left';
-    ctx.fillText(prefix, cx, ly2);
-    cx += ctx.measureText(prefix).width;
-    for (var li = 0; li < levelTexts.length; li++) {
-        ctx.fillStyle = levelColors[li];
-        ctx.fillRect(cx, ly2 + 2, 7, 7);
-        cx += 9;
-        ctx.fillStyle = '#6b7280';
-        ctx.fillText(levelTexts[li], cx, ly2);
-        cx += ctx.measureText(levelTexts[li]).width;
-        if (li < levelTexts.length - 1) {
-            ctx.fillText(' ' + String.fromCharCode(183) + ' ', cx, ly2);
-            cx += ctx.measureText(' ' + String.fromCharCode(183) + ' ').width;
-        }
-    }
-
-    return { dataUrl: canvas.toDataURL('image/png'), width: W };
+    var condKeys = (student.conditions || []).map(function(c) { return c.key; });
+    return activities.map(function(act) {
+        var maxSev = 0;
+        condKeys.forEach(function(ck) {
+            var profile = barrierProfiles[ck];
+            if (!profile) return;
+            act.dims.forEach(function(dim) { maxSev = Math.max(maxSev, profile[dim] || 0); });
+        });
+        return Math.min(3, maxSev);
+    });
 }
 
 function renderPdfCIFChart(students) {
@@ -2532,17 +2382,17 @@ function renderPdfCIFChart(students) {
         return Object.values(scores).some(function(v) { return Number(v || 0) > 0; });
     });
     if (!hasAnyMatrix) return [];
-
-    var radarResult = renderPdfCIFRadarChartCanvas(students);
-    if (!radarResult) return [];
-    var radarDataUrl = radarResult.dataUrl;
-    var cw = radarResult.width;
-    var pdfWidth = Math.min(cw, 285);
-
-    return [
-        { image: radarDataUrl, width: pdfWidth, alignment: 'center', margin: [0, 2, 0, 4] },
-        { text: '' }
-    ];
+    var activities = window.UiePlannerData.accessMatrixActivities;
+    var labels = activities.map(function(act) { return shortActivityLabels[act.id] || act.label; });
+    var output = [];
+    for (var start = 0; start < students.length; start += 4) {
+        var group = students.slice(start, start + 4);
+        var series = group.map(function(student, i) {
+            return { label: formatStudentLabel(student), values: getStudentAdjustmentLevels(student, start + i) };
+        });
+        PDF.levelBarChart(labels, series).forEach(function(node) { output.push(node); });
+    }
+    return output;
 }
 
 function buildPlanPDFDocument(students, includeDua, includeCharts) {
@@ -2577,45 +2427,46 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
     content.push({ text: modeTitle, style: 'mainTitle' });
     content.push({ text: 'Documento orientativo para acordar una base DUA de clase y adecuaciones curriculares de acceso.', style: 'introText' });
 
-    content.push({ text: '1. Base DUA para la clase', style: 'sectionTitle' });
-    content.push({ text: 'Antes de aplicar adecuaciones individuales, asegura una base común de accesibilidad pedagógica para todo el curso. Estas acciones reducen barreras sin modificar los resultados de aprendizaje.', style: 'bodyText', italics: true, color: '#4b5563' });
-    [
+    content.push(PDF.sectionTitle(1, 'Base DUA para la clase'));
+    content.push({ text: 'Antes de aplicar adecuaciones individuales, asegura una base común de accesibilidad pedagógica para todo el curso. Estas acciones reducen barreras sin modificar los resultados de aprendizaje.', style: 'noteText' });
+    content.push(PDF.bulletList([
         'Entregar la programación completa desde el inicio: fechas, evaluaciones, condiciones y cambios relevantes.',
         'Publicar instrucciones, criterios de logro y ejemplos en formato visible, oral y escrito.',
         'Modelar tareas complejas antes del trabajo autónomo y dividirlas en pasos verificables.',
         'Organizar participación y trabajo grupal con roles claros, turnos y apoyos entre pares.',
         'Ofrecer canales claros para pedir ayuda y comunicar apoyos institucionales disponibles.',
         'Verificar comprensión sin exponer públicamente al estudiante.'
-    ].forEach(function(item) {
-        content.push({ text: '• ' + item, style: 'bodyText', margin: [10, 1, 0, 1] });
-    });
+    ]));
 
-    content.push({ text: '2. Resumen para la gestión docente', style: 'sectionTitle' });
-    content.push({ text: 'Este resumen permite identificar rápidamente a quién corresponde cada apoyo y si la priorización se basó en una matriz CIF o en orientación inicial por condición.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
+    content.push(PDF.sectionTitle(2, 'Resumen para la gestión docente'));
+    content.push({ text: 'Identifica a quién corresponde cada apoyo y si la priorización se basó en una matriz CIF o en una orientación inicial por condición.', style: 'noteText' });
     content.push({
         table: {
             headerRows: 1,
-            widths: ['22%', '16%', '28%', '20%', '14%'],
+            widths: ['24%', '15%', '27%', '20%', '14%'],
             body: [[
-                { text: 'Estudiante', style: 'tableHeader' },
+                { text: 'ESTUDIANTE', style: 'tableHeader' },
                 { text: 'RUT', style: 'tableHeader' },
-                { text: 'Carrera', style: 'tableHeader' },
-                { text: 'Código asignatura', style: 'tableHeader' },
-                { text: 'Matriz CIF', style: 'tableHeader' }
+                { text: 'CARRERA', style: 'tableHeader' },
+                { text: 'CÓDIGO ASIGNATURA', style: 'tableHeader' },
+                { text: 'MATRIZ CIF', style: 'tableHeader' }
             ]].concat(students.map(function(student) {
+                var rut = studentInfo(student.rut);
+                var career = studentInfo(student.career);
+                var section = studentInfo(student.section);
                 return [
-                    { text: studentInfo(student.name, 'Estudiante ' + student.index), style: 'bodyText' },
-                    { text: studentInfo(student.rut), style: 'bodyText' },
-                    { text: studentInfo(student.career), style: 'bodyText' },
-                    { text: studentInfo(student.section), style: 'bodyText' },
-                    { text: studentMatrixLabel(student), style: 'bodyText' }
+                    { text: studentInfo(student.name, 'Estudiante ' + student.index), style: 'tableCell', bold: true },
+                    { text: rut, style: 'tableCell', color: rut === missingText ? PDF.COLORS.faint : PDF.COLORS.body },
+                    { text: career, style: 'tableCell', color: career === missingText ? PDF.COLORS.faint : PDF.COLORS.body },
+                    { text: section, style: 'tableCell', color: section === missingText ? PDF.COLORS.faint : PDF.COLORS.body },
+                    { text: studentMatrixLabel(student), style: 'tableCell' }
                 ];
             }))
         },
-        layout: 'lightHorizontalLines',
-        margin: [0, 4, 0, 8]
+        layout: PDF.tableLayout(),
+        margin: [0, 2, 0, 8]
     });
-    content.push({ text: 'La condición se utiliza como referencia de pertinencia para seleccionar apoyos; la decisión final debe responder a barreras observadas y acuerdos con el estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 2, 0, 8] });
+    content.push({ text: 'La condición se usa como referencia de pertinencia; la decisión final responde a barreras observadas y a acuerdos con el estudiante.', style: 'noteText' });
 
     var chartSectionNumber = includeCharts ? 3 : 0;
     var criteriaSectionNumber = includeCharts ? 4 : 3;
@@ -2623,60 +2474,49 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
     var followUpSectionNumber = includeCharts ? 6 : 5;
 
     if (includeCharts) {
-        content.push({ text: chartSectionNumber + '. Mapa de énfasis de apoyo', style: 'sectionTitle' });
-        content.push({ text: 'El gráfico resume visualmente dónde conviene concentrar coordinación, observación o apoyos. Úsalo como lectura rápida antes de revisar las recomendaciones por estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
+        content.push(PDF.sectionTitle(chartSectionNumber, 'Mapa de énfasis de apoyo'));
+        content.push({ text: 'Cada barra indica el nivel de ajuste sugerido por actividad CIF (0 a 3). Úsalo como lectura rápida antes de revisar las recomendaciones por estudiante.', style: 'noteText' });
         var allChartContent = renderPdfCIFChart(students);
         allChartContent.forEach(function(item) { content.push(item); });
     }
 
-    content.push({ text: criteriaSectionNumber + '. Criterios para aplicar adecuaciones individuales', style: 'sectionTitle' });
-    content.push({ text: 'Usa estos criterios para decidir qué apoyos implementar, resguardando el resultado de aprendizaje, la privacidad y la participación del estudiante.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
-    goodPracticesData.slice(0, 4).forEach(function(item) {
-        content.push({ text: [{ text: '• ' + item.title + ': ', bold: true }, item.text], style: 'bodyText', margin: [10, 1, 0, 1] });
-    });
+    content.push(PDF.sectionTitle(criteriaSectionNumber, 'Criterios para aplicar adecuaciones individuales'));
+    content.push({ text: 'Usa estos criterios para decidir qué apoyos implementar, resguardando el resultado de aprendizaje, la privacidad y la participación del estudiante.', style: 'noteText' });
+    content.push(PDF.bulletList(goodPracticesData.slice(0, 4).map(function(item) {
+        return { text: [{ text: item.title + ': ', bold: true, color: PDF.COLORS.ink }, item.text] };
+    })));
 
-    content.push({ text: supportsSectionNumber + '. Apoyos y adecuaciones por estudiante', style: 'sectionTitle' });
-    content.push({ text: 'Las adecuaciones curriculares de acceso son ajustes que eliminan barreras sin modificar los objetivos de aprendizaje. A continuación el detalle por estudiante.', style: 'bodyText', italics: true, margin: [0, 6, 0, 8] });
-
-    if (!includeCharts) {
-        var legColors = ['#ea4335', '#fbbc04', '#34a853', '#9aa0a6'];
-        var legLabels = ['Barrera significativa — intervenir', 'Barrera moderada — ajustar', 'Barrera leve — observar', 'Sin barrera detectada'];
-        var legCols = [];
-        for (var i = 0; i < 4; i++) {
-            legCols.push({ width: 'auto', canvas: [{ type: 'rect', x: 0, y: 0, w: 8, h: 8, r: 2, color: legColors[i] }], margin: [0, 2, 3, 0] });
-            legCols.push({ width: 'auto', text: legLabels[i], fontSize: 8, color: '#6b7280', margin: [0, 0, 12, 0] });
-        }
-        content.push({ columns: legCols, margin: [0, 0, 0, 6] });
-    }
+    content.push(PDF.sectionTitle(supportsSectionNumber, 'Apoyos y adecuaciones por estudiante'));
+    content.push({ text: 'Las adecuaciones curriculares de acceso eliminan barreras sin modificar los objetivos de aprendizaje. Las recomendaciones se ordenan de mayor a menor prioridad.', style: 'noteText' });
 
     students.forEach(function(student, sIdx) {
         var nameLabel = student.name || ('Estudiante ' + student.index);
-        content.push({ text: supportsSectionNumber + '.' + (sIdx + 1) + ' ' + nameLabel, style: 'studentSectionTitle' });
+        content.push({ text: [{ text: supportsSectionNumber + '.' + (sIdx + 1) + '  ', color: PDF.COLORS.muted }, nameLabel], style: 'studentSectionTitle', headlineLevel: 1 });
 
         if (student.conditions && student.conditions.length) {
-            content.push({ text: 'Condición registrada en ficha: ' + student.conditions.map(function(c) { return c.name; }).join(', '), style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
+            content.push({ text: [{ text: 'Condición registrada: ', color: PDF.COLORS.muted }, student.conditions.map(function(c) { return c.name; }).join(', ')], style: 'bodyText', margin: [0, 0, 0, 2], keepWithNext: true });
         }
 
         if (student.mode === 'social') {
 
             content.push({ text: 'Recomendaciones por dimensión del mapa', style: 'subSectionTitle' });
-            content.push({ text: 'Cada recomendación se filtra por la condición registrada en la ficha y se agrupa en las mismas dimensiones del mapa de barreras.', style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
+            content.push({ text: 'Cada recomendación se filtra por la condición registrada en la ficha y se agrupa en las mismas dimensiones del mapa de barreras.', style: 'noteText' });
 
             var barrierRecs = getBarrierBasedRecommendations(student.matrixScores || {}, student.conditionKeys || []);
             if (barrierRecs.length) {
                 barrierRecs.forEach(function(group) {
-                    content.push({ text: group.label, style: 'bodyText', bold: true, margin: [0, 8, 0, 2] });
-                    content.push({ text: 'Barreras en: ' + group.activities.join(', '), style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [10, 0, 0, 2] });
+                    content.push({ text: group.label, style: 'categoryTitle', headlineLevel: 1 });
+                    content.push({ text: 'Barreras en: ' + group.activities.join(', '), style: 'metaText' });
                     group.items.forEach(function(item) {
                         content.push({ text: item.activity + ' (' + item.score + ' - ' + item.severity + ')', style: 'bodyText', bold: true, margin: [10, 5, 0, 1] });
                         item.recommendations.forEach(function(rec) {
                             content.push({ text: '• ' + rec, style: 'bodyText', margin: [18, 1, 0, 1] });
                         });
                         item.observations.forEach(function(obs) {
-                            content.push({ text: '• ' + obs, style: 'bodyText', color: '#6b7280', italics: true, margin: [18, 1, 0, 1] });
+                            content.push({ text: '• ' + obs, style: 'metaText', margin: [18, 1, 0, 1] });
                         });
                         if (item.clarification) {
-                            content.push({ text: item.clarification, style: 'bodyText', color: '#6b7280', italics: true, margin: [18, 1, 0, 1] });
+                            content.push({ text: item.clarification, style: 'metaText', margin: [18, 1, 0, 1] });
                         }
                     });
                 });
@@ -2691,53 +2531,43 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
             var matrixProfile = getStudentMatrixProfile(student.cardIndex || student.index);
 
             if (student.assessmentSource && student.assessmentSource !== 'standard') {
-                content.push({ text: 'Perfil ajustado por matriz de acceso CIF/OMS.', style: 'bodyText', color: '#4b5563', italics: true, margin: [10, 0, 0, 4] });
+                content.push({ text: 'Perfil ajustado por matriz de acceso CIF/OMS.', style: 'metaText', keepWithNext: true });
             }
-
-            content.push({ text: 'Recomendaciones', style: 'subSectionTitle' });
 
             if (matrixProfile) {
                 var groupedMatrixItems = groupMatrixItemsByDimension(getVisibleMatrixItems(student, { includeManual: true }));
                 if (groupedMatrixItems.length) {
                     groupedMatrixItems.forEach(function(group) {
-                        content.push({ text: group.label, style: 'bodyText', bold: true, margin: [0, 6, 0, 2] });
+                        var groupTitle = { text: group.label, style: 'categoryTitle' };
+                        var titlePlaced = false;
                         var priorityBuckets = { 3: [], 2: [], 1: [], 0: [], manual: [], clarification: [], observation: [] };
                         group.items.forEach(function(item) {
                             var bucket = item.kind === 'manual' ? 'manual' : item.kind === 'clarification' ? 'clarification' : item.kind === 'observation' ? 'observation' : (item.priorityLevel >= 3 ? 3 : item.priorityLevel === 2 ? 2 : item.priorityLevel === 1 ? 1 : 0);
                             if (priorityBuckets[bucket] !== undefined) priorityBuckets[bucket].push(item);
                         });
                         var priorityHeaders = { 3: 'Barrera significativa — intervenir', 2: 'Barrera moderada — ajustar', 1: 'Barrera leve — observar', 0: 'Sin barrera detectada' };
-                        var priorityColors = { 3: '#ea4335', 2: '#fbbc04', 1: '#34a853', 0: '#9aa0a6' };
                         [3, 2, 1, 0].forEach(function(level) {
                             var bucket = priorityBuckets[level];
                             if (!bucket || !bucket.length) return;
-                            content.push({
-                                columns: [
-                                    { width: 'auto', text: priorityHeaders[level], style: 'bodyText', bold: true, italics: true, color: '#4b5563', margin: [0, 0, 4, 0] },
-                                    { width: 'auto', canvas: [{ type: 'rect', x: 0, y: 0, w: 9, h: 9, r: 2, color: priorityColors[level] }], margin: [0, 3, 0, 0] }
-                                ],
-                                margin: [8, 2, 0, 1]
-                            });
-                            bucket.forEach(function(item) {
-                                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [16, 1, 0, 1] });
-                                content.push({ text: 'Actividad CIF: ' + item.activities.join(', '), style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [22, 0, 0, 1] });
+                            var block = [];
+                            if (!titlePlaced) { block.push(groupTitle); titlePlaced = true; }
+                            block.push(PDF.levelTag(level, priorityHeaders[level]));
+                            block.push(PDF.bulletList(bucket.map(function(item) {
+                                var lines = [{ text: item.text }, { text: 'Actividad CIF: ' + item.activities.join(', '), style: 'metaText' }];
                                 var evidence = formatClarificationEvidence(student.cardIndex || student.index, item);
-                                if (evidence) {
-                                    content.push({ text: 'Evidencia: ' + evidence, style: 'bodyText', color: '#6b7280', italics: true, fontSize: 9, margin: [22, 0, 0, 1] });
-                                }
-                            });
+                                if (evidence) lines.push({ text: 'Evidencia: ' + evidence, style: 'metaText' });
+                                return { stack: lines };
+                            }), { indent: 16 }));
+                            content.push({ stack: block, unbreakable: bucket.length <= 8 });
                         });
+                        if (!titlePlaced) content.push(groupTitle);
                         if (priorityBuckets.clarification.length) {
-                            content.push({ text: 'Precisar barrera', style: 'bodyText', bold: true, italics: true, color: '#4b5563', margin: [8, 2, 0, 1] });
-                            priorityBuckets.clarification.forEach(function(item) {
-                                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [16, 1, 0, 1] });
-                            });
+                            content.push({ text: 'Precisar barrera', fontSize: 9, bold: true, color: PDF.COLORS.secondary, margin: [0, 7, 0, 3] });
+                            content.push(PDF.bulletList(priorityBuckets.clarification.map(function(item) { return item.text; }), { indent: 16 }));
                         }
                         if (priorityBuckets.manual.length) {
-                            content.push({ text: 'Agregadas manualmente', style: 'bodyText', bold: true, italics: true, color: '#4b5563', margin: [8, 2, 0, 1] });
-                            priorityBuckets.manual.forEach(function(item) {
-                                content.push({ text: '• ' + item.text, style: 'bodyText', margin: [16, 1, 0, 1] });
-                            });
+                            content.push({ text: 'Agregadas manualmente', fontSize: 9, bold: true, color: PDF.COLORS.secondary, margin: [0, 7, 0, 3] });
+                            content.push(PDF.bulletList(priorityBuckets.manual.map(function(item) { return item.text; }), { indent: 16 }));
                         }
                     });
                 } else {
@@ -2749,15 +2579,15 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
                 var items = merged[cat];
                 var manualItems = getManualRecommendations(student.cardIndex || student.index, cat);
                 if ((!items || !items.length) && !manualItems.length) return;
-                content.push({ text: catNames[cat], style: 'bodyText', bold: true, margin: [0, 6, 0, 2] });
-
+                var catItems = [];
                 (items || []).forEach(function(item) {
                     if (isRecommendationHidden(cat, item.text)) return;
-                    content.push({ text: '• ' + item.text, style: 'bodyText', margin: [10, 1, 0, 1] });
+                    catItems.push(item.text);
                 });
                 manualItems.forEach(function(item) {
-                    content.push({ text: '• [Agregada manualmente] ' + item.text, style: 'bodyText', margin: [10, 1, 0, 1] });
+                    catItems.push({ text: [{ text: 'Agregada manualmente · ', color: PDF.COLORS.muted }, item.text] });
                 });
+                if (catItems.length) content.push({ stack: [{ text: catNames[cat], style: 'categoryTitle' }, PDF.bulletList(catItems)], unbreakable: catItems.length <= 8 });
             });
             }
         }
@@ -2770,12 +2600,13 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
         content.push({ text: '' });
     });
 
-    content.push({ text: followUpSectionNumber + '. Seguimiento de apoyos aplicados', style: 'sectionTitle' });
-    content.push({ text: 'Registra una revisión breve por estudiante para decidir si el apoyo se mantiene, se ajusta o se retira.', style: 'bodyText', italics: true, color: '#4b5563', margin: [0, 0, 0, 6] });
+    content.push(PDF.sectionTitle(followUpSectionNumber, 'Seguimiento de apoyos aplicados'));
+    content.push({ text: 'Registra una revisión breve por estudiante para decidir si el apoyo se mantiene, se ajusta o se retira.', style: 'noteText' });
     students.forEach(function(student, sIdx) {
         var nameLabel = student.name || ('Estudiante ' + student.index);
-        content.push({ text: nameLabel, style: 'studentSectionTitle' });
-        content.push({
+        var followBlock = [];
+        followBlock.push({ text: nameLabel, style: 'studentSectionTitle' });
+        followBlock.push({
             columns: [
                 { width: '*', stack: [
                     checkboxItem('Apoyo aplicado según lo acordado.', false),
@@ -2789,19 +2620,20 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
             columnGap: 12,
             margin: [0, 0, 0, 4]
         });
-        content.push({
+        followBlock.push({
             table: {
                 widths: ['100%'],
                 body: [[
-                    { text: 'Comentarios de seguimiento:\n\n\n', style: 'bodyText', color: '#6b7280' }
+                    { text: 'Comentarios de seguimiento\n\n\n\n', fontSize: 8.5, color: PDF.COLORS.muted }
                 ]]
             },
-            layout: matrixTableLayout,
+            layout: PDF.boxLayout(),
             margin: [0, 0, 0, 8]
         });
+        content.push({ stack: followBlock, unbreakable: true });
     });
 
-    content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
+    content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 499, y2: 0, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
     content.push({ text: '' });
     content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
 
@@ -2847,94 +2679,51 @@ function showToast(msg) {
 }
 
 function buildPdfHeader() {
-    var logoBase64 = window.LOGO_UIE_BASE64 || '';
-    var columns = [];
-    if (logoBase64) {
-        columns.push({ image: logoBase64, width: 110, margin: [0, 0, 14, 0] });
-    }
-    columns.push({
-        stack: [
-            { text: 'Unidad de Inclusión Educativa', style: 'headerOrg' },
-            { text: 'Equipo de Inclusión Académica · Duoc UC Campus Arauco', style: 'headerMeta' },
-            { text: formatReportDate(), style: 'headerMeta' }
-        ],
-        alignment: 'right'
-    });
-    return [
-        { columns: columns, columnGap: 8 },
-        { canvas: [{ type: 'line', x1: 0, y1: 8, x2: 515, y2: 8, lineWidth: 2, lineColor: '#b42318' }] },
-        { text: '' }
-    ];
+    return PDF.firstPageHeader(formatReportDate());
 }
 
 function downloadDuaChecklist() {
     if (!window.UiePlannerDua) {
-        window.UiePlannerNotice.showNotice('Error: El módulo DUA no está cargado.');
+        window.UiePlannerNotice.showNotice('No se pudo cargar el módulo DUA. Recarga la página e intenta de nuevo.');
         return;
     }
     var checkedDua = window.UiePlannerDua.getCheckedDuaItems() || [];
     if (!checkedDua.length) {
-        window.UiePlannerNotice.showNotice('Selecciona al menos un elemento DUA antes de descargar.');
+        window.UiePlannerNotice.showNotice('Selecciona al menos una decisión DUA antes de generar el PDF.');
         return;
     }
     var content = buildPdfHeader();
-    
-    content.push({ text: 'Checklist DUA para la clase', style: 'mainTitle' });
-    content.push({ text: '' });
-
     var checkedTexts = {};
     checkedDua.forEach(function(item) { checkedTexts[item.text] = true; });
     var stages = window.UiePlannerData.duaStagesData || [];
-    stages.forEach(function(stage) {
-        content.push({ text: stage.label + ' — ' + stage.badge, style: 'subSectionTitle' });
+    var total = stages.reduce(function(sum, stage) { return sum + stage.checklist.length; }, 0);
+
+    content.push({ text: 'Checklist DUA para la clase', style: 'mainTitle' });
+    content.push({ text: checkedDua.length + ' de ' + total + ' decisiones seleccionadas. Las casillas marcadas indican lo que ya está incorporado en la planificación; las vacías quedan como opciones para revisar.', style: 'introText' });
+
+    stages.forEach(function(stage, index) {
+        var done = stage.checklist.filter(function(item) { return !!checkedTexts[item]; }).length;
+        content.push({
+            columns: [
+                { width: '*', text: [{ text: (index + 1) + '  ', color: PDF.COLORS.accent }, stage.label, { text: '  ·  ' + stage.badge, color: PDF.COLORS.muted, bold: false, fontSize: 10 }] },
+                { width: 'auto', text: done + ' de ' + stage.checklist.length, fontSize: 9, bold: false, color: PDF.COLORS.muted, margin: [0, 3, 0, 0] }
+            ],
+            style: 'sectionTitle',
+            headlineLevel: 1
+        });
         stage.checklist.forEach(function(item) {
             content.push(checkboxItem(item, !!checkedTexts[item]));
         });
-        content.push({ text: '' });
     });
 
-    content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#d1d5db' }] });
-    content.push({ text: '' });
+    content.push({ canvas: [{ type: 'line', x1: 0, y1: 14, x2: 499, y2: 14, lineWidth: 0.6, lineColor: '#E5E7EB' }] });
     content.push({ text: 'Documento generado desde el Planificador Inclusivo UIE. Orientaciones alineadas con documentación institucional y fuentes disponibles en Apoyos adicionales / Referencias.', style: 'footerText' });
 
-    var docDef = {
-        content: content,
-        styles: {
-            headerOrg: { fontSize: 13, bold: true, color: '#b42318' },
-            headerMeta: { fontSize: 8.5, color: '#6b7280' },
-            mainTitle: { fontSize: 20, bold: true, color: '#111827', margin: [0, 0, 0, 8] },
-            subSectionTitle: { fontSize: 11, bold: true, color: '#b42318', margin: [0, 10, 0, 4] },
-            bodyText: { fontSize: 10.5, color: '#111827', margin: [0, 3, 0, 3] },
-            footerText: { fontSize: 8.5, color: '#9ca3af', margin: [0, 6, 0, 0], italics: true }
-        },
-        defaultStyle: { fontSize: 10.5, color: '#111827' },
-        pageMargins: [40, 40, 40, 40]
-    };
-
-    if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
-        window.UiePlannerNotice.showNotice('Librería PDF no disponible. Recarga la página.');
-        return;
-    }
-    try {
-        window.pdfMake.createPdf(docDef).download('checklist-dua.pdf');
-    } catch(e) {
-        console.error('Error generando PDF DUA:', e);
-        window.UiePlannerNotice.showNotice('Error al generar el PDF: ' + e.message);
-    }
+    PDF.preview({ content: content }, 'checklist-dua.pdf', { title: 'Checklist DUA', subject: 'Decisiones DUA para la clase' });
 }
 
 function checkboxItem(text, checked) {
-    var s = 9;
-    var canvas = [
-        { type: 'rect', x: 0, y: 0, w: s, h: s, r: 1.5, lineWidth: 1, lineColor: '#6b7280' }
-    ];
-    if (checked) {
-        canvas.push(
-            { type: 'line', x1: 2, y1: 5, x2: 4, y2: 7.5, lineWidth: 2.5, lineColor: '#16a34a' },
-            { type: 'line', x1: 4, y1: 7.5, x2: 8, y2: 2, lineWidth: 2.5, lineColor: '#16a34a' }
-        );
-    }
-    return { columns: [{ canvas: canvas, width: s + 4, margin: [0, 1.5, 0, 0] }, { text: text, fontSize: 9, width: '*' }], margin: [0, 2, 0, 2] };
+    return PDF.checkbox(text, checked);
 }
 
 function generatePlanEmail() {
@@ -3086,7 +2875,6 @@ window.UiePlannerSupports = {
     renderCIFRadarChart,
     destroyCIFRadarChart,
     rethemeAllRadarCharts,
-    renderPdfCIFRadarChartCanvas,
     barrierProfiles,
     openPlanModal,
     closePlanModal,
