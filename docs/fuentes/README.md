@@ -1,6 +1,8 @@
 # Fuentes de referencia
 
-Documentos que respaldan el contenido del planificador. Los PDF de terceros no se guardan en el repositorio: se enlazan a su fuente oficial. Existe un respaldo en Markdown de todos ellos fuera del repositorio, junto con los PDF originales.
+Documentos que respaldan el contenido del planificador. Los PDF de terceros se enlazan a su fuente oficial. Las guías de Duoc UC se mantienen en el repositorio.
+
+**Respaldo completo:** la carpeta [respaldo-fuentes](https://duoccl0-my.sharepoint.com/:f:/g/personal/jperezas_duoc_cl/IgAr9EYQbJg_S72MOb0hDQFNAZ57BycOLUHV272CYYwA68M?e=TjNrmv) (OneDrive institucional) contiene los PDF originales de todas las fuentes y su versión en Markdown. Úsala para consultar o extraer el texto de cualquier documento.
 
 ## Documentos con enlace oficial
 
@@ -20,7 +22,7 @@ Documentos que respaldan el contenido del planificador. Los PDF de terceros no s
 
 ## Documentos institucionales Duoc UC
 
-Siguen en `docs/guias/` y `docs/investigacion/` mientras no tengan un enlace definitivo. Cuando se publiquen en Drive u otro sitio institucional, se reemplaza la ruta en `data.js` y se eliminan los PDF del repositorio.
+Se publican desde el propio repositorio. El planificador las enlaza en la sección de referencias.
 
 | Documento | Ubicación actual |
 | --- | --- |

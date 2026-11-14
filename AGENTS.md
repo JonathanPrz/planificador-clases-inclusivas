@@ -55,6 +55,11 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - Sin analítica ni contadores externos
 - Los datos de estudiantes no se guardan en el navegador ni se envían a servidores
 
-### 7. Respaldo
+### 7. Fuentes
+- Índice y enlaces oficiales en `docs/fuentes/README.md`
+- Respaldo de todos los PDF y su versión en Markdown (OneDrive Duoc UC): https://duoccl0-my.sharepoint.com/:f:/g/personal/jperezas_duoc_cl/IgAr9EYQbJg_S72MOb0hDQFNAZ57BycOLUHV272CYYwA68M?e=TjNrmv
+- Para extraer texto de una fuente, usar primero ese respaldo en Markdown
+
+### 8. Respaldo
 - Los respaldos se guardan fuera de este repositorio, con fecha
 - No eliminar respaldos antiguos
