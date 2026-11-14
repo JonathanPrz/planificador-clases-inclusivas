@@ -428,7 +428,13 @@ function getChartStudents(students) {
 
 function renderCIFChartPanel(students, radarId) {
     var chartStudents = getChartStudents(students || []);
-    if (!chartStudents.length) return '';
+    if (!chartStudents.length) {
+        if (!students || !students.length) return '';
+        return '<section class="cif-chart-panel cif-chart-empty" aria-labelledby="' + radarId + '-title">' +
+            '<h3 id="' + radarId + '-title">Mapa de barreras CIF</h3>' +
+            '<p>El mapa aparece cuando completas la matriz CIF de al menos un estudiante. Ábrela en su tarjeta, en «Ajustar perfil con matriz CIF».</p>' +
+        '</section>';
+    }
     var view = cifChartView || (chartStudents.length > 1 ? 'radar' : 'bars');
     var radarNote = chartStudents.length > 3 ? '<p class="small-note cif-radar-note">El radar compara hasta 3 estudiantes. Marca «Incluir en el gráfico» en las fichas para elegir cuáles, o usa la vista Detalle.</p>' : '';
     return '<section class="cif-chart-panel" aria-labelledby="' + radarId + '-title" data-view="' + view + '">' +
