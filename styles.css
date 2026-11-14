@@ -5580,3 +5580,23 @@ body[data-mode="reunion"] .section-card, body[data-mode="reunion"] .adq-block { 
     #dua-tabs .tab-count { order: 2; }
     #dua-tabs .tab-label { order: 3; flex-basis: 100%; font-size: 17px; }
 }
+.adq-done-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 16px; }
+.adq-done-hint { font-size: 14px; color: var(--text-muted); }
+.adq-summary { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 16px; padding: 14px 16px; border: 1px solid var(--border); border-left: 4px solid var(--support); border-radius: 0 var(--radius) var(--radius) 0; background: var(--bg-card); }
+.adq-summary[hidden] { display: none; }
+.adq-summary-text { flex: 1 1 320px; min-width: 0; font-size: 14.5px; }
+.adq-summary-title { margin: 0 0 6px; font-weight: 700; }
+.adq-summary-list { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; color: var(--text-secondary); }
+.adq-summary-list b { color: var(--text-primary); font-weight: 700; }
+.adq-summary-levels li { display: flex; align-items: center; gap: 6px; }
+.adq-student-summary { margin: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; }
+
+.first-aid-steps { margin: 12px 0 0; padding-left: 22px; display: grid; gap: 8px; color: var(--text-primary); line-height: 1.5; max-width: 72ch; }
+.first-aid-call { margin: 16px 0 8px; padding: 12px 16px; border-radius: 10px; border-left: 4px solid var(--danger); background: var(--danger-light); color: var(--text-primary); max-width: 72ch; }
+.health-crisis-panel h3 { margin-top: 0; }
+.gem-warning { border-color: var(--danger); background: var(--danger-light); }
+.labor-link { margin: 0 0 24px; }
+.crisis-section .context-panel + .context-panel { margin-top: 20px; }
+.crisis-section .decision-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 14px 0 12px; }
+.crisis-section .context-panel > .small-note { margin: 6px 0 0; font-size: 14px; }
+.context-panel .mini-grid + .small-note { margin-top: 12px; }

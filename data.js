@@ -24,7 +24,31 @@ const referencesData = [
     { code: 'LEY 20.609', title: 'Ley 20.609: establece medidas contra la discriminación', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=1042092', year: 2012, type: 'law', authors: 'Congreso Nacional de Chile' },
     { code: 'LEY 20.422', title: 'Ley 20.422: establece normas sobre igualdad de oportunidades e inclusión social de personas con discapacidad', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=1010903', year: 2010, type: 'law', authors: 'Ministerio de Planificación, Chile' },
     { code: 'CDPD', title: 'Decreto 201: promulga la Convención de las Naciones Unidas sobre los derechos de las personas con discapacidad y su protocolo facultativo', source: 'Chile', url: 'https://www.bcn.cl/leychile/navegar?idNorma=278018', year: 2008, type: 'law', authors: 'Ministerio de Relaciones Exteriores, Chile' },
-    { code: 'CIF OMS', title: 'International Classification of Functioning, Disability and Health (ICF)', source: 'WHO', url: 'https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health', year: 2001, type: 'web', authors: 'World Health Organization' }
+    { code: 'CIF OMS', title: 'International Classification of Functioning, Disability and Health (ICF)', source: 'WHO', url: 'https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health', year: 2001, type: 'web', authors: 'World Health Organization' },
+    { code: 'DEC', title: 'Orientaciones para la elaboración del protocolo de respuesta a situaciones de desregulación emocional y conductual de estudiantes en establecimientos educacionales', source: 'Chile', url: 'https://especial.mineduc.cl/wp-content/uploads/sites/31/2022/09/PROTOCOLO-DEC-2022.pdf', year: 2022, type: 'guide', authors: 'Ministerio de Educación, Chile' },
+    { code: 'LF EUROPA', title: 'Information for all: European standards for making information easy to read and understand', source: 'Inclusion Europe', url: 'https://www.inclusion-europe.eu/easy-to-read-standards-guidelines/', year: 2009, type: 'standard', authors: 'Inclusion Europe' },
+    { code: 'WAI REDACCIÓN', title: 'Writing for Web Accessibility: tips for getting started', source: 'W3C', url: 'https://www.w3.org/WAI/tips/writing/', year: 2024, type: 'web', authors: 'W3C Web Accessibility Initiative' },
+    { code: 'CONVULSIÓN', title: 'Primeros auxilios de crisis epilépticas: cómo ayudar a alguien que está teniendo una crisis', source: 'Epilepsy Foundation', url: 'https://www.epilepsy.com/primerosauxilios', year: 2020, type: 'infographic', authors: 'Epilepsy Foundation of America' },
+    { code: 'LEY FÁCIL 21.790', title: 'Ley Fácil: estudiantes cuidadores', source: 'Chile', url: 'https://www.bcn.cl/portal/leyfacil/recurso/estudiantes-cuidadores', year: 2026, type: 'web', authors: 'Biblioteca del Congreso Nacional de Chile' },
+    { code: 'REQUISITOS-INHERENTES', title: 'Declaraciones de requisitos inherentes y ajustes razonables (QUT, UTS, Western Sydney University), bajo Disability Standards for Education 2005', source: 'Catálogo de apoyos', url: 'https://www.qut.edu.au/study/applying/clinical-exercise-physiology-inherent-requirements', year: 2005, type: 'web' },
+    { code: 'ADCET-PRACTICAS', title: 'ADCET, Fieldwork, Work Placements, Excursions and Practicums', source: 'Catálogo de apoyos', url: 'https://adcet.edu.au/inclusive-teaching/teaching-assessment/fieldwork-and-placement', year: null, type: 'web' },
+    { code: 'LEEDS-PASAPORTE', title: 'University of Leeds (2024), Guidance for clinical placements on reasonable adjustments and Health Passports', source: 'Catálogo de apoyos', url: 'https://placements.leeds.ac.uk/wp-content/uploads/sites/58/2024/09/Guidance-for-clinical-placements-on-reasonable-adjustments-and-Health-Passports-1.pdf', year: 2024, type: 'pdf' },
+    { code: 'SHERIDAN-AUTISMO', title: 'Sheridan College (2021), Strategies to Support Students with Autism (aprendizaje integrado al trabajo)', source: 'Catálogo de apoyos', url: 'https://core.ac.uk/download/428272549.pdf', year: 2021, type: 'pdf' },
+    { code: 'STURGESS-GRUPO', title: 'Sturgess (2020), University of Leicester, principios de buena práctica para el trabajo con pares de estudiantes autistas (AHEAD Journal)', source: 'Catálogo de apoyos', url: 'https://www.ahead.ie/journal/The-development-of-good-practice-principles-for-supporting-students-with-autism-to-work-with-their-peers', year: 2020, type: 'web' },
+    { code: 'FABRI-AUTISMUNI', title: 'Fabri, proyecto Autism&Uni, recomendaciones para docentes universitarios', source: 'Catálogo de apoyos', url: 'https://www.inkl.com/news/how-to-help-autistic-students-succeed-at-university', year: null, type: 'web' },
+    { code: 'DOIT-ONLINE', title: 'Burgstahler, 20 Tips for Teaching an Accessible Online Course (DO-IT, University of Washington)', source: 'Catálogo de apoyos', url: 'https://www.washington.edu/doit/node/6672', year: null, type: 'web' },
+    { code: 'UALR-ONLINE', title: 'UA Little Rock, Disability Resource Center, guía de educación online accesible', source: 'Catálogo de apoyos', url: 'https://ualr.edu/disability/online-education/', year: null, type: 'web' },
+    { code: 'WWU-ONLINE', title: 'Western Washington University, Accessible Online Course Design (precisión de subtítulos automáticos)', source: 'Catálogo de apoyos', url: 'https://disability.wwu.edu/node/12', year: null, type: 'web' },
+    { code: 'NDC-ONLINE', title: 'National Deaf Center (2020), Making Online Learning Accessible for Deaf Students', source: 'Catálogo de apoyos', url: 'https://core.ac.uk/download/372702175.pdf', year: 2020, type: 'pdf' },
+    { code: 'WCAG-22', title: 'W3C, WCAG 2.2 (1.1.1 texto alternativo, 1.2.2 subtítulos, 1.3.1 estructura, 2.1.1 teclado)', source: 'Catálogo de apoyos', url: 'https://www.w3.org/TR/WCAG22/', year: null, type: 'web' },
+    { code: 'GCU-TERRENO', title: 'Glasgow Caledonian University, Guide to inclusive field trips', source: 'Catálogo de apoyos', url: 'https://www.gcu.ac.uk/currentstudents/support/disabilityservice/staff-materials/guide-to-inclusive-field-trips', year: null, type: 'web' },
+    { code: 'THE-TERRENO', title: 'Alexis-Martin, Ten steps to equity: making fieldwork accessible (THE Campus)', source: 'Catálogo de apoyos', url: 'https://www.timeshighereducation.com/campus/ten-steps-equity-making-fieldwork-accessible', year: null, type: 'web' },
+    { code: 'DOIT-TERRENO', title: 'DO-IT, University of Washington, casos de trabajo en terreno', source: 'Catálogo de apoyos', url: 'https://doit.uw.edu/fieldwork/', year: null, type: 'web' },
+    { code: 'DOIT-LAB', title: 'DO-IT, seguridad en laboratorio para estudiantes sordos; Burgstahler (2012), Making Science Labs Accessible', source: 'Catálogo de apoyos', url: 'https://doit.uw.edu/knowledge-base/what-lab-safety-issues-need-to-be-considered-when-working-with-a-student-who-is-deaf', year: 2012, type: 'web' },
+    { code: 'ACCESSCOMPUTING-LAB', title: 'AccessComputing, University of Washington, Science Labs (rol activo y esencial en trabajo en pareja)', source: 'Catálogo de apoyos', url: 'https://accesscomputing.uw.edu/science-labs', year: null, type: 'web' },
+    { code: 'UCDAVIS-LAB', title: 'UC Davis Chemistry, Accommodating Students with Disabilities in Chemistry Teaching Laboratories (evaluación de necesidades)', source: 'Catálogo de apoyos', url: 'https://chemistry.ucdavis.edu/sites/g/files/dgvnsk196/files/files/page/needs-assessment.pdf', year: null, type: 'pdf' },
+    { code: 'DOIT-SALUD', title: 'DO-IT, ajustes en laboratorio para estudiantes con condiciones de salud', source: 'Catálogo de apoyos', url: 'https://www.washington.edu/doit/node/4722', year: null, type: 'web' },
+    { code: 'OTTAWA-LAB', title: 'MacLean, Making Lab Based Courses Inclusive (uOttawa, eCampusOntario)', source: 'Catálogo de apoyos', url: 'https://openlibrary-repo.ecampusontario.ca/jspui/bitstream/123456789/1689/2/Making-Lab-Based-Courses-Inclusive-1669839512.-htmlbook.html', year: null, type: 'web' }
 ];
 
 const duaStagesData = [
@@ -502,7 +526,11 @@ const vocabularyData = [
     { bad: 'Invidente / no vidente', good: 'Persona ciega o persona con discapacidad visual', why: 'Nombra la condición sin negar otras formas de percepción.' },
     { bad: 'Sufre discapacidad', good: 'Persona con discapacidad', why: 'Evita presentar la discapacidad como tragedia individual.' },
     { bad: 'Retraso mental', good: 'Persona con discapacidad intelectual', why: 'Usa terminología vigente y respetuosa.' },
-    { bad: 'Autista como etiqueta totalizante', good: 'Persona autista o estudiante autista, según preferencia', why: 'Reconoce identidad y evita reducir a la persona a un diagnóstico.' }
+    { bad: 'El autista, el TEA (para nombrar a alguien)', good: 'Persona autista o persona en el espectro autista, según prefiera', why: 'Muchas personas autistas prefieren nombrarse así; otras prefieren poner la persona primero. Pregunta y respeta su preferencia.' },
+    { bad: 'Discapacitado/a, inválido/a', good: 'Persona con discapacidad o persona en situación de discapacidad', why: 'Ambos términos se usan en Chile: el primero en la Ley 20.422 y el segundo en SENADIS y el Minsal.' },
+    { bad: 'Enfermo/a mental, loco/a', good: 'Persona con una condición de salud mental o con discapacidad psíquica', why: 'Evita estigmatizar y nombra la condición sin reducir a la persona.' },
+    { bad: 'Normal (para comparar)', good: 'Sin discapacidad, o el resto del curso', why: 'Llamar «normal» a unos implica que otros no lo son.' },
+    { bad: 'Confinado/a a una silla de ruedas', good: 'Persona usuaria de silla de ruedas', why: 'La silla es un apoyo que da movilidad, no un encierro.' }
 ];
 
 const autismMyths = [
@@ -514,12 +542,16 @@ const autismMyths = [
 ];
 
 const glossaryData = [
-    { term: 'Accesibilidad universal', desc: 'Condición que permite que entornos, procesos, productos y servicios sean comprensibles y utilizables por todas las personas.' },
-    { term: 'Ajustes razonables', desc: 'Modificaciones necesarias y pertinentes para asegurar participación en igualdad de condiciones sin imponer carga desproporcionada.' },
-    { term: 'Barreras', desc: 'Factores físicos, comunicacionales, digitales, sociales o actitudinales que limitan participación y aprendizaje.' },
-    { term: 'Lectura fácil', desc: 'Forma de redactar y presentar información con palabras simples, estructura clara y apoyos para comprensión.' },
+    { term: 'Accesibilidad universal', desc: 'Condición que permite que entornos, procesos, productos y servicios sean comprensibles y utilizables por todas las personas, de la forma más autónoma posible (Ley 20.422).' },
+    { term: 'Adecuación curricular de acceso', desc: 'Apoyo individual que cambia cómo el estudiante accede a la información, responde o se ubica en el entorno, o el tiempo disponible, sin cambiar el resultado de aprendizaje ni la exigencia.' },
+    { term: 'Ajustes razonables', desc: 'Modificaciones necesarias y adecuadas para un caso particular, que no impongan una carga desproporcionada, para participar en igualdad de condiciones (CDPD, art. 2; Ley 21.091).' },
+    { term: 'Asesor de inclusión', desc: 'Profesional de la Unidad de Inclusión que acompaña al docente para diseñar la clase y acordar los ajustes de un estudiante.' },
+    { term: 'Barreras', desc: 'Factores del entorno (físicos, comunicacionales, digitales, pedagógicos, de evaluación o actitudinales) que limitan la participación y el aprendizaje.' },
+    { term: 'Desregulación emocional o sensorial', desc: 'Reacción intensa ante estímulos o situaciones que sobrepasan a la persona, que en ese momento no logra manejar ni expresar lo que siente. Requiere calma, menos estímulos y apoyos acordados.' },
+    { term: 'DUA (Diseño Universal para el Aprendizaje)', desc: 'Marco de CAST para diseñar clases que consideren desde el inicio la variedad de estudiantes: distintas formas de motivarse, de comprender y de expresar lo aprendido.' },
+    { term: 'Lectura fácil', desc: 'Forma de redactar y presentar información con pautas específicas (UNE 153101, Inclusion Europe) que se comprueba con personas con dificultades de comprensión.' },
     { term: 'Macrotipo', desc: 'Texto ampliado para personas con baja visión, ajustado según necesidad real y no como solución automática.' },
-    { term: 'Desregulación emocional o sensorial', desc: 'Respuesta intensa ante sobrecarga sensorial o emocional; requiere calma, reducción de estímulos, respeto y apoyos acordados.' },
+    { term: 'Matriz CIF', desc: 'Registro que entrega psicopedagogía, inspirado en la Clasificación Internacional del Funcionamiento de la OMS. Califica de 4 a 1 cuánto participa el estudiante en 11 actividades académicas.' },
     { term: 'Neurodiversidad', desc: 'Reconocimiento de la variabilidad neurológica humana como parte natural de la diversidad.' },
     { term: 'Texto alternativo', desc: 'Descripción breve y funcional de una imagen para transmitir su propósito a quienes no la perciben visualmente.' }
 ];
