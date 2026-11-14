@@ -71,7 +71,7 @@ function handleCartAction(action, btn) {
     switch (action) {
         case 'download-dua':
             btn.disabled = true;
-            btn.textContent = 'Generando PDF...';
+            btn.textContent = 'Generando PDF…';
             ensurePdfMake(function() {
                 generateDuaPdf(function() {
                     btn.disabled = false;
@@ -84,7 +84,7 @@ function handleCartAction(action, btn) {
             break;
         case 'download-acc':
             btn.disabled = true;
-            btn.textContent = 'Generando PDF...';
+            btn.textContent = 'Generando PDF…';
             ensurePdfMake(function() {
                 generateAccPdf(function() {
                     btn.disabled = false;
@@ -97,7 +97,7 @@ function handleCartAction(action, btn) {
             break;
         case 'download-full':
             btn.disabled = true;
-            btn.textContent = 'Generando PDF...';
+            btn.textContent = 'Generando PDF…';
             ensurePdfMake(function() {
                 generatePdfMake(function() {
                     btn.disabled = false;

@@ -92,7 +92,7 @@ function renderReferences() {
 
     container.innerHTML = `
         <div class="ref-controls">
-            <input type="search" id="ref-search" class="ref-search-input" placeholder="Buscar por título, autor..." aria-label="Buscar referencias">
+            <input type="search" id="ref-search" class="ref-search-input" placeholder="Buscar por título o autor…" autocomplete="off" aria-label="Buscar referencias">
             <select id="ref-type-filter" class="ref-filter-select" aria-label="Filtrar por tipo">
                 <option value="">Todos los tipos</option>
                 ${types.map(t => `<option value="${t}">${typeLabels[t] || t}</option>`).join('')}

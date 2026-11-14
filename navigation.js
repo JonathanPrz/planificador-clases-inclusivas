@@ -20,6 +20,7 @@ function bindSectionNavigation() {
     };
 
     const setActiveState = function(view, activeId) {
+        document.body.dataset.view = view;
         navLinks.forEach(function(link) {
             const isActive = link.dataset.view === view;
             link.classList.toggle('active', isActive);
