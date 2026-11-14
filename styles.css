@@ -5558,3 +5558,9 @@ body[data-mode="reunion"] .section-card, body[data-mode="reunion"] .adq-block { 
 .dua-pending.is-done { background: var(--support-light); color: var(--support); font-weight: 700; }
 .dua-pending-link { margin: 4px 4px 0 0; padding: 3px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-card); color: var(--accent); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .dua-pending-link:hover { border-color: var(--accent); }
+.tab-link:not(.is-visited)::after { background: var(--text-muted); opacity: .55; }
+.dua-coverage-intro { margin: 0 0 12px; font-size: 14px; color: var(--text-secondary); }
+.dua-pending { background: var(--bg-card); border: 1px solid var(--border-light); }
+.dua-principle.is-elegido .dua-principle-status { background: var(--support-light); color: var(--support); }
+.dua-principle.is-vacio .dua-principle-status { background: var(--bg-elevated); color: var(--text-secondary); }
+.dua-principle.is-vacio p { font-style: italic; }

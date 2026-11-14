@@ -41,9 +41,10 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 
 ### 0b. DUA (dua.js)
 - Acciones redactadas como lo que se planifica hacer (infinitivo), con `when` por etapa (antes, durante o después de la clase)
-- Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). La cobertura se mide por principio: 0 acciones = sin acciones, 1 = inicial, 2 o más = cubierto. Nunca volver a medir por cantidad total
+- Cada acción tiene su principio DUA 3.0 en `principles` (compromiso, representación, acción y expresión, o «base» para conocer y revisar). DUA funciona como un menú (CAST 3.0 habla de «consideraciones», no de casillas): el panel muestra cuántas acciones se eligieron por principio, sin totales ni metas, y si un principio queda vacío plantea una pregunta en vez de un déficit. No volver a mostrar «X de Y» ni niveles tipo «base parcial»
 - Cada etapa muestra cuántas acciones tiene marcadas, un punto rojo si aún no se ha abierto y un botón «Continuar con…» al final. El panel de cobertura lista las etapas sin revisar
-- Los índices de `checklist` son la clave guardada en el navegador (`etapa-índice`): agregar acciones solo al final de cada etapa
+- Los índices de `checklist` son la clave guardada en el navegador (`etapa-índice`, clave `dua-checklist-state-v2`): agregar acciones solo al final de cada etapa. Si se reordenan, cambiar la versión de la clave y actualizar `duaCatalogLinks`
+- Menú revisado contra las 36 consideraciones DUA 3.0 (noviembre de 2026): 27 acciones, 10 de compromiso, 6 de representación, 6 de acción y expresión y 5 de conocer y revisar
 - El flujo antiguo por condición en `supports.js` (tarjetas, reglas, modal de plan) quedó sin uso en la página; se conserva solo lo que usan otras partes (checklist DUA, buenas prácticas)
 
 
