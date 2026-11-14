@@ -986,6 +986,24 @@ function createMedicalStudentCard(studentIndex) {
         '<div class="condition-pills-inline" id="condition-pills-card-' + studentIndex + '">' +
             pillsHtml +
         '</div>' +
+        '<details class="student-context-toggle">' +
+            '<summary>Contexto para decidir los apoyos <span class="student-context-optional">(opcional)</span></summary>' +
+            '<div class="student-context-body">' +
+                '<label class="student-context-field"><span>¿Qué evalúa la asignatura?</span>' +
+                    '<textarea class="text-control student-outcome" rows="2" placeholder="Ejemplo: diagnostica fallas eléctricas en un circuito residencial…"></textarea></label>' +
+                '<fieldset class="student-context-formats">' +
+                    '<legend>¿Algún formato es parte de lo que se evalúa?</legend>' +
+                    '<p class="student-context-help">Márcalo solo si el formato es la competencia y no solo el medio para demostrarla. En ese caso, el PDF marcará para revisar los apoyos que lo cambian.</p>' +
+                    '<label><input type="checkbox" class="student-format" value="oral"> Comunicación oral</label>' +
+                    '<label><input type="checkbox" class="student-format" value="escrito"> Producción escrita</label>' +
+                    '<label><input type="checkbox" class="student-format" value="tiempo"> Rapidez o tiempo límite</label>' +
+                    '<label><input type="checkbox" class="student-format" value="practico"> Ejecución práctica o manual</label>' +
+                '</fieldset>' +
+                '<label class="student-context-field"><span>Lo que el estudiante dice que le funciona</span>' +
+                    '<textarea class="text-control student-voice" rows="2" placeholder="Ejemplo: recibir el material antes de clase y responder por escrito…"></textarea></label>' +
+                '<p class="student-context-help">Registra solo lo que el estudiante aceptó compartir. Aparecerá en el PDF.</p>' +
+            '</div>' +
+        '</details>' +
         '<label class="radar-visibility-toggle">' +
             '<input type="checkbox" class="show-in-chart">' +
             '<span>Incluir en el gráfico</span>' +
@@ -2255,6 +2273,25 @@ function collectPlanStudents() {
     return collectMedicalStudents();
 }
 
+var FORMAT_PATTERNS = {
+    oral: { label: 'comunicación oral', pattern: /(respuestas? (escritas|visuales|preparadas)|participaci[oó]n oral|exposici[oó]n oral|expresi[oó]n oral|exposiciones|alternativas? a la (presentaci[oó]n|exposici[oó]n))/i },
+    escrito: { label: 'producción escrita', pattern: /(dictado|respuestas? orales?|evaluaci[oó]n oral|examen oral|escritura manual|transcrip)/i },
+    tiempo: { label: 'rapidez o tiempo límite', pattern: /(tiempo adicional|m[aá]s tiempo|ajusta el tiempo|flexibiliza plazos)/i },
+    practico: { label: 'ejecución práctica', pattern: /(puesto, herramienta|postura|secuencia de ejecuci[oó]n|alternativa.{0,30}pr[aá]ctic)/i }
+};
+
+function getFormatConflicts(text, formats) {
+    return (formats || []).filter(function(key) {
+        return FORMAT_PATTERNS[key] && FORMAT_PATTERNS[key].pattern.test(text || '');
+    }).map(function(key) { return FORMAT_PATTERNS[key].label; });
+}
+
+function formatConflictNote(text, formats) {
+    var conflicts = getFormatConflicts(text, formats);
+    if (!conflicts.length) return null;
+    return { text: 'Revisar: cambia ' + conflicts.join(' y ') + ', que marcaste como parte de lo que se evalúa.', style: 'metaText', color: PDF.LEVELS[3].text, bold: true };
+}
+
 function readAdvisorComments(card) {
     var idx = card ? card.getAttribute('data-student-index') : '';
     return (advisorCommentsByStudent[idx] || '').trim();
@@ -2296,6 +2333,9 @@ function collectMedicalStudents() {
             matrixScores: getStudentMatrixScores(studentIndex),
             cardIndex: studentIndex,
             mode: 'medical',
+            outcome: readStudentProfileField(card, '.student-outcome'),
+            studentVoice: readStudentProfileField(card, '.student-voice'),
+            protectedFormats: Array.from(card.querySelectorAll('.student-format:checked')).map(function(box) { return box.value; }),
             advisorComments: readAdvisorComments(card)
         });
     });
@@ -2569,6 +2609,15 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
         if (student.conditions && student.conditions.length) {
             content.push({ text: [{ text: 'Condición registrada: ', color: PDF.COLORS.muted }, student.conditions.map(function(c) { return c.name; }).join(', ')], style: 'bodyText', margin: [0, 0, 0, 2], keepWithNext: true });
         }
+        if (student.outcome) {
+            content.push({ text: [{ text: 'Qué evalúa la asignatura: ', color: PDF.COLORS.muted }, student.outcome], style: 'bodyText', margin: [0, 0, 0, 2], keepWithNext: true });
+        }
+        if (student.protectedFormats && student.protectedFormats.length) {
+            content.push({ text: [{ text: 'Formatos que son parte de lo evaluado: ', color: PDF.COLORS.muted }, student.protectedFormats.map(function(key) { return FORMAT_PATTERNS[key].label; }).join(', ')], style: 'bodyText', margin: [0, 0, 0, 2], keepWithNext: true });
+        }
+        if (student.studentVoice) {
+            content.push({ text: [{ text: 'Lo que el estudiante dice que le funciona: ', color: PDF.COLORS.muted }, student.studentVoice], style: 'bodyText', margin: [0, 0, 0, 2], keepWithNext: true });
+        }
 
         if (student.mode === 'social') {
 
@@ -2627,6 +2676,8 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
                             block.push(PDF.levelTag(level, priorityHeaders[level]));
                             block.push(PDF.bulletList(bucket.map(function(item) {
                                 var lines = [{ text: item.text }, { text: 'Actividad CIF: ' + item.activities.join(', '), style: 'metaText' }];
+                                var conflictNote = formatConflictNote(item.text, student.protectedFormats);
+                                if (conflictNote) lines.push(conflictNote);
                                 var evidence = formatClarificationEvidence(student.cardIndex || student.index, item);
                                 if (evidence) lines.push({ text: 'Evidencia: ' + evidence, style: 'metaText' });
                                 return { stack: lines };
@@ -2655,7 +2706,8 @@ function buildPlanPDFDocument(students, includeDua, includeCharts) {
                 var catItems = [];
                 (items || []).forEach(function(item) {
                     if (isRecommendationHidden(cat, item.text)) return;
-                    catItems.push(item.text);
+                    var conflictNote = formatConflictNote(item.text, student.protectedFormats);
+                    catItems.push(conflictNote ? { stack: [{ text: item.text }, conflictNote] } : item.text);
                 });
                 manualItems.forEach(function(item) {
                     catItems.push({ text: [{ text: 'Agregada manualmente · ', color: PDF.COLORS.muted }, item.text] });

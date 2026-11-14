@@ -36,6 +36,11 @@ App web (sin backend/build) para planificación inclusiva en educación superior
 - `renderCIFChartPanel` + `activateCIFChartPanel`: un solo panel con vistas «Comparar» (radar, máx. 3 estudiantes) y «Detalle» (barras). Por defecto: radar si hay 2+ estudiantes con matriz, barras si hay 1
 - La casilla «Incluir en el gráfico» de cada ficha elige qué estudiantes entran; si ninguna está marcada, entran todos los que tienen matriz
 
+### 2c. Contexto para decidir apoyos (por estudiante)
+- Campos opcionales en la tarjeta: «¿Qué evalúa la asignatura?», formatos que son parte de lo evaluado (oral, escrito, tiempo, práctico) y «Lo que el estudiante dice que le funciona». Van al PDF
+- `FORMAT_PATTERNS` + `formatConflictNote`: si un apoyo cambia un formato marcado, el PDF agrega «Revisar». Basado en la distinción estándar de competencia vs. método de evaluación (EHRC 2024)
+- Tiempo adicional: referencia de 25 %, solo si la evaluación exige rapidez en la habilidad afectada (Harrison, Pollock y Holmes, 2022)
+
 ### 3. Recomendaciones sin matriz
 - `renderProfileGroup` usa `getReferenceScores` para asignar scores basados en perfiles de barrera
 - Esto permite mostrar badges de prioridad incluso sin datos de matriz

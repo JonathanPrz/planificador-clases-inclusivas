@@ -108,7 +108,7 @@ const accommodationsData = {
             'Oriente al estudiante respecto de los espacios físicos de la sede y sala para facilitar desplazamientos.',
             'Asegura rutas accesibles, mesa adecuada y espacio de circulación.',
             'Coordina ubicación estratégica según movilidad, fatiga o uso de apoyos.',
-            'Otorga tiempo adicional o pausas cuando exista fatiga, dolor o barreras de desplazamiento.'
+            'Ofrece pausas acordadas cuando exista fatiga o dolor, y tiempo adicional si escribir o desplazarse toma más tiempo; parte con 25 % y ajusta según lo que realmente use.'
         ],
         materials: [
             'Disponibiliza materiales digitales con anticipación.'
@@ -125,7 +125,7 @@ const accommodationsData = {
             'Facilita salir de la sala si el estudiante lo requiere (medicación o baño).'
         ],
         evaluacion: [
-            'Si hay dificultad en expresión oral, otorga tiempo adicional para exposiciones.',
+            'Si hay dificultad en la expresión oral, acuerda más tiempo para exposiciones, salvo que la fluidez oral sea parte de lo que se evalúa.',
             'Ofrece exponer solo frente al docente si la ansiedad lo requiere.',
             'Flexibiliza plazos de entrega cuando exista fatiga.'
         ],
@@ -144,7 +144,7 @@ const accommodationsData = {
         materials: [
             'Entrega instrucciones y contenidos clave por escrito.',
             'Asegura subtítulos, transcripciones o guiones de material audiovisual.',
-            'Da tiempo adicional para procesar instrucciones escritas extensas o mediadas por interpretación.'
+            'Considera el tiempo que suma la interpretación en lengua de señas o la lectura de instrucciones extensas, y ajusta el tiempo de la actividad en esa medida.'
         ],
         methods: [
             'Apoya explicaciones orales con esquemas, palabras clave y ejemplos escritos.',
@@ -173,7 +173,7 @@ const accommodationsData = {
         materials: [
             'Usa documentos accesibles, editables y compatibles con lector de pantalla.',
             'Describe imágenes, gráficos y acciones realizadas en pizarra.',
-            'Otorga más tiempo para lectura y navegación de materiales.'
+            'Ajusta el tiempo de lectura y navegación según lo que demore el formato accesible (lector de pantalla, ampliación o braille).'
         ],
         methods: [
             'No dependas solo del color, la ubicación visual o gestos para comunicar información.',
@@ -188,7 +188,7 @@ const accommodationsData = {
         evaluacion: [
             'Permite realizar evaluaciones por medios digitales y plataformas virtuales.',
             'Dispón el material escrito con anticipación para su adaptación.',
-            'Otorga más tiempo en evaluaciones si es necesario.'
+            'En evaluaciones, otorga tiempo adicional según lo que demore el formato accesible; revisa con el estudiante cuánto usa realmente.'
         ],
         tech: [
             'Asegura compatibilidad con lectores de pantalla y dispositivos Braille.',
@@ -241,7 +241,7 @@ const accommodationsData = {
         ],
         evaluacion: [
             'Ofrece formatos alternativos (digital u oral) ante dificultades de escritura manual.',
-            'Otorga tiempo adicional para responder evaluaciones cuando sea necesario.',
+            'Otorga tiempo adicional cuando la evaluación exija escribir o manipular con rapidez; parte con 25 % y ajusta según lo que realmente use.',
             'Flexibiliza plazos si el estudiante debe ausentarse por su condición.'
         ],
         tech: [
@@ -269,7 +269,7 @@ const accommodationsData = {
             'En trabajos en equipo, entrega instrucciones y roles definidos con anticipación.'
         ],
         evaluacion: [
-            'Otorga tiempo adicional para responder evaluaciones si es necesario.',
+            'Ofrece pausas y la posibilidad de detenerse si aparecen mareos; usa tiempo adicional solo si la barrera afecta la rapidez de respuesta.',
             'Flexibiliza plazos si el estudiante debe ausentarse por su condición.'
         ],
         tech: [
@@ -298,7 +298,7 @@ const accommodationsData = {
         ],
         evaluacion: [
             'Flexibiliza plazos de entrega y fechas de evaluación según condición de salud.',
-            'Otorga tiempo adicional para responder evaluaciones si es necesario.'
+            'Ofrece pausas o salidas acordadas por necesidades de salud; repón ese tiempo y suma tiempo adicional solo si la barrera afecta la rapidez de respuesta.'
         ],
         tech: [
             'Facilita plataformas digitales para continuidad cuando el estudiante no pueda asistir.'
@@ -335,7 +335,7 @@ const accommodationsData = {
             'Segmenta instrucciones con pasos breves, a modo de lista de verificación.',
             'Prefiere preguntas directas y guiadas, evita enunciados extensos o ambiguos.',
             'Ofrece formatos alternativos (práctico, oral, visual) para comprobar aprendizajes.',
-            'Otorga tiempo adicional y flexibiliza plazos de entrega.'
+            'Flexibiliza plazos de entrega y, en evaluaciones con tiempo limitado, otorga tiempo adicional si leer o escribir con rapidez no es lo que se evalúa (referencia: 25 %).'
         ],
         tech: [
             'Apoya con organizadores gráficos digitales y calendarios de estudio.'
@@ -365,7 +365,7 @@ const accommodationsData = {
             'Ofrece flexibilidad para presentaciones orales: opción sin público, e ir incrementando nivel de exposición poco a poco.',
             'Retroalimente con frecuencia y de manera personalizada.',
             'Flexibiliza fechas y plazos cuando existan episodios documentados.',
-            'Otorga tiempo adicional para responder evaluaciones si es necesario.'
+            'Prioriza pausas acordadas, un ambiente con menos estímulos o dividir la evaluación; el tiempo adicional no tiene respaldo en la investigación para esta barrera salvo que afecte la rapidez de respuesta.'
         ],
         tech: [
             'Permite entrega de trabajos por medios digitales cuando la presencialidad sea una barrera.'
@@ -394,7 +394,7 @@ const accommodationsData = {
         evaluacion: [
             'Flexibiliza entregas, pausas y evaluaciones cuando exista sobrecarga o desregulación.',
             'Brinda información adicional durante la evaluación si el estudiante muestra signos de estrés.',
-            'Ofrece tiempo adicional si es necesario.'
+            'Decide el tiempo adicional caso a caso: úsalo si la barrera afecta la rapidez de respuesta y combínalo con instrucciones claras, anticipación y un ambiente con menos estímulos.'
         ],
         tech: [
             'Permite el uso de audífonos con cancelación de ruido durante trabajo autónomo y evaluaciones.'
@@ -523,7 +523,7 @@ const matrixRecommendationRules = [
     { id: 'autismo_recordar_estructura', text: 'Usar agenda, checklist, calendario o recordatorios visibles para organizar tareas, fechas y pasos.', conditions: ['autismo','psiquica','intelectual'], activities: ['recordar'], dimensions: ['methods','tech'], scores: [1,2], priority: 'alta' },
     { id: 'intelectual_recordar_modelado', text: 'Dividir tareas en pasos breves, modelar el procedimiento y verificar comprensión antes del trabajo autónomo.', conditions: ['intelectual','autismo'], activities: ['recordar'], dimensions: ['methods'], scores: [1,2], priority: 'alta' },
     { id: 'evaluacion_instrucciones_claras', text: 'Entregar instrucciones de evaluación por escrito, segmentadas y con criterios claros antes de iniciar.', conditions: ['autismo','intelectual','psiquica','auditiva','sordoceguera','visual'], activities: ['examenes'], dimensions: ['evaluacion','materials'], scores: [1,2], priority: 'alta' },
-    { id: 'evaluacion_tiempo_pausas', text: 'Otorgar tiempo adicional, pausas acordadas o división de la evaluación cuando la barrera afecte el acceso a la respuesta.', conditions: ['fisica','visual','sordoceguera','tactil','vestibular','visceral','intelectual','psiquica','autismo'], activities: ['examenes'], dimensions: ['evaluacion','context'], scores: [1,2], priority: 'media' },
+    { id: 'evaluacion_tiempo_pausas', text: 'Acordar pausas, división de la evaluación o tiempo adicional según la barrera. El tiempo adicional solo se justifica si la evaluación exige rapidez en la habilidad afectada: parte con 25 %, revisa cuánto usa realmente y justifica por escrito si supera el 50 %.', conditions: ['fisica','visual','sordoceguera','tactil','vestibular','visceral','intelectual','psiquica','autismo'], activities: ['examenes'], dimensions: ['evaluacion','context'], scores: [1,2], priority: 'media' },
     { id: 'evaluacion_auditiva_formato', text: 'Evitar instrucciones exclusivamente orales y asegurar subtítulos, transcripción o mediación comunicacional si la evaluación depende de audio.', conditions: ['auditiva','sordoceguera'], activities: ['examenes'], dimensions: ['evaluacion','tech'], scores: [1,2], priority: 'alta' },
     { id: 'evaluacion_visual_formato', text: 'Permitir formato digital accesible, ampliación, lector de pantalla o alternativa textual para contenidos visuales.', conditions: ['visual','sordoceguera'], activities: ['examenes'], dimensions: ['evaluacion','tech'], scores: [1,2], priority: 'alta' },
     { id: 'practicos_fisica_alternativa', text: 'Ajustar el puesto, herramienta, postura o secuencia de ejecución para participar sin alterar el resultado de aprendizaje.', conditions: ['fisica','tactil','vestibular','visceral'], activities: ['practicos','practicas_rec'], dimensions: ['methods','context'], scores: [1,2], priority: 'alta' },
