@@ -50,9 +50,6 @@ function bindSectionNavigation() {
         const view = target.dataset.view;
         const primaryTarget = target.id;
         setActiveState(view, primaryTarget);
-        if (window.UiePlannerMetrics && typeof window.UiePlannerMetrics.trackSectionView === 'function') {
-            window.UiePlannerMetrics.trackSectionView(primaryTarget, view);
-        }
 
         if (window.location.hash !== '#' + primaryTarget) {
             try {
@@ -80,6 +77,12 @@ function bindSectionNavigation() {
         if (event.defaultPrevented) return;
         const link = event.target.closest('a[href^="#"]');
         if (!link) return;
+        if (link.classList.contains('skip-link')) {
+            event.preventDefault();
+            const main = document.getElementById('contenido-principal');
+            if (main) main.focus();
+            return;
+        }
         if (!sectionById(link.getAttribute('href').slice(1))) return;
         event.preventDefault();
         activate(link.getAttribute('href').slice(1));

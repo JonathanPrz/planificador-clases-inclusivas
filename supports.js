@@ -148,31 +148,6 @@ const selectedConditionKeys = [];
 var currentMode = 'medical';
 var editingMode = false;
 
-function trackSupportMetric(eventName, params) {
-    if (window.UiePlannerMetrics && typeof window.UiePlannerMetrics.trackMetric === 'function') {
-        window.UiePlannerMetrics.trackMetric(eventName, params || {});
-    }
-}
-
-function getSupportMetricSummary(students) {
-    var list = students || collectPlanStudents();
-    var conditionKeys = [];
-    var matrixCount = 0;
-    list.forEach(function(student) {
-        (student.conditionKeys || []).forEach(function(key) {
-            if (conditionKeys.indexOf(key) === -1) conditionKeys.push(key);
-        });
-        if (student.assessmentSource === 'matrix' || hasStudentMatrixApplied(student.cardIndex || student.index)) matrixCount += 1;
-    });
-    return {
-        student_count: list.length,
-        matrix_students: matrixCount,
-        condition_groups: window.UiePlannerMetrics && typeof window.UiePlannerMetrics.getConditionGroups === 'function'
-            ? window.UiePlannerMetrics.getConditionGroups(conditionKeys)
-            : []
-    };
-}
-
 function setEditingMode(enabled) {
     editingMode = Boolean(enabled);
     var supportsSection = document.getElementById('apoyos');
@@ -183,35 +158,6 @@ function setEditingMode(enabled) {
         toggle.setAttribute('aria-pressed', String(editingMode));
     }
     renderSelectedSupportRecommendations();
-}
-
-function _unused_switchMode(mode) {
-    currentMode = mode;
-    var selector = document.getElementById('mode-selector');
-    var panelMedical = document.getElementById('panel-medical');
-    var panelSocial = document.getElementById('panel-social');
-    var results = document.getElementById('support-results');
-    var resultsLayout = document.querySelector('.support-layout');
-    var ctaPanel = document.getElementById('plan-cta-panel');
-    var genMedical = document.getElementById('btn-generate-plan-medical');
-    var genSocial = document.getElementById('btn-generate-plan-social');
-    var editToggle = document.getElementById('btn-toggle-editing-mode');
-
-    if (selector) selector.classList.add('mode-selected');
-    if (panelMedical) panelMedical.style.display = (mode === 'medical') ? '' : 'none';
-    if (panelSocial) panelSocial.style.display = (mode === 'social') ? '' : 'none';
-    if (results) results.classList.add('hidden');
-    if (resultsLayout) resultsLayout.style.display = 'none';
-    if (ctaPanel) ctaPanel.style.display = mode ? '' : 'none';
-    if (genMedical) genMedical.style.display = (mode === 'medical') ? '' : 'none';
-    if (genSocial) genSocial.style.display = (mode === 'social') ? '' : 'none';
-
-    if (mode === 'medical') {
-        renderMedicalStudents(renderSelectedSupportRecommendations);
-        initConditionPillsMedical();
-    } else if (mode === 'social') {
-        _unused_renderSocialStudents(renderSelectedSupportRecommendations);
-    }
 }
 
 function initModeSelector() {
@@ -226,7 +172,6 @@ function initModeSelector() {
     if (editToggle && editToggle.dataset.boundEdit !== 'true') {
         editToggle.addEventListener('click', function() {
             setEditingMode(!editingMode);
-            trackSupportMetric('editing_mode_changed', { enabled: editingMode });
         });
         editToggle.setAttribute('data-bound-edit', 'true');
         setEditingMode(editingMode);
@@ -281,15 +226,6 @@ function initConditionPills() {
     renderMedicalStudents(renderSelectedSupportRecommendations);
     renderSelectedSupportRecommendations();
     setEditingMode(editingMode);
-}
-
-function initConditionPillsMedical() {
-    if (!selectedConditionKeys.length) {
-        selectedConditionKeys.push('autismo');
-    }
-
-    renderConditionPills();
-    renderConditionDetail();
 }
 
 function renderConditionPills() {
@@ -455,129 +391,6 @@ function renderSelectedSupportRecommendations() {
     bindClarificationButtons();
 }
 
-function _unused_renderSocialResults() {
-    var results = document.getElementById('support-results');
-    if (!results) return;
-
-    var layout = document.querySelector('.support-layout');
-    if (layout) layout.style.display = '';
-
-    var cards = document.querySelectorAll('#support-students-social .support-student-card');
-    var hasMatrixData = false;
-
-    var students = Array.from(cards).map(function(card) {
-        var idx = card.getAttribute('data-student-index');
-        var name = (card.querySelector('.student-name')?.value || '').trim();
-        var mData = matrixData[idx];
-        if (mData && mData.applied) hasMatrixData = true;
-        return {
-            label: name || ('Estudiante ' + idx),
-            cardIndex: Number(idx),
-            name: name,
-            conditionKeys: mData ? mData.conditionKeys || _unused_readSocialConditionKeys(idx) : _unused_readSocialConditionKeys(idx),
-            conditions: (mData ? mData.conditionKeys || _unused_readSocialConditionKeys(idx) : _unused_readSocialConditionKeys(idx)).map(function(key) {
-                var data = accommodationsData[key];
-                return data ? { key: key, name: data.name, source: data.source } : null;
-            }).filter(Boolean),
-            hasMatrix: !!(mData && mData.applied),
-            matrixScores: mData ? mData.scores || {} : {}
-        };
-    });
-
-    results.classList.remove('hidden');
-
-    var matrixStudents = [];
-    var recsHtml = students.map(function(student, sIdx) {
-        var label = student.name || ('Estudiante ' + student.cardIndex);
-
-        if (student.hasMatrix) {
-            matrixStudents.push(student);
-            var barrierRecs = getBarrierBasedRecommendations(student.matrixScores, student.conditionKeys || []);
-
-            if (!barrierRecs.length) {
-                return '<article class="support-recommendation-group">' +
-                    '<div class="results-title-header"><div>' +
-                    '<h3>' + label + '</h3>' +
-                    '<p>No se identificaron barreras significativas o falta seleccionar la condici\u00f3n registrada en la ficha.</p>' +
-                    '</div></div></article>';
-            }
-
-            var itemsHtml = barrierRecs.map(function(group) {
-                var activityHtml = group.items.map(function(item) {
-                    var body = '';
-                    if (item.recommendations.length) {
-                        body += '<ul class="acc-list">' + item.recommendations.map(function(rec) { return '<li>' + rec + '</li>'; }).join('') + '</ul>';
-                    }
-                    if (item.observations.length) {
-                        body += '<ul class="acc-list matrix-observation-list">' + item.observations.map(function(obs) { return '<li>' + obs + '</li>'; }).join('') + '</ul>';
-                    }
-                    if (item.clarification) {
-                        body += '<p class="matrix-clarification">' + item.clarification + '</p>';
-                    }
-                    return '<div class="matrix-activity-result">' +
-                        '<h5>' + item.activity + ' <span class="matrix-severity ' + item.severityClass + '">' + item.score + ' \u00b7 ' + item.severity + '</span></h5>' +
-                        body +
-                        '</div>';
-                }).join('');
-                return '<article class="acc-card barrier-card">' +
-                    '<h4>' + group.label + '</h4>' +
-                    '<p class="barrier-activities">Barreras en: ' + group.activities.join(', ') + '</p>' +
-                    activityHtml +
-                    '</article>';
-            }).join('');
-
-            var conditionText = student.conditions.length
-                ? student.conditions.map(function(c) { return c.name; }).join(', ')
-                : 'Sin condici\u00f3n registrada';
-
-            return '<article class="support-recommendation-group">' +
-                '<div class="results-title-header"><div>' +
-                '<span class="source-pill">Matriz CIF/OMS</span>' +
-                '<h3>' + label + '</h3>' +
-                '<p><strong>Filtro de pertinencia:</strong> ' + conditionText + '. Las recomendaciones se agrupan en las mismas dimensiones del mapa de barreras.</p>' +
-                '</div></div>' +
-                '<div class="support-grid">' + itemsHtml + '</div>' +
-                '</article>';
-        }
-
-        if (!student.conditions.length) {
-            return '<article class="support-recommendation-group">' +
-                '<div class="results-title-header"><div>' +
-                '<h3>' + label + '</h3>' +
-                '<p>Selecciona una condici\u00f3n registrada en la ficha para ver orientaciones de apoyo.</p>' +
-                '</div></div></article>';
-        }
-
-        var group = {
-            conditions: student.conditions,
-            students: [{ label: student.label, name: student.name, cardIndex: student.cardIndex }]
-        };
-        try {
-            return renderStandardRecommendationGroup(group, { hasMatrixProfile: false });
-        } catch (e) {
-            return '<article class="support-recommendation-group"><div class="results-title-header"><div><h3>' + label + '</h3><p>Error generando recomendaciones: ' + e.message + '</p></div></div></article>';
-        }
-    }).join('');
-
-    if (matrixStudents.length) {
-        var radarId = 'cif-radar-social';
-        recsHtml = '<div id="' + radarId + '" class="cif-radar-container"></div>' + recsHtml;
-    }
-
-    var headerHtml = hasMatrixData
-        ? '<div class="results-title-header results-toolbar"><div><span class="source-pill">Perfil CIF</span><p>Lee este gráfico como un mapa de énfasis: muestra dónde conviene concentrar observación, coordinación o apoyo. En las recomendaciones siguientes, el semáforo precisa la prioridad de cada ajuste.</p></div></div>'
-        : '<div class="results-title-header results-toolbar"><div><span class="source-pill">Consultor por condici\u00f3n</span><h3>Orientaciones iniciales para observar barreras</h3><p>Revisa cada categor\u00eda como referencia inicial mientras identificas barreras concretas.</p></div></div>';
-
-    results.innerHTML = headerHtml + recsHtml;
-    if (matrixStudents.length) {
-        renderCIFRadarChart(matrixStudents, 'cif-radar-social', { height: '380px' });
-    }
-    bindBarrierMapToggles();
-    bindRecommendationEditing();
-    bindManualRecommendationEditing();
-    bindAdvisorCommentFields();
-}
-
 function renderCIFBarChart(students, options) {
     options = options || {};
     var activities = window.UiePlannerData.accessMatrixActivities;
@@ -623,7 +436,7 @@ function renderCIFBarChart(students, options) {
     if (!hasAnyMatrix) return '';
 
     var headerCells = studentCols.map(function(col) {
-        return '<div class="cif-student-header">' + col.label + '</div>';
+        return '<div class="cif-student-header">' + escapeSupportHtml(col.label) + '</div>';
     }).join('');
 
     var bodyRows = activities.map(function(act, ai) {
@@ -675,22 +488,6 @@ function renderCIFBarChart(students, options) {
             (extraCount ? '<p class="small-note">+ ' + extraCount + ' estudiante(s) no graficados.</p>' : '') +
         '</div>' +
         '</div>';
-}
-
-function _unused_bindCIFBarToggles() {
-    document.querySelectorAll('.cif-bar-toggle:not([data-bound])').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var panel = btn.closest('.barrier-map-panel');
-            if (!panel) return;
-            var chart = panel.querySelector('.cif-chart');
-            if (!chart) return;
-            var isHidden = chart.style.display === 'none';
-            chart.style.display = isHidden ? '' : 'none';
-            btn.textContent = isHidden ? 'Ocultar gr\u00e1fico' : 'Ver gr\u00e1fico';
-            btn.setAttribute('aria-expanded', String(isHidden));
-        });
-        btn.setAttribute('data-bound', 'true');
-    });
 }
 
 var CIF_RADAR_COLORS = [
@@ -946,73 +743,6 @@ function mergeConditionProfiles(conditionKeys) {
     }, {});
 }
 
-function supportRecommendationGroup(grouped) {
-    const data = grouped.condition;
-    const studentNames = grouped.students.map(student => formatStudentLabel(student)).join(', ');
-    return `
-        <article class="support-recommendation-group">
-            <div class="results-title-header">
-                <div>
-                    <h3>${studentNames}</h3>
-                    <p><span class="source-pill">${data.source}</span> <strong>Condición:</strong> ${data.name}</p>
-                </div>
-            </div>
-            <div class="support-grid">
-                ${supportCategory('Contexto aula', data.context)}
-                ${supportCategory('Materiales de estudio', data.materials)}
-                ${supportCategory('Métodos de enseñanza', data.methods)}
-                ${supportCategory('Interacción en aula', data.interaction)}
-                ${supportCategory('De las evaluaciones', data.evaluacion)}
-                ${supportCategory('Tecnologías asistivas', data.tech)}
-            </div>
-            ${data.highlights ? `
-                <div class="context-panel">
-                    <h4>Apoyos destacados para esta condición</h4>
-                    <div class="mini-grid">
-                        ${data.highlights.map(item => `
-                            <article class="mini-card">
-                                <h5>${item.title}</h5>
-                                <p>${item.text}</p>
-                            </article>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            ${data.regulation ? `
-                <div class="regulation-panel">
-                    <div class="resource-heading">
-                        <span class="source-pill">Autismo</span>
-                        <h4>Desregulación emocional y conductual</h4>
-                        <p>Orientación pedagógica de apoyo, no protocolo clínico. La desregulación suele responder a sobrecarga, ansiedad, cambios inesperados o estímulos desencadenantes.</p>
-                    </div>
-                    <div class="regulation-grid">
-                        ${data.regulation.map(group => `
-                            <article class="regulation-card">
-                                <h5>${group.title}</h5>
-                                <ul class="acc-list">
-                                    ${group.items.map(item => `<li>${item}</li>`).join('')}
-                                </ul>
-                            </article>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            ${data.source === 'Autismo' ? `
-                <div class="myths-panel">
-                    <div class="resource-heading">
-                        <span class="source-pill">Autismo</span>
-                        <h4>Mitos y trato en autismo</h4>
-                        <p>Estas orientaciones ayudan a evitar prejuicios al acompañar la práctica docente.</p>
-                    </div>
-                    <div class="myths-grid">
-                        ${autismMyths.map(item => `<article class="myth-item">${item}</article>`).join('')}
-                    </div>
-                </div>
-            ` : ''}
-        </article>
-    `;
-}
-
 function renderGoodPractices() {
     const container = document.getElementById('good-practices');
     if (!container) return;
@@ -1029,15 +759,6 @@ function renderGoodPractices() {
                 </article>
             `).join('')}
         </div>
-    `;
-}
-
-function supportCategory(title, items) {
-    return `
-        <article class="acc-card">
-            <h4>${title}</h4>
-            <ul class="acc-list">${items.map(item => `<li>${item}</li>`).join('')}</ul>
-        </article>
     `;
 }
 
@@ -1127,146 +848,8 @@ function renderMedicalStudents(onStudentChange) {
     });
 }
 
-function _unused_renderSocialStudents(onStudentChange) {
-    var container = document.getElementById('support-students-social');
-    var addBtn = document.getElementById('add-student-btn-social');
-    if (!container) return;
-
-    var count = Number(container.getAttribute('data-student-count')) || 1;
-    count = Math.max(1, Math.min(8, count));
-    container.setAttribute('data-student-count', String(count));
-
-    var existingCards = container.querySelectorAll('.support-student-card');
-    var existingCount = existingCards.length;
-
-    if (count > existingCount) {
-        for (var i = existingCount; i < count; i++) {
-            container.appendChild(createSocialStudentCard(i + 1));
-        }
-    } else if (count < existingCount) {
-        for (var j = existingCount - 1; j >= count; j--) {
-            var removedIndex = existingCards[j].getAttribute('data-student-index');
-            delete matrixData[removedIndex];
-            existingCards[j].remove();
-        }
-    }
-
-    container.querySelectorAll('.support-student-card:not([data-events-bound])').forEach(function(card) {
-        var studentIndex = card.getAttribute('data-student-index');
-
-        card.querySelectorAll('.student-profile-field').forEach(function(input) {
-            input.addEventListener('input', onStudentChange);
-            input.addEventListener('change', onStudentChange);
-        });
-
-        card.querySelectorAll('.social-condition-pill').forEach(function(pill) {
-            pill.addEventListener('click', function() {
-                var key = pill.getAttribute('data-condition-key');
-                var isMultiplePill = key === 'multiple';
-                var isMultipleMode = card.getAttribute('data-multiple') === 'true';
-
-                if (isMultiplePill) {
-                    var newMode = !isMultipleMode;
-                    card.setAttribute('data-multiple', String(newMode));
-                    pill.classList.toggle('active', newMode);
-                    if (!newMode) {
-                        var activePills = card.querySelectorAll('.social-condition-pill.active:not(.multiple)');
-                        if (activePills.length > 1) {
-                            for (var i = 1; i < activePills.length; i++) {
-                                activePills[i].classList.remove('active');
-                            }
-                        }
-                    }
-                } else if (isMultipleMode) {
-                    pill.classList.toggle('active');
-                } else {
-                    var wasActive = pill.classList.contains('active');
-                    card.querySelectorAll('.social-condition-pill:not(.multiple)').forEach(function(p) {
-                        p.classList.remove('active');
-                    });
-                    if (!wasActive) pill.classList.add('active');
-                }
-
-                _unused_updateSocialConditionSummary(studentIndex);
-                if (matrixData[studentIndex] && matrixData[studentIndex].applied) {
-                    renderSelectedSupportRecommendations();
-                }
-            });
-        });
-
-        card.querySelectorAll('input[type="radio"][name^="social-matrix"]').forEach(function(radio) {
-            radio.addEventListener('change', function() {
-                updateStudentMatrixBadge(studentIndex);
-                if (_unused_readSocialConditionKeys(studentIndex).length) {
-                    applyStudentMatrix(studentIndex);
-                }
-            });
-        });
-
-        var applyBtn = card.querySelector('[id^="apply-matrix-"]');
-        var clearBtn = card.querySelector('[id^="clear-matrix-"]');
-        if (applyBtn) applyBtn.addEventListener('click', function() { applyStudentMatrix(studentIndex); });
-        if (clearBtn) clearBtn.addEventListener('click', function() { clearStudentMatrix(studentIndex); });
-
-        var removeBtn = card.querySelector('.btn-remove-student');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', function() { _unused_removeLastSocialStudent(onStudentChange); });
-        }
-
-        card.setAttribute('data-events-bound', '');
-    });
-
-    if (addBtn && addBtn.dataset.boundSocial !== 'true') {
-        addBtn.addEventListener('click', function() { _unused_addSocialStudentCard(onStudentChange); });
-        addBtn.setAttribute('data-bound-social', 'true');
-    }
-
-    _unused_updateSocialRemoveButtons();
-    _unused_updateSocialAddButton();
-    _unused_updateSocialMatrixSummaries();
-    container.querySelectorAll('.support-student-card').forEach(function(card) {
-        _unused_updateSocialConditionSummary(card.getAttribute('data-student-index'));
-    });
-}
-
 function renderSupportStudents(onStudentChange) {
     renderMedicalStudents(onStudentChange || renderSelectedSupportRecommendations);
-}
-
-function getConditionFilterButtons(className) {
-    return conditionGridOrder.map(function(key) {
-        var isMultiple = key === 'multiple';
-        var data = accommodationsData[key];
-        if (!data && !isMultiple) return '';
-        var extraClass = isMultiple ? ' multiple' : '';
-        var label = isMultiple ? 'Múltiple' : (shortConditionNames[key] || key);
-        return '<button class="condition-pill ' + className + extraClass + '" data-condition-key="' + key + '" type="button">' +
-            '<span class="condition-pill-name">' + label + '</span>' +
-            '</button>';
-    }).join('');
-}
-
-function _unused_readSocialConditionKeys(studentIndex) {
-    var card = document.querySelector('#support-students-social .support-student-card[data-student-index="' + studentIndex + '"]');
-    if (!card) return [];
-    return Array.from(card.querySelectorAll('.social-condition-pill.active')).map(function(pill) {
-        return pill.getAttribute('data-condition-key');
-    }).filter(function(key) { return key && key !== 'multiple'; });
-}
-
-function _unused_updateSocialConditionSummary(studentIndex) {
-    var card = document.querySelector('#support-students-social .support-student-card[data-student-index="' + studentIndex + '"]');
-    if (!card) return;
-    var note = card.querySelector('.social-condition-summary');
-    var keys = _unused_readSocialConditionKeys(studentIndex);
-    if (note) {
-        note.textContent = keys.length
-            ? 'Filtro activo: ' + keys.map(function(key) { return shortConditionNames[key] || key; }).join(', ')
-            : 'Selecciona la condición registrada en la ficha para filtrar apoyos pertinentes.';
-    }
-    if (matrixData[studentIndex]) {
-        matrixData[studentIndex].conditionKeys = keys;
-    }
 }
 
 function createAssessmentRows(studentIndex, prefix) {
@@ -1304,9 +887,10 @@ function createMedicalStudentCard(studentIndex) {
 
     wrapper.innerHTML =
         '<h4>Estudiante ' + studentIndex + '</h4>' +
+        '<p class="privacy-hint">Los datos personales son opcionales. Puedes usar iniciales o un código. <button type="button" class="privacy-info-btn" data-open-privacy>¿Qué debo considerar?</button></p>' +
         '<div class="student-management-fields">' +
-            '<label><span>Nombre (opcional)</span><input id="student-name-medical-' + studentIndex + '" class="text-control student-name student-profile-field" type="text" placeholder="Estudiante ' + studentIndex + '"></label>' +
-            '<label><span>RUT (opcional)</span><input class="text-control student-rut student-profile-field" type="text" placeholder="Sin informar"></label>' +
+            '<label><span>Nombre (opcional)</span><input id="student-name-medical-' + studentIndex + '" class="text-control student-name student-profile-field student-personal-field" type="text" autocomplete="off" placeholder="Estudiante ' + studentIndex + '"></label>' +
+            '<label><span>RUT (opcional)</span><input class="text-control student-rut student-profile-field student-personal-field" type="text" autocomplete="off" placeholder="Sin informar"></label>' +
             '<label><span>Carrera (opcional)</span><input class="text-control student-career student-profile-field" type="text" placeholder="Sin informar"></label>' +
             '<label><span>Código asignatura (opcional)</span><input class="text-control student-section student-profile-field" type="text" placeholder="Sin informar"></label>' +
         '</div>' +
@@ -1382,61 +966,6 @@ function createMedicalStudentCard(studentIndex) {
     return wrapper;
 }
 
-function _unused_createSocialStudentCard(studentIndex) {
-    var wrapper = document.createElement('article');
-    wrapper.className = 'support-student-card';
-    wrapper.setAttribute('data-student-index', String(studentIndex));
-    wrapper.setAttribute('data-multiple', 'false');
-
-    var activities = window.UiePlannerData.accessMatrixActivities;
-    var matrixRows = activities.map(function(act) {
-        var cells = [4, 3, 2, 1].map(function(val) {
-            return '<td class="matrix-col-score">' +
-                '<label class="matrix-radio-group">' +
-                '<input type="radio" name="social-matrix-' + studentIndex + '-' + act.id + '" value="' + val + '">' +
-                '<span>' + val + '</span>' +
-                '</label></td>';
-        }).join('');
-        return '<tr><td class="matrix-activity-label">' + act.label + '</td>' + cells + '</tr>';
-    }).join('');
-
-    wrapper.innerHTML =
-        '<h4>Estudiante ' + studentIndex + '</h4>' +
-        '<label for="student-name-social-' + studentIndex + '">Nombre del estudiante (opcional)</label>' +
-        '<input id="student-name-social-' + studentIndex + '" class="text-control student-name" type="text" placeholder="Si queda vacío se usará Estudiante ' + studentIndex + '">' +
-        '<div class="student-card-status" id="student-status-social-' + studentIndex + '">Sin apoyos definidos</div>' +
-        '<div class="social-condition-filter">' +
-            '<h5 class="matrix-heading">Condición registrada en ficha</h5>' +
-            '<p class="matrix-help">Filtra apoyos pertinentes. No cambia el gráfico.</p>' +
-            '<div class="condition-pills-inline">' + getConditionFilterButtons('social-condition-pill') + '</div>' +
-            '<p class="social-condition-summary">Selecciona la condición registrada en la ficha para filtrar apoyos pertinentes.</p>' +
-        '</div>' +
-        '<div class="student-matrix-section">' +
-            '<h5 class="matrix-heading">Matriz de acceso CIF/OMS</h5>' +
-            '<p class="matrix-help">Puntúa cada actividad según la ficha del estudiante.</p>' +
-            '<div class="student-matrix-wrap">' +
-                '<table class="student-matrix-table">' +
-                    '<thead><tr><th>Actividad</th><th class="matrix-col-score">4</th><th class="matrix-col-score">3</th><th class="matrix-col-score">2</th><th class="matrix-col-score">1</th></tr></thead>' +
-                    '<tbody>' + matrixRows + '</tbody>' +
-                '</table>' +
-                '<div class="student-matrix-legend">' +
-                    '<span><strong>4</strong> Compatibilidad perfecta</span>' +
-                    '<span><strong>3</strong> Compatibilidad buena</span>' +
-                    '<span><strong>2</strong> Compatibilidad parcial</span>' +
-                    '<span><strong>1</strong> Incompatibilidad</span>' +
-                '</div>' +
-            '</div>' +
-            '<div class="student-matrix-actions">' +
-                '<button class="btn btn-primary btn-sm" id="apply-matrix-' + studentIndex + '" type="button">Identificar barreras</button>' +
-                '<button class="btn btn-secondary btn-sm" id="clear-matrix-' + studentIndex + '" type="button">Limpiar</button>' +
-                '<span class="student-matrix-badge" id="student-matrix-badge-' + studentIndex + '"></span>' +
-            '</div>' +
-        '</div>' +
-        '<button class="btn-remove-student" type="button" title="Eliminar estudiante" style="display:none">&times;</button>';
-
-    return wrapper;
-}
-
 function addMedicalStudentCard(onStudentChange) {
     var container = document.getElementById('support-students-medical');
     if (!container) return;
@@ -1444,16 +973,6 @@ function addMedicalStudentCard(onStudentChange) {
     if (count >= 8) return;
     container.setAttribute('data-student-count', String(count + 1));
     renderMedicalStudents(onStudentChange);
-    trackSupportMetric('support_student_added', { student_count: count + 1 });
-}
-
-function _unused_addSocialStudentCard(onStudentChange) {
-    var container = document.getElementById('support-students-social');
-    if (!container) return;
-    var count = Number(container.getAttribute('data-student-count')) || 1;
-    if (count >= 8) return;
-    container.setAttribute('data-student-count', String(count + 1));
-    _unused_renderSocialStudents(onStudentChange);
 }
 
 function removeLastMedicalStudent(onStudentChange) {
@@ -1470,24 +989,6 @@ function removeLastMedicalStudent(onStudentChange) {
     if (typeof onStudentChange === 'function') onStudentChange();
 }
 
-function _unused_removeLastSocialStudent(onStudentChange) {
-    var container = document.getElementById('support-students-social');
-    if (!container) return;
-    var count = Number(container.getAttribute('data-student-count')) || 1;
-    if (count <= 1) return;
-    var cards = container.querySelectorAll('.support-student-card');
-    if (cards.length > 0) {
-        var matrixIdx = cards[cards.length - 1].getAttribute('data-student-index');
-        delete matrixData[matrixIdx];
-        cards[cards.length - 1].remove();
-    }
-    container.setAttribute('data-student-count', String(count - 1));
-    _unused_updateSocialRemoveButtons();
-    _unused_updateSocialAddButton();
-    _unused_updateSocialMatrixSummaries();
-    if (typeof onStudentChange === 'function') onStudentChange();
-}
-
 function updateMedicalAddButton() {
     var addBtn = document.getElementById('add-student-btn-medical');
     var container = document.getElementById('support-students-medical');
@@ -1501,33 +1002,8 @@ function updateMedicalAddButton() {
     addBtn.style.display = hasCondition ? '' : 'none';
 }
 
-function _unused_updateSocialAddButton() {
-    var addBtn = document.getElementById('add-student-btn-social');
-    var container = document.getElementById('support-students-social');
-    if (!addBtn || !container) return;
-    var count = Number(container.getAttribute('data-student-count')) || 1;
-    if (count >= 8) { addBtn.style.display = 'none'; return; }
-    var cards = container.querySelectorAll('.support-student-card');
-    var lastCard = cards[cards.length - 1];
-    if (!lastCard) { addBtn.style.display = 'none'; return; }
-    var hasMatrix = matrixData[lastCard.getAttribute('data-student-index')] && matrixData[lastCard.getAttribute('data-student-index')].applied;
-    addBtn.style.display = hasMatrix ? '' : 'none';
-}
-
 function updateMedicalRemoveButtons() {
     var container = document.getElementById('support-students-medical');
-    if (!container) return;
-    var cards = container.querySelectorAll('.support-student-card');
-    var count = Number(container.getAttribute('data-student-count')) || 1;
-    cards.forEach(function(card, index) {
-        var btn = card.querySelector('.btn-remove-student');
-        if (!btn) return;
-        btn.style.display = (count > 1 && index === cards.length - 1) ? '' : 'none';
-    });
-}
-
-function _unused_updateSocialRemoveButtons() {
-    var container = document.getElementById('support-students-social');
     if (!container) return;
     var cards = container.querySelectorAll('.support-student-card');
     var count = Number(container.getAttribute('data-student-count')) || 1;
@@ -1564,14 +1040,6 @@ function updateMedicalConditionSummaries() {
     });
 }
 
-function _unused_updateSocialMatrixSummaries() {
-    document.querySelectorAll('#support-students-social .support-student-card').forEach(function(card) {
-        var idx = card.getAttribute('data-student-index');
-        updateStudentMatrixBadge(idx);
-        updateStudentStatusBadgeForContainer('support-students-social', idx, null);
-    });
-}
-
 function updateStudentStatusBadgeForContainer(containerId, idx, conditions) {
     var status = document.getElementById('student-status-' + containerId.replace('support-students-', '') + '-' + idx) ||
                  document.getElementById('student-status-' + idx);
@@ -1589,34 +1057,6 @@ function updateStudentStatusBadgeForContainer(containerId, idx, conditions) {
         status.textContent = 'Sin apoyos definidos';
         status.className = 'student-card-status';
     }
-}
-
-function _unused_renderReferenceCatalog() {
-    var conditionKeys = Object.keys(accommodationsData);
-
-    var items = conditionKeys.map(function(key) {
-        var data = accommodationsData[key];
-        var catsHtml = ['context', 'materials', 'methods', 'interaction', 'evaluacion', 'tech'].map(function(cat) {
-            var arr = data[cat];
-            if (!arr || !arr.length) return '';
-            var listItems = arr.slice(0, 4).map(function(r) { return '<li>' + r + '</li>'; }).join('');
-            var extra = arr.length > 4 ? '<li class="ref-more">+ ' + (arr.length - 4) + ' más</li>' : '';
-            return '<div class="ref-cat"><strong>' + (categoryLabels[cat] || cat) + '</strong><ul>' + listItems + extra + '</ul></div>';
-        }).join('');
-
-        return '<details class="ref-condition">' +
-            '<summary><span>' + data.name + '</span></summary>' +
-            '<div class="ref-body">' + catsHtml + '</div>' +
-            '</details>';
-    }).join('');
-
-    return '<div class="results-title-header">' +
-        '<div>' +
-            '<h3>Recomendaciones por condición</h3>' +
-            '<p>Catálogo de referencia para apoyar a cualquier estudiante según su condición. Selecciona condiciones en la ficha de arriba para ver solo las relevantes.</p>' +
-        '</div>' +
-    '</div>' +
-    '<div class="ref-catalog">' + items + '</div>';
 }
 
 function getSelectedSupportStudentGroups() {
@@ -2180,7 +1620,7 @@ function renderStandardRecommendationGroup(group, options) {
     group.conditions.forEach(function(c) {
         if (sources.indexOf(c.source) === -1) sources.push(c.source);
     });
-    var studentNames = group.students.map(function(s) { return formatStudentLabel(s); }).join(', ');
+    var studentNames = group.students.map(function(s) { return escapeSupportHtml(formatStudentLabel(s)); }).join(', ');
     var hasMultiple = conditionKeys.length > 1;
     var hasMatrixProfile = options.hasMatrixProfile;
     var studentScores = options.studentScores || getFirstStudentScores(group);
@@ -2574,84 +2014,13 @@ function computeProfileFromPrioritizedRecommendations(items) {
     }, {});
 }
 
-function _unused_computeWeightedMatrixProfile(scores, conditionKeys) {
-    var activities = window.UiePlannerData.accessMatrixActivities;
-    var filterKeys = (conditionKeys || []).filter(function(key) { return accommodationsData[key]; });
-    var evidence = {};
-
-    barrierDimensions.forEach(function(dim) {
-        evidence[dim.key] = { maxValue: 0, strongCount: 0, primaryCount: 0 };
-    });
-
-    activities.forEach(function(activity) {
-        var score = scores[activity.id] || 0;
-        var requirement = scoreToRequirement(score);
-        if (!requirement) return;
-
-        var matchingRules = filterKeys.length ? (matrixRecommendationRules || []).filter(function(rule) {
-            return ruleMatchesMatrixActivity(rule, activity, score, filterKeys);
-        }) : [];
-
-        if (matchingRules.length) {
-            matchingRules.forEach(function(rule) {
-                var weights = getRuleWeights(rule);
-                Object.keys(weights).forEach(function(dimKey) {
-                    if (!evidence[dimKey]) return;
-                    var weight = Math.max(0, Math.min(1, Number(weights[dimKey]) || 0));
-                    var value = requirement * weight;
-                    evidence[dimKey].maxValue = Math.max(evidence[dimKey].maxValue, value);
-                    if (weightedValueToLevel(value) >= 2) evidence[dimKey].strongCount += 1;
-                    if (weight >= 1) evidence[dimKey].primaryCount += 1;
-                });
-            });
-            return;
-        }
-
-        (activity.dims || []).forEach(function(dimKey) {
-            if (!evidence[dimKey]) return;
-            var value = requirement * 0.7;
-            evidence[dimKey].maxValue = Math.max(evidence[dimKey].maxValue, value);
-            if (weightedValueToLevel(value) >= 2) evidence[dimKey].strongCount += 1;
-        });
-    });
-
-    return barrierDimensions.reduce(function(profile, dim) {
-        var item = evidence[dim.key];
-        var level = weightedValueToLevel(item.maxValue);
-        if (level === 2 && item.strongCount >= 2) level = 3;
-        if (level === 3 && item.primaryCount === 0 && item.strongCount < 2) level = 2;
-        profile[dim.key] = level;
-        return profile;
-    }, {});
-}
-
-function _unused_computeRadarProfile(scores) {
-    var activities = window.UiePlannerData.accessMatrixActivities;
-    var dims = { context: [], materials: [], methods: [], interaction: [], evaluacion: [], tech: [] };
-
-    activities.forEach(function(act) {
-        var score = scores[act.id] || 0;
-        if (!score) return;
-        var radarValue = Math.max(0, 4 - score);
-        act.dims.forEach(function(dim) {
-            dims[dim].push(radarValue);
-        });
-    });
-
-    return barrierDimensions.reduce(function(profile, dim) {
-        var values = dims[dim.key] || [];
-        profile[dim.key] = values.length ? Math.max.apply(null, values) : 0;
-        return profile;
-    }, {});
-}
-
 function applyStudentMatrix(studentIndex) {
     var scores = readStudentMatrixScores(studentIndex);
     var scored = Object.values(scores).filter(function(v) { return v > 0; });
     if (!scored.length) return;
     var conditionKeys = readMedicalConditionKeys(studentIndex);
     if (!conditionKeys.length) {
-        alert('Selecciona la condición registrada en la ficha antes de identificar barreras. Esto evita sugerir apoyos que no corresponden.');
+        window.UiePlannerNotice.showNotice('Selecciona la condición registrada en la ficha antes de identificar barreras. Esto evita sugerir apoyos que no corresponden.');
         return;
     }
 
@@ -2675,12 +2044,6 @@ function applyStudentMatrix(studentIndex) {
     updateMedicalAddButton();
     updateMedicalRemoveButtons();
     renderSelectedSupportRecommendations();
-    trackSupportMetric('matrix_cif_applied', {
-        scored_activities: scored.length,
-        condition_groups: window.UiePlannerMetrics && typeof window.UiePlannerMetrics.getConditionGroups === 'function'
-            ? window.UiePlannerMetrics.getConditionGroups(conditionKeys)
-            : []
-    });
 }
 
 function clearStudentMatrix(studentIndex) {
@@ -2702,7 +2065,6 @@ function clearStudentMatrix(studentIndex) {
     updateStudentStatusBadge(studentIndex);
     updateMedicalConditionSummaries();
     renderSelectedSupportRecommendations();
-    trackSupportMetric('matrix_cif_cleared');
 }
 
 function updateStudentMatrixBadge(studentIndex) {
@@ -2796,9 +2158,6 @@ function bindPlanModalEvents(onStudentChange) {
             if (!hasMatrix) {
                 this.checked = false;
                 showToast('Para incluir gráficos, completa la rúbrica CIF de al menos un estudiante.');
-                trackSupportMetric('support_plan_chart_include_blocked');
-            } else {
-                trackSupportMetric('support_plan_chart_include_enabled', getSupportMetricSummary(students));
             }
         });
         chartsCb.setAttribute('data-bound', 'true');
@@ -2850,39 +2209,6 @@ function collectMedicalStudents() {
             matrixScores: getStudentMatrixScores(studentIndex),
             cardIndex: studentIndex,
             mode: 'medical',
-            advisorComments: readAdvisorComments(card)
-        });
-    });
-
-    return students;
-}
-
-function _unused_collectSocialStudents() {
-    var students = [];
-    var cards = document.querySelectorAll('#support-students-social .support-student-card');
-
-    cards.forEach(function(card) {
-        var studentIndex = Number(card.getAttribute('data-student-index'));
-        var name = (card.querySelector('.student-name')?.value?.trim() || '');
-
-        var hasMatrix = matrixData[studentIndex] && matrixData[studentIndex].applied;
-        var matrixScores = hasMatrix ? matrixData[studentIndex].scores : {};
-        var conditionKeys = hasMatrix ? (matrixData[studentIndex].conditionKeys || _unused_readSocialConditionKeys(studentIndex)) : _unused_readSocialConditionKeys(studentIndex);
-        var hasScores = hasMatrix && Object.values(matrixScores).filter(function(v) { return v > 0; }).length > 0;
-
-        if (!hasScores) return;
-
-        students.push({
-            index: studentIndex,
-            name: name,
-            conditions: conditionKeys.map(function(key) {
-                var data = accommodationsData[key];
-                return data ? { key: key, name: data.name, source: data.source } : null;
-            }).filter(Boolean),
-            conditionKeys: conditionKeys,
-            matrixScores: matrixScores,
-            cardIndex: studentIndex,
-            mode: 'social',
             advisorComments: readAdvisorComments(card)
         });
     });
@@ -2982,7 +2308,7 @@ function generatePlanPDF() {
     var students = collectPlanStudents();
     if (!students.length) {
         var msg = 'Selecciona al menos una condición de referencia para algún estudiante.';
-        alert(msg);
+        window.UiePlannerNotice.showNotice(msg);
         return;
     }
 
@@ -3006,142 +2332,21 @@ function generatePlanPDF() {
         docDef.content = headerContent.concat(docDef.content);
     } catch (e) {
         console.error('Error construyendo documento PDF:', e);
-        alert('Error al construir el documento: ' + e.message);
+        window.UiePlannerNotice.showNotice('Error al construir el documento: ' + e.message);
         return;
     }
 
     if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
-        alert('Librería PDF no disponible. Recarga la página.');
+        window.UiePlannerNotice.showNotice('Librería PDF no disponible. Recarga la página.');
         return;
     }
     var filename = 'plan-de-apoyo-por-condicion.pdf';
     try {
         window.pdfMake.createPdf(docDef).download(filename);
-        var summary = getSupportMetricSummary(students);
-        summary.include_charts = includeCharts;
-        trackSupportMetric('support_plan_pdf_downloaded', summary);
     } catch(e) {
         console.error('Error generando PDF:', e);
-        alert('Error al generar el PDF: ' + e.message);
+        window.UiePlannerNotice.showNotice('Error al generar el PDF: ' + e.message);
     }
-}
-
-function _unused_renderStudentBarChartCanvas(student, label) {
-    var activities = window.UiePlannerData.accessMatrixActivities;
-    var studentIndex = student.cardIndex || student.index || 1;
-    var matrixScores = getStudentMatrixScores(studentIndex);
-    var hasMatrix = Object.values(matrixScores).some(function(v) { return Number(v || 0) > 0; });
-
-    var rows;
-    if (hasMatrix) {
-        rows = activities.map(function(act) {
-            var score = Number(matrixScores[act.id] || 0);
-            var requirement = scoreToRequirement(score);
-            return { label: shortActivityLabels[act.id] || act.label, score: score, severity: requirement };
-        });
-    } else {
-        var condKeys = student.conditions.map(function(c) { return c.key; });
-        rows = activities.map(function(act) {
-            var maxSev = 0;
-            condKeys.forEach(function(ck) {
-                var profile = barrierProfiles[ck];
-                if (!profile) return;
-                act.dims.forEach(function(dim) {
-                    maxSev = Math.max(maxSev, profile[dim] || 0);
-                });
-            });
-            return { label: shortActivityLabels[act.id] || act.label, score: 0, severity: maxSev };
-        });
-    }
-
-    var barColors = { 0: '#9aa0a6', 1: '#34a853', 2: '#fbbc04', 3: '#ea4335' };
-    var barBorderColors = { 0: '#9aa0a6', 1: '#34a853', 2: '#fbbc04', 3: '#ea4335' };
-    var rowH = 24;
-    var gap = 4;
-    var labelW = 100;
-    var trackW = 200;
-    var scoreW = 30;
-    var tagW = 100;
-    var marginL = 20;
-    var marginT = 30;
-    var marginB = 10;
-    var w = marginL + labelW + 8 + trackW + 8 + scoreW + 8 + tagW + marginL;
-    var h = marginT + rows.length * (rowH + gap) + marginB;
-    var maxSev = 3;
-
-    var canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    var ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.fillStyle = '#111827';
-    ctx.font = 'bold 12px Arial';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(label, marginL, 4);
-
-    rows.forEach(function(row, i) {
-        var y = marginT + i * (rowH + gap);
-        var sev = Math.min(maxSev, Math.max(0, row.severity));
-        var barW = sev > 0 ? (sev / maxSev) * trackW : 0;
-        var fillColor = barColors[sev];
-        var borderColor = barBorderColors[sev];
-        var scoreText = row.score > 0 ? String(row.score) : '\u2014';
-        var tagText = requirementLabel(sev);
-        var alpha = hasMatrix ? 1.0 : 0.55;
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-
-        ctx.fillStyle = '#111827';
-        ctx.font = '11px Arial';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(row.label, marginL, y + rowH / 2);
-
-        ctx.fillStyle = '#f3f4f6';
-        ctx.beginPath();
-        ctx.roundRect(marginL + labelW + 8, y, trackW, rowH, 4);
-        ctx.fill();
-
-        if (barW > 0) {
-            ctx.fillStyle = fillColor;
-            ctx.beginPath();
-            ctx.roundRect(marginL + labelW + 8, y, barW, rowH, 4);
-            ctx.fill();
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.roundRect(marginL + labelW + 8, y, barW, rowH, 4);
-            ctx.stroke();
-        }
-
-        ctx.fillStyle = '#374151';
-        ctx.font = 'bold 11px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(scoreText, marginL + labelW + 8 + trackW + 4 + scoreW / 2, y + rowH / 2);
-
-        var tagX = marginL + labelW + 8 + trackW + 8 + scoreW + 8;
-        var tagColors = { 0: { bg: '#9aa0a6', text: '#ffffff' }, 1: { bg: '#34a853', text: '#ffffff' }, 2: { bg: '#fbbc04', text: '#374151' }, 3: { bg: '#ea4335', text: '#ffffff' } };
-        var tc = tagColors[sev] || tagColors[0];
-        ctx.fillStyle = tc.bg;
-        ctx.beginPath();
-        ctx.roundRect(tagX, y, tagW, rowH, 12);
-        ctx.fill();
-        ctx.fillStyle = tc.text;
-        ctx.font = 'bold 9px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(tagText, tagX + tagW / 2, y + rowH / 2);
-
-        ctx.restore();
-    });
-
-    return canvas.toDataURL('image/png');
 }
 
 function renderPdfCIFRadarChartCanvas(students) {
@@ -3626,39 +2831,12 @@ function formatReportDate() {
     return days[d.getDay()] + ' ' + d.getDate() + ' de ' + months[d.getMonth()] + ' de ' + d.getFullYear();
 }
 
-function imageToBase64(url, callback) {
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-        var canvas = document.createElement('canvas');
-        var maxW = 400;
-        var scale = Math.min(1, maxW / img.width);
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        try {
-            callback(canvas.toDataURL('image/png'));
-        } catch (e) {
-            callback(null);
-        }
-    };
-    img.onerror = function() {
-        var altUrl = url.indexOf(' ') !== -1 ? url.replace(/ /g, '%20') : url.replace(/%20/g, ' ');
-        if (altUrl !== url) {
-            imageToBase64(altUrl, callback);
-        } else {
-            callback(null);
-        }
-    };
-    img.src = url;
-}
-
 function showToast(msg) {
     var existing = document.querySelector('.toast-notification');
     if (existing) existing.remove();
     var t = document.createElement('div');
     t.className = 'toast-notification';
+    t.setAttribute('role', 'status');
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(function() { t.classList.add('toast-show'); }, 10);
@@ -3691,12 +2869,12 @@ function buildPdfHeader() {
 
 function downloadDuaChecklist() {
     if (!window.UiePlannerDua) {
-        alert('Error: El módulo DUA no está cargado.');
+        window.UiePlannerNotice.showNotice('Error: El módulo DUA no está cargado.');
         return;
     }
     var checkedDua = window.UiePlannerDua.getCheckedDuaItems() || [];
     if (!checkedDua.length) {
-        alert('Selecciona al menos un elemento DUA antes de descargar.');
+        window.UiePlannerNotice.showNotice('Selecciona al menos un elemento DUA antes de descargar.');
         return;
     }
     var content = buildPdfHeader();
@@ -3734,15 +2912,14 @@ function downloadDuaChecklist() {
     };
 
     if (!window.pdfMake || typeof window.pdfMake.createPdf !== 'function') {
-        alert('Librería PDF no disponible. Recarga la página.');
+        window.UiePlannerNotice.showNotice('Librería PDF no disponible. Recarga la página.');
         return;
     }
     try {
         window.pdfMake.createPdf(docDef).download('checklist-dua.pdf');
-        trackSupportMetric('dua_checklist_pdf_downloaded', { checked_count: checkedDua.length });
     } catch(e) {
         console.error('Error generando PDF DUA:', e);
-        alert('Error al generar el PDF: ' + e.message);
+        window.UiePlannerNotice.showNotice('Error al generar el PDF: ' + e.message);
     }
 }
 
@@ -3764,7 +2941,7 @@ function generatePlanEmail() {
     var students = collectPlanStudents();
     if (!students.length) {
         var msg = 'Selecciona al menos una condición de referencia para algún estudiante.';
-        alert(msg);
+        window.UiePlannerNotice.showNotice(msg);
         return;
     }
 
@@ -3869,7 +3046,6 @@ function generatePlanEmail() {
 
     var subject = 'Plan de apoyo docente - ' + today;
     var mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    trackSupportMetric('support_plan_email_opened', getSupportMetricSummary(students));
     window.location.href = mailto;
 }
 
@@ -3916,7 +3092,10 @@ window.UiePlannerSupports = {
     closePlanModal,
     generatePlanPDF,
     generatePlanEmail,
-    downloadDuaChecklist
+    downloadDuaChecklist,
+    getSemaforo,
+    buildPdfHeader,
+    groupHasMatrixProfile
 };
 
 })();

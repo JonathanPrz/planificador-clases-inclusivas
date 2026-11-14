@@ -1,6 +1,5 @@
 ﻿# Planificador Inclusivo UIE
 
-[![Licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 [![Hecho con](https://img.shields.io/badge/hecho%20con-Vanilla%20JS-f7df1e)](.)
 [![Hosting](https://img.shields.io/badge/hosting-GitHub%20Pages-222222)](.)
 
@@ -23,7 +22,7 @@ Prototipo diseñado y desarrollado por Jonathan Pérez, Coordinación de Inclusi
 | Tecnología | Uso |
 |---|---|
 | HTML5 + CSS3 | Interfaz (~4400 líneas CSS) |
-| JavaScript (Vanilla) | Lógica completa (~3800 líneas en supports.js) |
+| JavaScript (Vanilla) | Lógica completa (~3100 líneas en supports.js) |
 | [Chart.js](https://www.chartjs.org/) | Radar chart comparativo |
 | [pdfMake](https://pdfmake.org/) | Generación de PDF |
 | GitHub Pages | Hosting estático |
@@ -44,10 +43,15 @@ Sin framework, sin bundler, sin backend. 100% en el navegador.
 ├── navigation.js       ← Navegación entre vistas
 ├── tabs.js             ← Tabs dentro de vistas
 ├── content.js          ← Contenido de apoyos adicionales
-├── logos.js            ← Logos en base64
-├── sw.js              ← Service Worker
-└── docs/              ← Documentación completa
+├── privacy.js          ← Nota emergente de protección de datos
+├── notice.js           ← Avisos y confirmaciones accesibles
+├── logos.js            ← Logos en base64 (para PDF e impresión)
+├── favicon.png         ← Ícono del sitio
+├── sw.js               ← Desinstala service workers antiguos
+└── docs/               ← Documentación completa
 ```
+
+Al modificar un archivo `.css` o `.js`, actualiza el valor `?v=` en `index.html` para que los navegadores descarguen la versión nueva.
 
 ## Desarrollo local
 
@@ -68,8 +72,5 @@ npx serve .
 | [Manual de usuario](docs/manual-usuario/README.md) | Docentes |
 | [Documentación técnica](docs/desarrollador/README.md) | Desarrolladores |
 | [Arquitectura](docs/desarrollador/arquitectura.md) | Desarrolladores |
+| [Normativa de datos personales](docs/normativa/ley-21719-proteccion-datos.md) | Docentes / Inclusión |
 | [Presentación ejecutiva](docs/presentacion/index.html) | Directivos |
-
-## Licencia
-
-MIT © Unidad de Inclusión y Equidad — Duoc UC
